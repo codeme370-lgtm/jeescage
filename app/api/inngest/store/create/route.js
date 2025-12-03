@@ -1,5 +1,7 @@
 import {getAuth} from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import imagekit from '@/configs/imageKit';
+import prisma from '@/lib/prisma';
 
 //create the store function
 export async function POST(request){
@@ -8,11 +10,12 @@ export async function POST(request){
       // get the data from the form
 
       const formData=await request.formData()
-        const name=formData.get('name');
+      const name=formData.get('name');
       const username=formData.get('username');
       const description=formData.get('description');
       const email=formData.get('email');
       const contacts=formData.get('contacts');
+      const address=formData.get('address');
       const image=formData.get('image');
 
       //if it is not any of the following fields, return error
@@ -35,7 +38,7 @@ export async function POST(request){
       // che k if username is already taken
       const isUsernameTaken=await prisma.store.findFirst({
         where:{
-          username:username.tolowerCase()
+          username:username.toLowerCase()
         }
       })
 
@@ -44,15 +47,15 @@ export async function POST(request){
         }
 
         //image upload to imagekit
-        const buffer =buffer.from(await image.arrayBuffer());
-        const Response=await imagekit.upload({
-            file:image,
-            fileName:image.name,
-            folder:'logos'
+        const buffer = Buffer.from(await image.arrayBuffer());
+        const response = await imagekit.upload({
+            file: buffer,
+            fileName: image.name,
+            folder: 'logos'
         })
 
         //optimize the image url
-        const optimizeImage=imagekit.url({
+        const optimizeImage = imagekit.url({
             path: response.filePath,
             transformation:[
                 {quality:'auto'},
