@@ -4,8 +4,10 @@
         "Inngest",
         "jeema",
         "jeescage",
+        "jeeshop",
         "neondatabase",
         "turbopack",
         "Updation"
-    ]
+    ],
+    "prisma.pinToPrisma6": true
 }

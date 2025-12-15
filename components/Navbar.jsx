@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useClerk, UserButton,useUser } from "@clerk/nextjs";
+import { useClerk, UserButton,useUser,Protect } from "@clerk/nextjs";
 
 const Navbar = () => {
 //let's get the user
@@ -28,9 +28,11 @@ const {openSignIn}=useClerk();
 
                     <Link href="/" className="relative text-4xl font-semibold text-slate-700">
                         <span className="text-green-600">jees</span>cage<span className="text-green-600 text-5xl leading-0">.</span>
+                        <Protect plan="plus">
                         <p className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
                             plus
                         </p>
+                        </Protect>
                     </Link>
 
                     {/* Desktop Menu */}

@@ -4,9 +4,15 @@ import { Star } from 'lucide-react';
 import React, { useState } from 'react'
 import { XIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useAuth } from '@clerk/nextjs';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
+import { addRating } from '@/lib/features/ratings/ratingsSlice';
 
 const RatingModal = ({ ratingModal, setRatingModal }) => {
 
+    const {getToken}=useAuth();
+    const dispatch = useDispatch();
     const [rating, setRating] = useState(0);
     const [review, setReview] = useState('');
 
@@ -17,8 +23,30 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
         if (review.length < 5) {
             return toast('write a short review');
         }
+        //make an API call to submit the rating
+        try {
+            //generate the token
+            const token = await getToken();
+            //make the API call
+            const {data} = await axios.post('/api/ratings', {
+                orderId: ratingModal.orderId,
+                productId: ratingModal.productId,
+                rating: rating,
+                review: review
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+           
+            //update the ratings in the redux store
+            dispatch(addRating(data.rating));
+             toast.success("Rating submitted successfully");
+              setRatingModal(null);
+        } catch (error) {
+           toast.error(error?.response?.data?.error || "Something went wrong while submitting rating");
+        }
 
-        setRatingModal(null);
     }
 
     return (

@@ -5,8 +5,11 @@ import { CircleDollarSignIcon, ShoppingBasketIcon, StarIcon, TagsIcon } from "lu
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { useAuth } from "@/clerk/nextjs"
+
 
 export default function Dashboard() {
+    const {getToken} = useAuth()
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || 'GHS'
 
@@ -28,7 +31,20 @@ export default function Dashboard() {
     ]
 
     const fetchDashboardData = async () => {
-        setDashboardData(dummyStoreDashboardData)
+        //simulate fetch with dummy data
+        try {
+            const token = await getToken()
+        //make the api call using axios
+        const {data} = await axios.get("/api/store/dashboard", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        setDashboardData(data.dashboardCardsData)
+        
+        } catch (error) {
+            toast.error(error?.response?.data?.message || error.message)
+        }
         setLoading(false)
     }
 

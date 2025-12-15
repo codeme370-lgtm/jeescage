@@ -1,12 +1,15 @@
 import { PlusIcon, SquarePenIcon, XIcon } from 'lucide-react';
 import React, { useState } from 'react'
 import AddressModal from './AddressModal';
-import { useSelector } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-
+import { Protect } from '@clerk/nextjs';
+import { useAuth,useUser } from '@clerk/nextjs';
 const OrderSummary = ({ totalPrice, items }) => {
-
+    const {user}=useUser();
+    const {getToken}=useAuth();
+    const dispatch = useDispatch();
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || 'GHS';
 
     const router = useRouter();
@@ -21,13 +24,77 @@ const OrderSummary = ({ totalPrice, items }) => {
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
+        //let's handle the API call
+        try{
+          //authenticate the user
+          //when the user is not logged in
+          if(!user){
+            toast.error("You need to be logged in to apply a coupon")
+            return;
+          }
+          //suppose the user is logged in
+          const token = await getToken();
+          const {data} = await axios.post('/api/coupon', {code: couponCodeInput}, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          setCoupon(data.coupon);
+          toast.success("Coupon applied successfully")
+        }catch(error){
+            toast.error(error?.response?.data?.message || "Something went wrong while applying coupon")
+        }
         
     }
 
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
-
-        router.push('/orders')
+        try{
+            //when the user is not logged in
+            if(!user){
+                toast.error("You need to be logged in to place an order")
+                return;
+              }
+              //when no address is selected
+              if(!selectedAddress){
+                toast.error("Please select an address to place order")
+                return;
+              }
+              //suppose the user is available and address is selected
+              const token = await getToken();
+              const orderData = {
+                items,
+                totalPrice: coupon ? (totalPrice + 5 - (coupon.discount / 100 * totalPrice)) : (totalPrice + 5),
+                paymentMethod,
+                addressId: selectedAddress.id,
+                coupon: coupon ? coupon.code : null
+              };
+              //if the coupon is applied, include it in the order data
+              if(coupon){
+                orderData.coupon = coupon.code;
+              }
+              //make the API call to place order
+              const {data} =
+              await axios.post('/api/orders', orderData, {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              //payment handling can be done here based on payment method
+              if(paymentMethod === 'STRIPE'){
+                window.location.href = data.sessionUrl;
+                return;
+              }else{
+                //for COD, we can directly show success message
+                toast.success("Order placed successfully with Cash on Delivery");
+                 router.push('/orders')
+                 dispatch(fetchCart({getToken}));
+              }
+        }catch(error){
+            toast.error(error?.response?.data?.message || "Something went wrong while placing order")
+            return;
+        }
+       
     }
 
     return (
@@ -78,7 +145,11 @@ const OrderSummary = ({ totalPrice, items }) => {
                     </div>
                     <div className='flex flex-col gap-1 font-medium text-right'>
                         <p>{currency}{totalPrice.toLocaleString()}</p>
-                        <p>Free</p>
+                        <p>
+                            <protect plan="plus" fallback={`{currency}5.00`}>
+                            Free
+                            </protect>
+                            </p>
                         {coupon && <p>{`-${currency}${(coupon.discount / 100 * totalPrice).toFixed(2)}`}</p>}
                     </div>
                 </div>
@@ -99,7 +170,13 @@ const OrderSummary = ({ totalPrice, items }) => {
             </div>
             <div className='flex justify-between py-4'>
                 <p>Total:</p>
-                <p className='font-medium text-right'>{currency}{coupon ? (totalPrice - (coupon.discount / 100 * totalPrice)).toFixed(2) : totalPrice.toLocaleString()}</p>
+                <p className='font-medium text-right'>
+                    <protect plan="plus" fallback={`${currency}${coupon ? (totalPrice + 5 - (coupon.discount / 100 *
+                         totalPrice)).toFixed(2) : (totalPrice).toLocaleString()}`}>
+                      {currency}{coupon ? (totalPrice + 5 - (coupon.discount / 100 *
+                         totalPrice)).toFixed(2) : totalPrice.toLocaleString()}
+                    </protect>
+                         </p>
             </div>
             <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'placing Order...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Place Order</button>
 

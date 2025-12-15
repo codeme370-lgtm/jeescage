@@ -2,15 +2,49 @@
 import PageTitle from "@/components/PageTitle"
 import { useEffect, useState } from "react";
 import OrderItem from "@/components/OrderItem";
-import { orderDummyData } from "@/assets/assets";
+import { useAuth, useUser } from "@clerk/nextjs";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import Loading from "@/components/Loading";
+
 
 export default function Orders() {
-
+const {getToken}=useAuth();
+const {user, isLoaded}=useUser();
     const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
 
+    const router = useRouter();
     useEffect(() => {
-        setOrders(orderDummyData)
-    }, []);
+       const fetchOrders = async () => {
+        try{
+              //when the user is logged in
+              const token = await getToken();
+             const {data} = await axios.get('/api/orders', {
+                headers: {
+                  Authorization: `Bearer ${token}`
+                }
+              });
+              setOrders(data.orders);
+              setLoading(false);
+        }catch(error){
+            console.log("Error fetching orders:", error);
+        }
+       } 
+       if(isLoaded){
+       //when the user is logged in
+       if(user){
+        fetchOrders();
+       }else{
+        router.push('/');
+       }
+    }
+    }, [isLoaded, user, getToken, router]);
+
+    //if loading is false
+    if(!isLoaded || loading){
+        return <Loading/>
+    }
 
     return (
         <div className="min-h-[70vh] mx-6">

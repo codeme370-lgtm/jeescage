@@ -4,27 +4,58 @@ import StoreInfo from "@/components/admin/StoreInfo"
 import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
+import { useUser, useAuth } from "@clerk/nextjs"
 
 export default function AdminApprove() {
+    //let's get the user
+    const {user}=useUser()
+    const {getToken} = useAuth()
 
     const [stores, setStores] = useState([])
     const [loading, setLoading] = useState(true)
 
 
     const fetchStores = async () => {
-        setStores(storesDummyData)
+        //make the api call to get stores pending approval
+        try {
+            const token = await getToken();
+            const {data} = await axios.get('/api/admin/stores/pending', {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            setStores(data.stores);
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error.message);
+        }
         setLoading(false)
     }
 
     const handleApprove = async ({ storeId, status }) => {
-        // Logic to approve a store
+        // api call to approve or reject store
+        try {
+            const token = await getToken();
+            await axios.post('/api/admin/stores/approve', { storeId, status }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            //update the stores list
+            setStores((prevStores) => prevStores.filter((store) => store.id !== storeId));
+            toast.success(`Store ${status === 'approved' ? 'approved' : 'rejected'} successfully`);
+            await fetchStores();
+        } catch (error) {
+            toast.error(error?.response?.data?.error || error.message);
+        }
 
 
     }
 
     useEffect(() => {
-            fetchStores()
-    }, [])
+            if(user){
+                fetchStores()
+            }
+    }, [user])
 
     return !loading ? (
         <div className="text-slate-500 mb-28">

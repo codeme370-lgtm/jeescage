@@ -9,14 +9,40 @@ export default function StoreOrders() {
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
+    const {getToken} = useAuth()
+
 
     const fetchOrders = async () => {
-       setOrders(orderDummyData)
-       setLoading(false)
+       try {
+        const token = await getToken()
+        const {data} = await axios.get("/api/store/orders", {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        setOrders(data.orders)
+        setLoading(false)
+       } catch (error) {
+        toast.error(error?.response?.data?.message || "Something went wrong while fetching orders")
+       }finally {
+        setLoading(false)
+       }
     }
 
     const updateOrderStatus = async (orderId, status) => {
         // Logic to update the status of an order
+        try {
+            const token = await getToken()
+            await axios.post("/api/store/orders", {orderId, status}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? {...order, status} : order))
+            toast.success("Order status updated successfully")
+        } catch (error) {
+            
+        }
 
 
     }
