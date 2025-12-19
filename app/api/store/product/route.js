@@ -1,8 +1,10 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import imagekit from "@/configs/imagekit";
+import { getImageKit } from "@/configs/imagekit";
 import prisma from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
+
+const imagekit = getImageKit();
 
 export async function POST(request) {
   try {
