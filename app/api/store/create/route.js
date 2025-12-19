@@ -1,8 +1,8 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import imagekit from "@/configs/imagekit";
 import prisma from "@/lib/prisma";
 import ensureUser from "@/lib/ensureUser";
+
 
 export async function POST(request) {
   try {
