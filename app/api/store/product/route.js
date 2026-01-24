@@ -1,10 +1,8 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { getImageKit } from "@/configs/imagekit.js";
 import prisma from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
 
-const imagekit = getImageKit();
 
 export async function POST(request) {
   try {
@@ -43,26 +41,8 @@ export async function POST(request) {
       );
     }
 
-    const imagesUrl = await Promise.all(
-      images.map(async (image) => {
-        const buffer = Buffer.from(await image.arrayBuffer());
-
-        const upload = await imagekit.upload({
-          file: buffer,
-          fileName: image.name,
-          folder: "products",
-        });
-
-        return imagekit.url({
-          path: upload.filePath,
-          transformation: [
-            { quality: "auto" },
-            { format: "webp" },
-            { width: 1024 },
-          ],
-        });
-      })
-    );
+    // Image uploads removed: store without uploaded images.
+    const imagesUrl = [];
 
     await prisma.product.create({
       data: {

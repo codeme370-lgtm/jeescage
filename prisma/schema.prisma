@@ -1,12 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  // remove previewFeatures if you don't need them; driverAdapters is deprecated
 }
 
 datasource db {
   provider = "postgresql"
 }
-
 
 
 // Required for creating a User: id, name, email, image, cart (optional JSON string)

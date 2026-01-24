@@ -1,10 +1,7 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { getImageKit } from "@/configs/imagekit.js";
 import prisma from "@/lib/prisma";
 import ensureUser from "@/lib/ensureUser";
-
-const imagekit = getImageKit();
 
 
 export async function POST(request) {
@@ -25,7 +22,8 @@ export async function POST(request) {
     const address = formData.get("address");
     const image = formData.get("image");
 
-    if (!name || !username || !description || !email || !contacts || !address || !image) {
+    // image is optional; use default general logo when not provided
+    if (!name || !username || !description || !email || !contacts || !address) {
       return NextResponse.json({ error: "missing store info" }, { status: 400 });
     }
 
@@ -42,22 +40,8 @@ export async function POST(request) {
       return NextResponse.json({ error: "username is already taken" }, { status: 400 });
     }
 
-    const fileBuffer = Buffer.from(await image.arrayBuffer());
-
-    const upload = await imagekit.upload({
-      file: fileBuffer,
-      fileName: image.name || `${username}-logo`,
-      folder: "logos",
-    });
-
-    const logoUrl = imagekit.url({
-      path: upload.filePath,
-      transformation: [
-        { quality: "auto" },
-        { format: "webp" },
-        { width: 200 },
-      ],
-    });
+    // Do not upload/store custom logos. Use a general default logo instead.
+    const logoUrl = "/favicon.ico";
 
     const newStore = await prisma.store.create({
       data: {
