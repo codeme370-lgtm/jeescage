@@ -46,10 +46,9 @@ export default function AdminDashboard() {
     }
 
     useEffect(() => {
-        if(user){
+
             fetchDashboardData()
-        }
-    }, [user])
+    }, [])
 
     if (loading) return <Loading />
 

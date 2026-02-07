@@ -52,6 +52,6 @@ export const deleteExpiredCoupons = inngest.createFunction(
     {event:'app/coupon.expired'},
     async({event, step})=>{
         const {data} = event;
-        return handleDeleteExpiredCoupon(data, step);
+        return deleteExpiredCoupons(data, step);
     }
 )

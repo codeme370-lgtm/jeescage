@@ -10,5 +10,8 @@
         "turbopack",
         "Updation"
     ],
-    "prisma.pinToPrisma6": false
+    "prisma.pinToPrisma6": false,
+    "powerquery.client.additionalSymbolsDirectories": [
+        "c:/Users/KA/Desktop/jeeshop/.vscode/excel-pq-symbols"
+    ]
 }
