@@ -1,0 +1,100 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes floatScale {
+    0%, 100% {
+        transform: translateY(0px) scale(1);
+    }
+    50% {
+        transform: translateY(-8px) scale(1.05);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes continuousSlideLeft {
+    0% {
+        transform: translateX(0px) scale(1);
+    }
+    50% {
+        transform: translateX(-5px) scale(1.03);
+    }
+    100% {
+        transform: translateX(0px) scale(1);
+    }
+}
+
+@keyframes continuousSlideRight {
+    0% {
+        transform: translateX(0px) scale(1);
+    }
+    50% {
+        transform: translateX(5px) scale(1.03);
+    }
+    100% {
+        transform: translateX(0px) scale(1);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+.animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.animate-floatScale {
+    animation: floatScale 3.5s ease-in-out infinite;
+}
+
+.animate-slideInLeft {
+    animation: slideInLeft 0.8s ease-in-out;
+}
+
+.animate-slideInRight {
+    animation: slideInRight 0.8s ease-in-out 0.1s both;
+}
+
+.animate-continuousLeft {
+    animation: continuousSlideLeft 4s ease-in-out infinite;
+}
+
+.animate-continuousRight {
+    animation: continuousSlideRight 4s ease-in-out infinite;
+}
