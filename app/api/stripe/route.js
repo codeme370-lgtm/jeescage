@@ -1,78 +1,77 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import crypto from "crypto";
 
 export async function POST(request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
   try {
     const body = await request.text();
-    const sig = request.headers.get("stripe-signature");
+    const signature = request.headers.get("x-paystack-signature");
 
-    if (!sig) {
+    if (!signature) {
       return NextResponse.json(
-        { error: "Missing Stripe signature" },
+        { error: "Missing Paystack signature" },
         { status: 400 }
       );
     }
 
-    const event = stripe.webhooks.constructEvent(
-      body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    // Verify Paystack signature
+    const hash = crypto
+      .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
+      .update(body)
+      .digest("hex");
 
-    const handlePaymentIntent = async (paymentIntentId, isPaid) => {
-      const sessions = await stripe.checkout.sessions.list({
-        payment_intent: paymentIntentId,
-      });
+    if (hash !== signature) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 400 }
+      );
+    }
 
-      if (!sessions.data.length) return;
+    const event = JSON.parse(body);
 
-      const { orderIds, userId, appId } = sessions.data[0].metadata;
+    if (event.event === "charge.success") {
+      const { reference, metadata } = event.data;
+      const { orderIds, userId, appId } = metadata;
 
       if (appId !== "jeeshop") {
-        return;
+        return NextResponse.json({ received: true });
       }
 
       const orderIdsArray = orderIds.split(",");
 
-      if (isPaid) {
-        await Promise.all(
-          orderIdsArray.map((orderId) =>
-            prisma.order.update({
-              where: { id: orderId },
-              data: { isPaid: true },
-            })
-          )
-        );
+      // Mark orders as paid
+      await Promise.all(
+        orderIdsArray.map((orderId) =>
+          prisma.order.update({
+            where: { id: orderId },
+            data: { isPaid: true, status: "PROCESSING" },
+          })
+        )
+      );
 
-        await prisma.user.update({
-          where: { id: userId },
-          data: { cart: {} },
-        });
-      } else {
-        await Promise.all(
-          orderIdsArray.map((orderId) =>
-            prisma.order.delete({
-              where: { id: orderId },
-            })
-          )
-        );
+      // Clear user cart
+      await prisma.user.update({
+        where: { id: userId },
+        data: { cart: {} },
+      });
+    } else if (event.event === "charge.failed") {
+      const { metadata } = event.data;
+      const { orderIds, userId, appId } = metadata;
+
+      if (appId !== "jeeshop") {
+        return NextResponse.json({ received: true });
       }
-    };
 
-    switch (event.type) {
-      case "payment_intent.succeeded":
-        await handlePaymentIntent(event.data.object.id, true);
-        break;
+      const orderIdsArray = orderIds.split(",");
 
-      case "payment_intent.canceled":
-        await handlePaymentIntent(event.data.object.id, false);
-        break;
-
-      default:
-        console.log("Unhandled event type:", event.type);
+      // Delete failed orders
+      await Promise.all(
+        orderIdsArray.map((orderId) =>
+          prisma.order.delete({
+            where: { id: orderId },
+          })
+        )
+      );
     }
 
     return NextResponse.json({ received: true });

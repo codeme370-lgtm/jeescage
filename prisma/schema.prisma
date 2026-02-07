@@ -51,7 +51,7 @@ enum OrderStatus {
 
 enum PaymentMethod {
     COD
-    STRIPE
+    PAYSTACK
 }
 
 // Required for creating an Order: total, userId, storeId, addressId, isPaid, paymentMethod, isCouponUsed, coupon (JSON), orderItems (nested)

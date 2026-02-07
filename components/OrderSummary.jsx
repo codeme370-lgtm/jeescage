@@ -80,8 +80,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                 }
               });
               //payment handling can be done here based on payment method
-              if(paymentMethod === 'STRIPE'){
-                window.location.href = data.sessionUrl;
+              if(paymentMethod === 'PAYSTACK'){
+                window.location.href = data.authorizationUrl;
                 return;
               }else{
                 //for COD, we can directly show success message
@@ -105,8 +105,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <label htmlFor="COD" className='cursor-pointer'>COD</label>
             </div>
             <div className='flex gap-2 items-center mt-1'>
-                <input type="radio" id="STRIPE" name='payment' onChange={() => setPaymentMethod('STRIPE')} checked={paymentMethod === 'STRIPE'} className='accent-gray-500' />
-                <label htmlFor="STRIPE" className='cursor-pointer'>Stripe Payment</label>
+                <input type="radio" id="PAYSTACK" name='payment' onChange={() => setPaymentMethod('PAYSTACK')} checked={paymentMethod === 'PAYSTACK'} className='accent-gray-500' />
+                <label htmlFor="PAYSTACK" className='cursor-pointer'>Paystack Payment</label>
             </div>
             <div className='my-4 py-4 border-y border-slate-200 text-slate-400'>
                 <p>Address</p>

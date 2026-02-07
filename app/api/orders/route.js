@@ -2,7 +2,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { PaymentMethod } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import Stripe from "stripe";
+import axios from "axios";
 
 //Get a new order
 export async function POST(request) {
@@ -19,6 +19,12 @@ export async function POST(request) {
        if(!Array.isArray(items) || items.length === 0 || !addressId || !paymentMethod){
         return NextResponse.json({error: "All fields are required"}, {status: 400})
        }
+
+       //get user email for Paystack
+       const user = await prisma.user.findUnique({
+        where: { id: userId }
+       })
+       const userEmail = user?.email
 
        //check coupon
        let coupon = null
@@ -106,7 +112,7 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
             paymentMethod,
             totalOrderAmount: parseFloat(orderAmount.toFixed(2)),
             couponId: coupon ? coupon.id : null,
-            status: paymentMethod === 'COD' ? 'PROCESSING' : 'PENDING',
+            status: paymentMethod === 'COD' ? 'PROCESSING' : 'ORDER_PLACED',
             orderItems: {
                 create: orderItems.map(item => ({
                     productId: item.productId,
@@ -117,38 +123,31 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
 }})
 orderIds.push(newOrder.id)
 }
-//check if payment method is stripe
-if(paymentMethod === PaymentMethod.STRIPE){
-    //initialize stripe
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-    //add the origin
-    const origin = await request.headers.get('origin')
-    //create a checkout session
-    const session = await stripe.checkout.sessions.create({
-        //payment method types
-        payment_method_types: ['card'],
-        mode: 'payment',
-        line_items: [{
-            price_data: {
-                currency: 'usd',
-            product_data: {
-                name: `Order Payment - ${orderIds.join(', ')}`
+//check if payment method is paystack
+if(paymentMethod === PaymentMethod.PAYSTACK){
+    //initialize paystack
+    const origin = request.headers.get('origin')
+    //create a paystack transaction
+    const response = await axios.post(
+        'https://api.paystack.co/transaction/initialize',
+        {
+            email: userEmail,
+            amount: Math.round(totalOrderAmount * 100), // Paystack accepts amount in kobo
+            metadata: {
+                orderIds: orderIds.join(','),
+                userId: userId,
+                appId: 'jeeshop'
             },
-            unit_amount: Math.round(totalOrderAmount * 100),
-            },
-            quantity: 1,
-        }],
-        expires_at: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes from now
-       mode: 'payment',
-        success_url: `${origin}/loading?nextUrl=/orders`,
-        cancel_url: `${origin}/cart`,
-        metadata: {orderIds: orderIds.join(','),
-            userId,
-            appId: 'jeeshop'
-
+            callback_url: `${origin}/loading?nextUrl=/orders`
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                'Content-Type': 'application/json'
+            }
         }
-    })
-    return NextResponse.json({sessionUrl: session.url
+    )
+    return NextResponse.json({authorizationUrl: response.data.data.authorization_url
     })
 }
 //clear cart data
@@ -179,7 +178,7 @@ export async function GET(request) {
                 OR:[
                     {paymentMethod: PaymentMethod.COD},
                     {AND:[
-                        {paymentMethod: PaymentMethod.STRIPE},
+                        {paymentMethod: PaymentMethod.PAYSTACK},
                         {isPaid: true}
                     ]}
                 ]
