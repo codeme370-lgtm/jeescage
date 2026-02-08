@@ -8,6 +8,7 @@ import Image from "next/image";
 import Counter from "./Counter";
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
+import { assets } from "@/assets/assets";
 
 
 const ProductDetails = ({ product }) => {
@@ -20,26 +21,26 @@ const ProductDetails = ({ product }) => {
 
     const router = useRouter()
 
-    const [mainImage, setMainImage] = useState(product.images[0]);
+    const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
 
     const addToCartHandler = () => {
         dispatch(addToCart({ productId }))
     }
 
-    const averageRating = product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length;
+    const averageRating = product?.rating && product.rating.length > 0 ? product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length : 0;
     
     return (
         <div className="flex max-lg:flex-col gap-12">
             <div className="flex max-sm:flex-col-reverse gap-3">
                 <div className="flex sm:flex-col gap-3">
-                    {product.images.map((image, index) => (
-                        <div key={index} onClick={() => setMainImage(product.images[index])} className="bg-slate-100 flex items-center justify-center size-26 rounded-lg group cursor-pointer">
-                            <Image src={image} className="group-hover:scale-103 group-active:scale-95 transition" alt={product?.name ? `${product.name} thumbnail ${index + 1}` : 'Product thumbnail'} width={45} height={45} />
+                    {product?.images && product.images.map((image, index) => (
+                        <div key={index} onClick={() => image && setMainImage(image)} className="bg-slate-100 flex items-center justify-center size-26 rounded-lg group cursor-pointer">
+                            <Image src={image || assets.product_placeholder} className="group-hover:scale-103 group-active:scale-95 transition" alt={product?.name ? `${product.name} thumbnail ${index + 1}` : 'Product thumbnail'} width={45} height={45} />
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-center items-center h-100 sm:size-113 bg-slate-100 rounded-lg ">
-                    <Image src={mainImage} alt={product?.name ? `${product.name} main image` : 'Product main image'} width={250} height={250} />
+                <div className="flex justify-center items-center h-100 w-full sm:size-113 bg-slate-100 rounded-lg overflow-hidden">
+                    <Image src={mainImage} alt={product?.name ? `${product.name} main image` : 'Product main image'} width={500} height={500} className="w-full h-full object-contain" />
                 </div>
             </div>
             <div className="flex-1">
@@ -48,7 +49,7 @@ const ProductDetails = ({ product }) => {
                     {Array(5).fill('').map((_, index) => (
                         <StarIcon key={index} size={14} className='text-transparent mt-0.5' fill={averageRating >= index + 1 ? "#00C950" : "#D1D5DB"} />
                     ))}
-                    <p className="text-sm ml-3 text-slate-500">{product.rating.length} Reviews</p>
+                    <p className="text-sm ml-3 text-slate-500">{product?.rating?.length || 0} Reviews</p>
                 </div>
                 <div className="flex items-start my-6 gap-3 text-2xl font-semibold text-slate-800">
                     <p> {currency}{product.price} </p>

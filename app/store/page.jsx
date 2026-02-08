@@ -25,10 +25,10 @@ export default function Dashboard() {
     })
 
     const dashboardCardsData = [
-        { title: 'Total Products', value: dashboardData.totalProducts, icon: ShoppingBasketIcon },
-        { title: 'Total Earnings', value: currency + dashboardData.totalEarnings, icon: CircleDollarSignIcon },
-        { title: 'Total Orders', value: dashboardData.totalOrders, icon: TagsIcon },
-        { title: 'Total Ratings', value: dashboardData.ratings.length, icon: StarIcon },
+        { title: 'Total Products', value: dashboardData?.totalProducts || 0, icon: ShoppingBasketIcon },
+        { title: 'Total Earnings', value: currency + (dashboardData?.totalEarnings || 0), icon: CircleDollarSignIcon },
+        { title: 'Total Orders', value: dashboardData?.totalOrders || 0, icon: TagsIcon },
+        { title: 'Total Ratings', value: dashboardData?.ratings?.length || 0, icon: StarIcon },
     ]
 
     const fetchDashboardData = async () => {
@@ -77,7 +77,7 @@ export default function Dashboard() {
 
             <div className="mt-5">
                 {
-                    dashboardData.ratings.map((review, index) => (
+                    (dashboardData?.ratings || []).map((review, index) => (
                         <div key={index} className="flex max-sm:flex-col gap-5 sm:items-center justify-between py-6 border-b border-slate-200 text-sm text-slate-600 max-w-4xl">
                             <div>
                                 <div className="flex gap-3">

@@ -8,9 +8,17 @@ import { NextResponse } from "next/server"
 export async function POST(request){
     try {
         const {userId}=getAuth(request)
-        const {address} = await request.json()
-//let's get the userId property
-        address.userId= userId
+        if(!userId){
+            return NextResponse.json({error: 'Not authenticated'}, {status: 401})
+        }
+
+        const address = await request.json()
+        if(!address || Object.keys(address).length === 0){
+            return NextResponse.json({error: 'Missing address data'}, {status: 400})
+        }
+
+        //attach userId and create address
+        address.userId = userId
         const newAddress = await prisma.address.create({
             data: address
         })
@@ -24,10 +32,13 @@ export async function POST(request){
 
 
 //get all address for a user
-export async function Get(request){
+export async function GET(request){
     try {
         const {userId}=getAuth(request)
-  
+        if(!userId){
+            return NextResponse.json({error: 'Not authenticated'}, {status: 401})
+        }
+
         const addresses = await prisma.address.findMany({
             where: {userId}
         })

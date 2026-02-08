@@ -25,7 +25,7 @@ export async function POST(request) {
     const price = Number(formData.get("price"));
     const category = formData.get("category");
     const mrp = Number(formData.get("mrp"));
-    const images = formData.getAll("images");
+    const imageUrls = formData.getAll("imageUrls");
 
     if (
       !name ||
@@ -33,7 +33,7 @@ export async function POST(request) {
       isNaN(price) ||
       !category ||
       isNaN(mrp) ||
-      images.length < 1
+      imageUrls.length < 1
     ) {
       return NextResponse.json(
         { error: "missing product details" },
@@ -41,8 +41,8 @@ export async function POST(request) {
       );
     }
 
-    // Image uploads removed: store without uploaded images.
-    const imagesUrl = [];
+    // Use the uploaded image URLs directly
+    const imagesUrl = imageUrls;
 
     await prisma.product.create({
       data: {
@@ -59,6 +59,50 @@ export async function POST(request) {
     return NextResponse.json({ message: "product added successfully" });
   } catch (error) {
     console.error("product:create error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Server error" },
+      { status: 500 }
+    );
+  }
+}
+
+//Get all products for a seller
+export async function GET(request) {
+  try {
+    const { userId } = getAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const storeId = await authSeller(userId);
+    if (!storeId) {
+      return NextResponse.json(
+        { error: "you are not authorized to perform this action" },
+        { status: 401 }
+      );
+    }
+
+    //fetch products for the seller's store with optimized query
+    const products = await prisma.product.findMany({
+      where: { storeId },
+      select: {
+        id: true,
+        name: true,
+        price: true,
+        mrp: true,
+        category: true,
+        description: true,
+        images: true,
+        inStock: true,
+        createdAt: true,
+        rating: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+
+    return NextResponse.json({ products }, { status: 200 });
+  } catch (error) {
+    console.error("product:get error:", error);
     return NextResponse.json(
       { error: error?.message || "Server error" },
       { status: 500 }

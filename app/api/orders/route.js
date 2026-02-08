@@ -54,7 +54,7 @@ export async function POST(request) {
         }
        }
        //check if the coupon has plus plan
-       if(couponCode && coupon.forMembers){
+       if(couponCode && coupon.forMember){
         const hasPlusPlan = has({plan: "plus"})
         if(!hasPlusPlan){
             return NextResponse.json({error: "This coupon is only for Plus members"}, {status: 403})
@@ -65,11 +65,18 @@ export async function POST(request) {
        const storeByOrders = new Map()
 
        for(const item of items){
+        //validate that productId exists
+        if(!item.productId){
+            return NextResponse.json({error: "Invalid product in cart"}, {status: 400})
+        }
         const product = await prisma.product.findUnique({
             where: {
                 id: item.productId
         }
     })
+    if(!product){
+        return NextResponse.json({error: "Product not found"}, {status: 404})
+    }
     const storeId = product.storeId
     //if the storeId is not in the map, add it
     if(!storeByOrders.has(storeId)){
@@ -87,7 +94,7 @@ let shippingFeeAdded = false
 //create orders for each seller
 for(const [storeId, orderItems] of storeByOrders.entries()){
     //calculate total amount for the order
-    let orderAmount = sellerItems.reduce((acc, item) => acc +
+    let orderAmount = orderItems.reduce((acc, item) => acc +
      item.price * item.quantity, 0)
 
      //coupon is true, provide the total
@@ -110,9 +117,10 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
             storeId,
             addressId,
             paymentMethod,
-            totalOrderAmount: parseFloat(orderAmount.toFixed(2)),
-            couponId: coupon ? coupon.id : null,
-            status: paymentMethod === 'COD' ? 'PROCESSING' : 'ORDER_PLACED',
+            total: parseFloat(orderAmount.toFixed(2)),
+            isCouponUsed: coupon ? true : false,
+            coupon: coupon ? coupon : {},
+            status: paymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
             orderItems: {
                 create: orderItems.map(item => ({
                     productId: item.productId,
@@ -127,34 +135,41 @@ orderIds.push(newOrder.id)
 if(paymentMethod === PaymentMethod.PAYSTACK){
     //initialize paystack
     const origin = request.headers.get('origin')
-    //create a paystack transaction
-    const response = await axios.post(
-        'https://api.paystack.co/transaction/initialize',
-        {
-            email: userEmail,
-            amount: Math.round(totalOrderAmount * 100), // Paystack accepts amount in kobo
-            metadata: {
-                orderIds: orderIds.join(','),
-                userId: userId,
-                appId: 'jeeshop'
+    try {
+        //create a paystack transaction
+        const response = await axios.post(
+            'https://api.paystack.co/transaction/initialize',
+            {
+                email: userEmail,
+                amount: Math.round(totalOrderAmount * 100), // Paystack accepts amount in kobo
+                metadata: {
+                    orderIds: orderIds.join(','),
+                    userId: userId,
+                    appId: 'jeeshop'
+                },
+                callback_url: `${origin}/api/paystack`
             },
-            callback_url: `${origin}/loading?nextUrl=/orders`
-        },
-        {
-            headers: {
-                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-                'Content-Type': 'application/json'
+            {
+                headers: {
+                    Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                    'Content-Type': 'application/json'
+                }
             }
+        )
+        if(!response.data.data?.authorization_url) {
+            throw new Error('No authorization URL received from Paystack')
         }
-    )
-    return NextResponse.json({authorizationUrl: response.data.data.authorization_url
-    })
+        return NextResponse.json({authorizationUrl: response.data.data.authorization_url})
+    } catch(paystackError) {
+        console.error('Paystack error:', paystackError.response?.data || paystackError.message)
+        return NextResponse.json({error: paystackError.response?.data?.message || 'Payment initialization failed'}, {status: 400})
+    }
 }
 //clear cart data
 await prisma.user.update({
     where: {id: userId},
     data: {
-        cart: []
+        cart: {}
 }
 })
 //return a response
@@ -192,8 +207,7 @@ export async function GET(request) {
             },
             orderBy: {createdAt: 'desc'}
         })
-        return NextResponse.json({orders}, {status: 200
-    })
+        return NextResponse.json({orders}, {status: 200})
 } catch (error) {
         console.error(error)
         return NextResponse.json({error: error.message}, {status: 400})

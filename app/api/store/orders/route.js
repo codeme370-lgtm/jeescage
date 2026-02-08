@@ -39,7 +39,7 @@ export async function POST(request) {
 
 export async function GET(request) {
     try {
-        const {userid}=getAuth(request)
+        const {userId}=getAuth(request)
         const storeId = await authSeller(userId)
         //suppose no store found
         if (!storeId) {

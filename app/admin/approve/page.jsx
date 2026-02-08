@@ -6,6 +6,7 @@ import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
 import { useUser, useAuth } from "@clerk/nextjs"
+import axios from "axios"
 
 export default function AdminApprove() {
     //let's get the user

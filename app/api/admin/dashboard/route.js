@@ -27,7 +27,7 @@ export async function GET(request) {
 
         const allOrders= await prisma.order.findMany({
             select:{
-                createdAT:true,
+                createdAt:true,
                 total:true}
         })
 

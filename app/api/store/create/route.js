@@ -70,3 +70,29 @@ export async function POST(request) {
     );
   }
 }
+
+//Get seller/store status
+export async function GET(request) {
+  try {
+    const { userId } = getAuth(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const store = await prisma.store.findFirst({
+      where: { userId }
+    });
+
+    if (!store) {
+      return NextResponse.json({ status: "no_store" }, { status: 200 });
+    }
+
+    return NextResponse.json({ status: store.status }, { status: 200 });
+  } catch (error) {
+    console.error("store:create GET error:", error);
+    return NextResponse.json(
+      { error: error?.message || "Server error" },
+      { status: 500 }
+    );
+  }
+}

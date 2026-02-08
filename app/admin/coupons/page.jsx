@@ -4,8 +4,8 @@ import { useEffect, useState } from "react"
 import { format } from "date-fns"
 import toast from "react-hot-toast"
 import { DeleteIcon } from "lucide-react"
-import { couponDummyData } from "@/assets/assets"
 import { useAuth } from "@clerk/nextjs"
+import axios from "axios"
 
 export default function AdminCoupons() {
 //get the api token
@@ -26,7 +26,7 @@ const {getToken} = useAuth()
         //add the api call to fetch coupons
         try {
             const token = await getToken();
-            const {data} = await axios.get('/api/admin/coupons', {
+            const {data} = await axios.get('/api/admin/coupon', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -46,7 +46,7 @@ const {getToken} = useAuth()
            newCoupon.discount = Number(newCoupon.discount);
            newCoupon.expiresAt = new Date(newCoupon.expiresAt);
 
-           const {data} = await axios.post('/api/admin/coupons',{coupon: newCoupon}, {
+           const {data} = await axios.post('/api/admin/coupon',{coupon: newCoupon}, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -73,7 +73,7 @@ const {getToken} = useAuth()
         //if not confirmed, return
         if (!confirm) return;
         const token = await getToken();
-        const {data} = await axios.delete(`/api/admin/coupons?code=${code}`, {
+        const {data} = await axios.delete(`/api/admin/coupon?code=${code}`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },

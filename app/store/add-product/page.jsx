@@ -52,7 +52,7 @@ export default function StoreAddProduct() {
                         }),
                         {
                             loading:"Analyzing image with AI....",
-                            success: ()=>{
+                            success: (res)=>{
                                 const data = res.data
                                 if(data.name && data.description){
                                     setProductInfo(prev =>({
@@ -88,6 +88,26 @@ export default function StoreAddProduct() {
             }
             setLoading(true)
 
+            //get the token
+            const token = await getToken()
+
+            //upload images first and get URLs
+            const imageUrls = []
+            for(const key in images){
+                if(images[key]){
+                    const uploadFormData = new FormData()
+                    uploadFormData.append("file", images[key])
+                    
+                    const uploadResponse = await axios.post('/api/store/upload', uploadFormData, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    })
+                    imageUrls.push(uploadResponse.data.imageUrl)
+                }
+            }
+
             //create a form data that will be sent to the api
             const formData = new FormData()
             formData.append("name", productInfo.name)
@@ -96,15 +116,10 @@ export default function StoreAddProduct() {
             formData.append("price", productInfo.price)
             formData.append("category", productInfo.category)
 
-            //adding images to form data
-            Object.keys(images).forEach((key) => {
-                if (images[key]) {
-                    formData.append("images", images[key])
-                }
+            //adding image URLs to form data instead of files
+            imageUrls.forEach((url) => {
+                formData.append("imageUrls", url)
             })
-
-            //get the token
-            const token = await getToken()
 
             //send the form data to the api
             await axios.post("/api/store/product", formData, {
@@ -142,7 +157,7 @@ export default function StoreAddProduct() {
                     <label key={key} htmlFor={`images${key}`}>
                         <Image width={300} height={300} className='h-15 w-auto border border-slate-200 rounded cursor-pointer' src={images[key] ? URL.createObjectURL(images[key]) : assets.upload_area} alt={images[key] ? `Product image ${key} preview` : 'Upload placeholder'} />
                         <input type="file" accept='image/*' id={`images${key}`}
-                         onChange={e => handleImageUpload(KeyboardEvent, e.target.files[0])}
+                         onChange={e => handleImageUpload(key, e.target.files[0])}
                           hidden />
                     </label>
                 ))}

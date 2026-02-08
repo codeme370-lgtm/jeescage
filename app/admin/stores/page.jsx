@@ -37,7 +37,7 @@ export default function AdminStores() {
         // let's make the api call to toggle isActive
         try {
             const token = await getToken();
-            await axios.post('/api/admin/toggle-active', { storeId }, {
+            const {data} = await axios.post('/api/admin/toggle-active', { storeId }, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },

@@ -5,6 +5,8 @@ import OrdersAreaChart from "@/components/OrdersAreaChart"
 import { CircleDollarSignIcon, ShoppingBasketIcon, StoreIcon, TagsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuth } from "@clerk/nextjs"
+import toast from "react-hot-toast"
+import axios from "axios"
 
 export default function AdminDashboard() {
     //we need the token for making api calls for the dashboard data
@@ -21,10 +23,10 @@ export default function AdminDashboard() {
     })
 
     const dashboardCardsData = [
-        { title: 'Total Products', value: dashboardData.products, icon: ShoppingBasketIcon },
-        { title: 'Total Revenue', value: currency + dashboardData.revenue, icon: CircleDollarSignIcon },
-        { title: 'Total Orders', value: dashboardData.orders, icon: TagsIcon },
-        { title: 'Total Stores', value: dashboardData.stores, icon: StoreIcon },
+        { title: 'Total Products', value: dashboardData?.products || 0, icon: ShoppingBasketIcon },
+        { title: 'Total Revenue', value: currency + (dashboardData?.revenue || 0), icon: CircleDollarSignIcon },
+        { title: 'Total Orders', value: dashboardData?.orders || 0, icon: TagsIcon },
+        { title: 'Total Stores', value: dashboardData?.stores || 0, icon: StoreIcon },
     ]
 
     const fetchDashboardData = async () => {
@@ -32,12 +34,12 @@ export default function AdminDashboard() {
             //let's get the dashboard data from the api
             const token = await getToken();
             //make the api call here and set the data
-            const data = await axios.get('/api/admin/dashboard', {
+            const response = await axios.get('/api/admin/dashboard', {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            setDashboardData(data.dashboardData);
+            setDashboardData(response.data.dashboardData);
            
         } catch (error) {
             toast.error(error?.response?.data?.error || error.message);
@@ -72,7 +74,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Area Chart */}
-            <OrdersAreaChart allOrders={dashboardData.allOrders} />
+            <OrdersAreaChart allOrders={dashboardData?.allOrders || []} />
         </div>
     )
 }

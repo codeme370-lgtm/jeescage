@@ -1,6 +1,6 @@
 import {getAuth} from '@clerk/nextjs/server'
 import { NextResponse } from 'next/server'
-
+import authAdmin from '@/middlewares/authAdmin'
 
 //Auth Administrator
 export async function GET(request) {
@@ -9,13 +9,10 @@ export async function GET(request) {
         const {userId}=getAuth(request)
         const isAdmin= await authAdmin(userId)
 
-        if(!isAdmin){
-           return NextResponse.json({error:'Unauthorized Access'}, {status:403}) 
-        }
-        return NextResponse.json({message:'You are an admin'}, {status:200})
+        return NextResponse.json({isAdmin}, {status:200})
     } catch (error) {
         console.error(error)
-        return NextResponse.json({error:'Internal Server Error'}, {status:500})
+        return NextResponse.json({isAdmin: false, error:'Internal Server Error'}, {status:500})
     }
 }
 
