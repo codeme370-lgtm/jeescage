@@ -11,6 +11,10 @@ const authSeller = async (userId)=>{
             include:{store:true}
         }
     )
+    //check if user exists
+    if(!user){
+        return false
+    }
     //approving a user
     if(user.store){
     if(user.store.status==='approved'){

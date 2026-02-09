@@ -43,23 +43,35 @@ export async function POST(request) {
     // Do not upload/store custom logos. Use a general default logo instead.
     const logoUrl = "/favicon.ico";
 
-    const newStore = await prisma.store.create({
-      data: {
-        userId,
-        name,
-        description,
-        username: username.toLowerCase().trim(),
-        email,
-        contact: contacts,
-        address,
-        logo: logoUrl,
-      },
-    });
+    let newStore;
+    try {
+      newStore = await prisma.store.create({
+        data: {
+          userId,
+          name,
+          description,
+          username: username.toLowerCase().trim(),
+          email,
+          contact: contacts,
+          address,
+          logo: logoUrl,
+        },
+      });
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: { store: { connect: { id: newStore.id } } },
-    });
+      await prisma.user.update({
+        where: { id: userId },
+        data: { store: { connect: { id: newStore.id } } },
+      });
+    } catch (err) {
+      // Handle unique-constraint race (user already has a store)
+      if (err?.code === 'P2002') {
+        const existing = await prisma.store.findFirst({ where: { userId } });
+        if (existing) {
+          return NextResponse.json({ status: existing.status });
+        }
+      }
+      throw err;
+    }
 
     return NextResponse.json({ message: "applied, waiting for approval" });
   } catch (error) {

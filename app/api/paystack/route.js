@@ -39,12 +39,16 @@ export async function POST(request) {
 
       const orderIdsArray = orderIds.split(",");
 
-      // Mark orders as paid
+      // Mark orders as payment pending (money captured but not settled yet)
       await Promise.all(
         orderIdsArray.map((orderId) =>
           prisma.order.update({
             where: { id: orderId },
-            data: { isPaid: true, status: "PROCESSING" },
+            data: { 
+              paymentStatus: "PENDING",
+              paystackReference: reference,
+              status: "PROCESSING" 
+            },
           })
         )
       );
@@ -64,11 +68,15 @@ export async function POST(request) {
 
       const orderIdsArray = orderIds.split(",");
 
-      // Delete failed orders
+      // Mark orders as payment failed
       await Promise.all(
         orderIdsArray.map((orderId) =>
-          prisma.order.delete({
+          prisma.order.update({
             where: { id: orderId },
+            data: { 
+              paymentStatus: "FAILED",
+              status: "ORDER_PLACED"
+            },
           })
         )
       );

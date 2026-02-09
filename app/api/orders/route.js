@@ -194,7 +194,7 @@ export async function GET(request) {
                     {paymentMethod: PaymentMethod.COD},
                     {AND:[
                         {paymentMethod: PaymentMethod.PAYSTACK},
-                        {isPaid: true}
+                        {paymentStatus: {in: ["PENDING", "AUTHORIZED"]}}
                     ]}
                 ]
             },

@@ -54,22 +54,30 @@ enum PaymentMethod {
     PAYSTACK
 }
 
+enum PaymentStatus {
+    PENDING
+    AUTHORIZED
+    FAILED
+}
+
 // Required for creating an Order: total, userId, storeId, addressId, isPaid, paymentMethod, isCouponUsed, coupon (JSON), orderItems (nested)
 model Order {
-    id            String        @id @default(cuid())
-    total         Float
-    status        OrderStatus   @default(ORDER_PLACED)
-    userId        String
-    storeId       String
-    addressId     String
-    isPaid        Boolean       @default(false)
-    paymentMethod PaymentMethod
-    createdAt     DateTime      @default(now())
-    updatedAt     DateTime      @updatedAt
-    isCouponUsed  Boolean       @default(false)
-    coupon        Json          @default("{}")
-    orderItems    OrderItem[]
-    ratings       Rating[]
+    id              String        @id @default(cuid())
+    total           Float
+    status          OrderStatus   @default(ORDER_PLACED)
+    userId          String
+    storeId         String
+    addressId       String
+    isPaid          Boolean       @default(false)
+    paymentMethod   PaymentMethod
+    paymentStatus   PaymentStatus @default(PENDING)
+    paystackReference String?
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+    isCouponUsed    Boolean       @default(false)
+    coupon          Json          @default("{}")
+    orderItems      OrderItem[]
+    ratings         Rating[]
 
     // Relations
     user    User    @relation("BuyerRelation", fields: [userId], references: [id])
