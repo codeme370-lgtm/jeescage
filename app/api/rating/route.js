@@ -1,5 +1,6 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 //add new rating
 
@@ -9,13 +10,9 @@ export async function POST(request) {
         //we need data from the request body
         const {orderId, productId, rating, review} = await request.json()
         //get the other data
-        const {order}=await prisma.order.findUnique({
-            where: {
-                id: orderId, userId}
-            }
-        )
-        //suppose order is not found
-        if(!order){
+        const order = await prisma.order.findUnique({ where: { id: orderId } })
+        //suppose order is not found or doesn't belong to user
+        if(!order || order.userId !== userId){
             return NextResponse.json({error: "Order not found"}, {status: 404})
         }
         //suppose order is found, check if the product is already rated

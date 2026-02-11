@@ -7,13 +7,17 @@ import axios from "axios";
 //Get a new order
 export async function POST(request) {
     try {
+        console.log('POST /api/orders incoming')
+        const textBody = await request.text().catch(() => null)
+        if(textBody) console.log('raw body length:', textBody.length)
         //user and has from clerk
         const {userId, has} = getAuth(request)
        //check if the userid is  not there
        if(!userId){
         return NextResponse.json({error: "Unauthorized"}, {status: 401})
        }
-       const {items, addressId, paymentMethod, couponCode} = await request.json()
+    const {items, addressId, paymentMethod, couponCode} = JSON.parse(textBody || "{}")
+    console.log('order payload:', { itemsCount: Array.isArray(items) ? items.length : 0, addressId, paymentMethod, couponCode })
 
        //check if all required fields are there
        if(!Array.isArray(items) || items.length === 0 || !addressId || !paymentMethod){
@@ -25,11 +29,16 @@ export async function POST(request) {
         where: { id: userId }
        })
        const userEmail = user?.email
+             // validate address exists
+             const addressExists = await prisma.address.findUnique({ where: { id: addressId } }).catch(() => null)
+             if (!addressExists) {
+                 return NextResponse.json({ error: "Address not found" }, { status: 404 })
+             }
 
        //check coupon
        let coupon = null
        if(couponCode){
-        coupon = await prisma.coupon.findUnique({
+        coupon = await prisma.coupon.findFirst({
             where: {
                 code: couponCode.toUpperCase(),
                 expiresAt: {
@@ -43,7 +52,7 @@ export async function POST(request) {
         return NextResponse.json({error: "Invalid or expired coupon"}, {status: 404})
        }
        //suppose coupon is found, check if for new users
-       if(couponCode && coupon.forNewUsers){
+       if(couponCode && coupon.forNewUser){
         const userOrders = await prisma.order.findMany({
             where: {
                 userId: userId
@@ -110,32 +119,42 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
      //let's provide the full amount
      totalOrderAmount += parseFloat(orderAmount.toFixed(2))
 
-     //create the order
-     const newOrder = await prisma.order.create({
-        data: {
-            userId,
-            storeId,
-            addressId,
-            paymentMethod,
-            total: parseFloat(orderAmount.toFixed(2)),
-            isCouponUsed: coupon ? true : false,
-            coupon: coupon ? coupon : {},
-            status: paymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
-            orderItems: {
-                create: orderItems.map(item => ({
-                    productId: item.productId,
-                    quantity: item.quantity,
-                    price: item.price
-                }))
- }
-}})
-orderIds.push(newOrder.id)
+        //create the order
+        let newOrder
+        try {
+            newOrder = await prisma.order.create({
+                data: {
+                    userId,
+                    storeId,
+                    addressId,
+                    paymentMethod,
+                    total: parseFloat(orderAmount.toFixed(2)),
+                    isCouponUsed: coupon ? true : false,
+                    coupon: coupon ? coupon : {},
+                    status: paymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
+                    orderItems: {
+                        create: orderItems.map(item => ({
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            price: item.price
+                        }))
+                    }
+                }
+            })
+            console.log('created order id:', newOrder.id)
+            orderIds.push(newOrder.id)
+        } catch (createErr) {
+            console.error('Error creating order for storeId', storeId, 'items:', orderItems, createErr?.message ?? createErr)
+            throw createErr
+        }
 }
 //check if payment method is paystack
 if(paymentMethod === PaymentMethod.PAYSTACK){
     //initialize paystack
-    const origin = request.headers.get('origin')
+    // prefer request origin, fallback to env var (useful in non-browser requests)
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
     try {
+        console.log('Initializing Paystack', { origin, totalOrderAmount, orderIds })
         //create a paystack transaction
         const response = await axios.post(
             'https://api.paystack.co/transaction/initialize',
@@ -147,7 +166,8 @@ if(paymentMethod === PaymentMethod.PAYSTACK){
                     userId: userId,
                     appId: 'jeeshop'
                 },
-                callback_url: `${origin}/api/paystack`
+                // redirect the user to a frontend callback page (not the webhook)
+                callback_url: `${origin}/paystack`
             },
             {
                 headers: {
@@ -156,10 +176,19 @@ if(paymentMethod === PaymentMethod.PAYSTACK){
                 }
             }
         )
-        if(!response.data.data?.authorization_url) {
-            throw new Error('No authorization URL received from Paystack')
-        }
-        return NextResponse.json({authorizationUrl: response.data.data.authorization_url})
+                if(!response.data.data?.authorization_url) {
+                        throw new Error('No authorization URL received from Paystack')
+                }
+
+                // persist paystack reference on created orders to help later correlation
+                const paystackRef = response.data.data.reference
+                if(paystackRef){
+                    await Promise.all(orderIds.map((oid) =>
+                        prisma.order.update({ where: { id: oid }, data: { paystackReference: paystackRef } })
+                    ))
+                }
+                console.log('Paystack initialized, authorization_url present')
+                return NextResponse.json({authorizationUrl: response.data.data.authorization_url, reference: paystackRef})
     } catch(paystackError) {
         console.error('Paystack error:', paystackError.response?.data || paystackError.message)
         return NextResponse.json({error: paystackError.response?.data?.message || 'Payment initialization failed'}, {status: 400})
@@ -175,8 +204,11 @@ await prisma.user.update({
 //return a response
 return NextResponse.json({message: "Order placed successfully", orderIds, totalOrderAmount}, {status: 201})
 } catch (error) {
-        console.error(error)
-        return NextResponse.json({error: error.code || error.message}, {status: 400})
+    console.error('POST /api/orders failed:', error)
+    try {
+      console.error('detailed error:', JSON.stringify(error, Object.getOwnPropertyNames(error)))
+    } catch (e) { /* ignore stringify errors */ }
+    return NextResponse.json({error: error.code || error.message || 'Unknown error'}, {status: 400})
     }
 }
 

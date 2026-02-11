@@ -28,7 +28,7 @@ const RatingModal = ({ ratingModal, setRatingModal }) => {
             //generate the token
             const token = await getToken();
             //make the API call
-            const {data} = await axios.post('/api/ratings', {
+            const {data} = await axios.post('/api/rating', {
                 orderId: ratingModal.orderId,
                 productId: ratingModal.productId,
                 rating: rating,

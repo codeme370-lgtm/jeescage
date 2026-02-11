@@ -12,6 +12,7 @@ const OrderItem = ({ order }) => {
     const [ratingModal, setRatingModal] = useState(null);
 
     const { ratings } = useSelector(state => state.rating);
+    const addr = order.address || {};
 
     return (
         <>
@@ -48,9 +49,9 @@ const OrderItem = ({ order }) => {
                 <td className="text-center max-md:hidden">{currency}{order.total}</td>
 
                 <td className="text-left max-md:hidden">
-                    <p>{order.address.name}, {order.address.street},</p>
-                    <p>{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country},</p>
-                    <p>{order.address.phone}</p>
+                    <p>{addr.name || '—'}, {addr.street || '—'}</p>
+                    <p>{addr.city || '—'}, {addr.state || '—'}, {addr.zip || '—'}, {addr.country || '—'}</p>
+                    <p>{addr.phone || '—'}</p>
                 </td>
 
                 <td className="text-left space-y-2 text-sm max-md:hidden">
@@ -70,9 +71,9 @@ const OrderItem = ({ order }) => {
             {/* Mobile */}
             <tr className="md:hidden">
                 <td colSpan={5}>
-                    <p>{order.address.name}, {order.address.street}</p>
-                    <p>{order.address.city}, {order.address.state}, {order.address.zip}, {order.address.country}</p>
-                    <p>{order.address.phone}</p>
+                    <p>{addr.name || '—'}, {addr.street || '—'}</p>
+                    <p>{addr.city || '—'}, {addr.state || '—'}, {addr.zip || '—'}, {addr.country || '—'}</p>
+                    <p>{addr.phone || '—'}</p>
                     <br />
                     <div className="flex items-center">
                         <span className='text-center mx-auto px-6 py-1.5 rounded bg-green-100 text-green-700' >

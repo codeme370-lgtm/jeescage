@@ -41,7 +41,7 @@ export default function Dashboard() {
                 Authorization: `Bearer ${token}`
             }
         })
-        setDashboardData(data.dashboardCardsData)
+        setDashboardData(data.dashboardData)
         
         } catch (error) {
             toast.error(error?.response?.data?.message || error.message)

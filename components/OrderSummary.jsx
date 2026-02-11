@@ -51,43 +51,50 @@ const OrderSummary = ({ totalPrice, items }) => {
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
         try{
-            //when the user is not logged in
-            if(!user){
-                toast.error("You need to be logged in to place an order")
-                return;
-              }
-              //when no address is selected
-              if(!selectedAddress){
-                toast.error("Please select an address to place order")
-                return;
-              }
-              //suppose the user is available and address is selected
-              const token = await getToken();
-              const orderData = {
-                items,
-                paymentMethod,
-                addressId: selectedAddress.id,
-                couponCode: coupon ? coupon.code : null
-              };
-              //make the API call to place order
-              const {data} =
-              await axios.post('/api/orders', orderData, {
-                headers: {
-                  Authorization: `Bearer ${token}`
-                }
-              });
-              //payment handling can be done here based on payment method
-              if(paymentMethod === 'PAYSTACK'){
-                window.location.href = data.authorizationUrl;
-                return;
-              }else{
-                //for COD, we can directly show success message
-                toast.success("Order placed successfully with Cash on Delivery");
-                 router.push('/orders')
-                 dispatch(fetchCart({getToken}));
-              }
+                        //when the user is not logged in
+                        if(!user){
+                                toast.error("You need to be logged in to place an order")
+                                return;
+                        }
+                        //when no address is selected
+                        if(!selectedAddress){
+                                toast.error("Please select an address to place order")
+                                return;
+                        }
+                        //suppose the user is available and address is selected
+                        const token = await getToken();
+                            // normalize items to what the API expects
+                            const normalizedItems = items.map(i => ({ productId: i.id || i.productId, quantity: i.quantity || 1 }))
+                            const orderData = {
+                                items: normalizedItems,
+                                paymentMethod,
+                                addressId: selectedAddress.id,
+                                couponCode: coupon ? coupon.code : null
+                            };
+                        //make the API call to place order
+                        const {data} =
+                        await axios.post('/api/orders', orderData, {
+                                headers: {
+                                        Authorization: `Bearer ${token}`
+                                }
+                        });
+                        //payment handling can be done here based on payment method
+                        if(paymentMethod === 'PAYSTACK'){
+                                if(!data?.authorizationUrl){
+                                        toast.error(data?.error || 'Payment initialization failed')
+                                        return;
+                                }
+                                window.location.href = data.authorizationUrl;
+                                return;
+                        }else{
+                                //for COD, we can directly show success message
+                                toast.success("Order placed successfully with Cash on Delivery");
+                                router.push('/orders')
+                                dispatch(fetchCart({getToken}));
+                        }
         }catch(error){
-            toast.error(error?.response?.data?.message || "Something went wrong while placing order")
+                        const apiErr = error?.response?.data?.error || error?.response?.data?.message || error?.message
+                        toast.error(apiErr || "Something went wrong while placing order")
             return;
         }
        

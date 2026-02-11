@@ -7,27 +7,25 @@ import authSeller from "@/middlewares/authSeller"
 
 export async function POST(request) {
     try {
-        const {userid}=getAuth(request)
-        const storeId = await authSeller(userid)
+        const { userId } = getAuth(request)
+        const storeId = await authSeller(userId)
 
         //suppose no store found
         if (!storeId) {
-            return NextResponse({ message: "You are not authorized to perform this action" }, { status: 403 })
+            return NextResponse.json({ message: "You are not authorized to perform this action" }, { status: 403 })
         }
 
         //update order status
         const { orderId, status } = await request.json()
 
         //update the order status in the database
-        await prisma.order.update({
-            where: {
-                id: orderId,
-                storeId: storeId
-            },
-            data: {
-                status: status
-            }
+        const res = await prisma.order.updateMany({
+            where: { id: orderId, storeId: storeId },
+            data: { status: status }
         })
+        if (res.count === 0) {
+            return NextResponse.json({ message: "Order not found or unauthorized" }, { status: 404 })
+        }
         return NextResponse.json({ message: "Order status updated successfully" }, { status: 200 })
     } catch (error) {
         console.error(error)
@@ -39,11 +37,11 @@ export async function POST(request) {
 
 export async function GET(request) {
     try {
-        const {userId}=getAuth(request)
+        const { userId } = getAuth(request)
         const storeId = await authSeller(userId)
         //suppose no store found
         if (!storeId) {
-            return NextResponse({ message: "You are not authorized to perform this action" }, { status: 403 })
+            return NextResponse.json({ message: "You are not authorized to perform this action" }, { status: 403 })
         }
         const orders = await prisma.order.findMany({
             where: {

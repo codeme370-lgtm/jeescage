@@ -6,9 +6,9 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-export default function Product() {
+export default function Product({ params }) {
 
-    const { productId } = useParams();
+    const { productId } = useParams() || params;
     const [product, setProduct] = useState();
     const products = useSelector(state => state.product.list);
 
@@ -22,7 +22,7 @@ export default function Product() {
             fetchProduct()
         }
         scrollTo(0, 0)
-    }, [productId,products]);
+    }, [productId, products]);
 
     return (
         <div className="mx-6">

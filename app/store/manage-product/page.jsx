@@ -13,7 +13,6 @@ export default function StoreManageProducts() {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || 'GHS'
 
     const {getToken} = useAuth()
-    const {user} = useAuth()
 
     const [loading, setLoading] = useState(true)
     const [products, setProducts] = useState([])
@@ -38,7 +37,7 @@ export default function StoreManageProducts() {
         // Logic to toggle the stock of a product
         try {
             const token = await getToken()
-        const {data} = await axios.post(`/api/store/toggle-stock`, {productId}, {
+        const {data} = await axios.post(`/api/store/stock-toggle`, {productId}, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -53,10 +52,8 @@ export default function StoreManageProducts() {
     }
 
     useEffect(() => {
-            if(user) {
-                fetchProducts()
-            }
-    }, [user])
+        fetchProducts()
+    }, [])
 
     if (loading) return <Loading />
 
