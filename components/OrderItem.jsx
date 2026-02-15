@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import Rating from "./Rating";
 import { useState } from "react";
 import RatingModal from "./RatingModal";
+import AddressViewModal from "./AddressViewModal";
 
 const OrderItem = ({ order }) => {
 
@@ -13,6 +14,7 @@ const OrderItem = ({ order }) => {
 
     const { ratings } = useSelector(state => state.rating);
     const addr = order.address || {};
+    const [showAddrModal, setShowAddrModal] = useState(false);
 
     return (
         <>
@@ -49,8 +51,16 @@ const OrderItem = ({ order }) => {
                 <td className="text-center max-md:hidden">{currency}{order.total}</td>
 
                 <td className="text-left max-md:hidden">
-                    <p>{addr.name || '—'}, {addr.street || '—'}</p>
-                    <p>{addr.city || '—'}, {addr.state || '—'}, {addr.zip || '—'}, {addr.country || '—'}</p>
+                    <p className="flex items-center gap-2">
+                        <span>{addr.name || '—'}</span>
+                        <button onClick={() => setShowAddrModal(true)} className="text-xs text-slate-500 hover:underline">View</button>
+                    </p>
+                    <div className="text-sm text-slate-700">
+                        <p>{addr.street || '—'}</p>
+                        <p>{addr.city || '—'}</p>
+                        <p>{addr.state || '—'}</p>
+                        <p>{addr.zip || ''} {addr.country || ''}</p>
+                    </div>
                     <p>{addr.phone || '—'}</p>
                 </td>
 
@@ -71,9 +81,21 @@ const OrderItem = ({ order }) => {
             {/* Mobile */}
             <tr className="md:hidden">
                 <td colSpan={5}>
-                    <p>{addr.name || '—'}, {addr.street || '—'}</p>
-                    <p>{addr.city || '—'}, {addr.state || '—'}, {addr.zip || '—'}, {addr.country || '—'}</p>
-                    <p>{addr.phone || '—'}</p>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="font-medium">{addr.name || '—'}</p>
+                            <div className="text-sm text-slate-700">
+                                <p>{addr.street || '—'}</p>
+                                <p>{addr.city || '—'}</p>
+                                <p>{addr.state || '—'}</p>
+                                <p>{addr.zip || ''} {addr.country || ''}</p>
+                            </div>
+                            <p>{addr.phone || '—'}</p>
+                        </div>
+                        <div>
+                            <button onClick={() => setShowAddrModal(true)} className="text-sm text-slate-500 hover:underline">View Address</button>
+                        </div>
+                    </div>
                     <br />
                     <div className="flex items-center">
                         <span className='text-center mx-auto px-6 py-1.5 rounded bg-green-100 text-green-700' >
@@ -82,6 +104,7 @@ const OrderItem = ({ order }) => {
                     </div>
                 </td>
             </tr>
+            {showAddrModal && <AddressViewModal address={addr} onClose={() => setShowAddrModal(false)} />}
             <tr>
                 <td colSpan={4}>
                     <div className="border-b border-slate-300 w-6/7 mx-auto" />

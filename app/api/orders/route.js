@@ -70,7 +70,7 @@ export async function POST(request) {
         }
        }
 
-       //Group orders by storeId using a map
+    //Group orders by storeId using a map
        const storeByOrders = new Map()
 
        for(const item of items){
@@ -98,40 +98,51 @@ export async function POST(request) {
 let orderIds = []
 let totalOrderAmount = 0
 
-let shippingFeeAdded = false
-
 //create orders for each seller
 for(const [storeId, orderItems] of storeByOrders.entries()){
     //calculate total amount for the order
-    let orderAmount = orderItems.reduce((acc, item) => acc +
-     item.price * item.quantity, 0)
+    let orderAmount = orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
 
-     //coupon is true, provide the total
-     if(coupon){
+    //apply coupon discount if present
+    if (coupon) {
         orderAmount = orderAmount - (coupon.discount / 100 * orderAmount)
-     }
+    }
 
-     //if not a plus member and shipping fee not added,then use order amount + 5
-     if(!has({plan: "plus"}) && !shippingFeeAdded){
-        orderAmount += 5
-        shippingFeeAdded = true
-     }
-     //let's provide the full amount
-     totalOrderAmount += parseFloat(orderAmount.toFixed(2))
+    // determine delivery fee rules based on address city
+    // default delivery fee 0 when city is Kumasi (case-insensitive)
+    const city = (addressExists.city || '').toString().toLowerCase()
+    let deliveryFee = 0
+    if (city !== 'kumasi') {
+        // if order amount <= 500, flat GHC 20, else 5% of order amount
+        if (orderAmount <= 500) {
+            deliveryFee = 20
+        } else {
+            deliveryFee = parseFloat((orderAmount * 0.05).toFixed(2))
+        }
+    }
+
+    // add delivery fee to the order amount
+    orderAmount = parseFloat((orderAmount + deliveryFee).toFixed(2))
+
+    // accumulate to total order amount
+    totalOrderAmount += orderAmount
 
         //create the order
         let newOrder
         try {
+            // Force payment method to PAYSTACK (COD disabled)
+            const forcedPaymentMethod = PaymentMethod.PAYSTACK
+
             newOrder = await prisma.order.create({
                 data: {
                     userId,
                     storeId,
                     addressId,
-                    paymentMethod,
+                    paymentMethod: forcedPaymentMethod,
                     total: parseFloat(orderAmount.toFixed(2)),
                     isCouponUsed: coupon ? true : false,
                     coupon: coupon ? coupon : {},
-                    status: paymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
+                    status: forcedPaymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
                     orderItems: {
                         create: orderItems.map(item => ({
                             productId: item.productId,
@@ -235,7 +246,8 @@ export async function GET(request) {
                     include: {
                         product: true
                     }
-                }
+                },
+                address: true
             },
             orderBy: {createdAt: 'desc'}
         })

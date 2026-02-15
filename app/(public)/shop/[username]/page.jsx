@@ -4,6 +4,7 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import { MailIcon, MapPinIcon } from "lucide-react"
 import Loading from "@/components/Loading"
+import { toast } from 'react-hot-toast'
 import Image from "next/image"
 import axios from "axios"
 
@@ -37,9 +38,9 @@ export default function StoreShop() {
             {storeInfo && (
                 <div className="max-w-7xl mx-auto bg-slate-50 rounded-xl p-6 md:p-10 mt-6 flex flex-col md:flex-row items-center gap-6 shadow-xs">
                     <Image
-                        src={storeInfo.logo}
+                        src={storeInfo.logo || '/favicon.ico'}
                         alt={storeInfo.name}
-                        className="size-32 sm:size-38 object-cover border-2 border-slate-100 rounded-md"
+                        className="size-32 sm:size-38 object-cover border-2 border-slate-100 rounded-full"
                         width={200}
                         height={200}
                     />

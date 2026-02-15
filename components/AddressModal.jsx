@@ -37,6 +37,10 @@ const dispatch = useDispatch()
         try {
             //generate the token
             const token = await getToken()
+            if(!token){
+                toast.error('Authentication failed. Please sign in and try again.')
+                return
+            }
             //let's get the data from the api
             const {data} = await axios.post('/api/address', address, {
                 headers: {

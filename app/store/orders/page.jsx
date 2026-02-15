@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Loading from "@/components/Loading"
+import AddressViewModal from "@/components/AddressViewModal"
 import { useAuth } from "@clerk/nextjs"
 import axios from "axios"
 import toast from "react-hot-toast"
@@ -12,6 +13,7 @@ export default function StoreOrders() {
     const [loading, setLoading] = useState(true)
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [showAddrModal, setShowAddrModal] = useState(false)
 
     const {getToken} = useAuth()
 
@@ -19,6 +21,11 @@ export default function StoreOrders() {
     const fetchOrders = async () => {
        try {
         const token = await getToken()
+        if (!token) {
+            toast.error("Authentication required. Please sign in.")
+            setLoading(false)
+            return
+        }
         const {data} = await axios.get("/api/store/orders", {
             headers: {
                 Authorization: `Bearer ${token}`
@@ -37,6 +44,10 @@ export default function StoreOrders() {
         // Logic to update the status of an order
         try {
             const token = await getToken()
+            if (!token) {
+                toast.error("Authentication required. Please sign in.")
+                return
+            }
             await axios.post("/api/store/orders", {orderId, status}, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -139,8 +150,12 @@ export default function StoreOrders() {
                             <h3 className="font-semibold mb-2">Customer Details</h3>
                             <p><span className="text-green-700">Name:</span> {selectedOrder.user?.name}</p>
                             <p><span className="text-green-700">Email:</span> {selectedOrder.user?.email}</p>
-                            <p><span className="text-green-700">Phone:</span> {selectedOrder.address?.phone}</p>
-                            <p><span className="text-green-700">Address:</span> {`${selectedOrder.address?.street}, ${selectedOrder.address?.city}, ${selectedOrder.address?.state}, ${selectedOrder.address?.zip}, ${selectedOrder.address?.country}`}</p>
+                                <p><span className="text-green-700">Phone:</span> {selectedOrder.address?.phone}</p>
+                                <p className="flex items-center gap-2">
+                                    <span className="text-green-700">Address:</span>
+                                    <span className="text-slate-700">{`${selectedOrder.address?.street || ''}${selectedOrder.address?.street ? ', ' : ''}${selectedOrder.address?.city || ''}${selectedOrder.address?.city ? ', ' : ''}${selectedOrder.address?.state || ''}`.slice(0, 80)}{(selectedOrder.address && (`${selectedOrder.address.street || ''}` + `${selectedOrder.address.city || ''}`).length > 80) ? '...' : ''}</span>
+                                    <button onClick={() => setShowAddrModal(true)} className="text-xs text-slate-500 hover:underline">View</button>
+                                </p>
                         </div>
 
                         {/* Products */}
@@ -183,6 +198,9 @@ export default function StoreOrders() {
                         </div>
                     </div>
                 </div>
+            )}
+            {showAddrModal && selectedOrder && (
+                <AddressViewModal address={selectedOrder.address} onClose={() => setShowAddrModal(false)} />
             )}
         </>
     )

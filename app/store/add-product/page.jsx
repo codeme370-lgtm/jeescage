@@ -7,12 +7,15 @@ import { toast } from "react-hot-toast"
 import { useAuth } from "@clerk/nextjs"
 import axios from "axios"
 import React from "react"
+import { useEffect } from 'react'
 
 
 
 export default function StoreAddProduct() {
 
-    const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Health', 'Toys & Games', 'Sports & Outdoors', 'Books & Media', 'Food & Drink', 'Hobbies & Crafts', 'Others']
+    const [categories, setCategories] = useState(['Electronics', 'Clothing', 'Home & Kitchen', 'Beauty & Health', 'Toys & Games', 'Sports & Outdoors', 'Books & Media', 'Food & Drink', 'Hobbies & Crafts', 'Others'])
+    const [newCategoryName, setNewCategoryName] = useState('')
+    const [aiSuggestion, setAiSuggestion] = useState(null)
 
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
     const [productInfo, setProductInfo] = useState({
@@ -27,6 +30,16 @@ export default function StoreAddProduct() {
 
 
     const {getToken} = useAuth()
+
+    useEffect(() => {
+        const fetchCats = async () => {
+            try {
+                const { data } = await axios.get('/api/store/category')
+                if (data?.categories) setCategories(prev => Array.from(new Set([...data.categories.map(c=>c.name), ...prev])))
+            } catch (e) { /* ignore */ }
+        }
+        fetchCats()
+    }, [])
 
 
     const onChangeHandler = (e) => {
@@ -190,6 +203,60 @@ export default function StoreAddProduct() {
                     <option key={category} value={category}>{category}</option>
                 ))}
             </select>
+
+            <div className="flex items-center gap-3 mt-2">
+                <input placeholder="New category name" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="border p-2 rounded" />
+                <button type="button" onClick={async () => {
+                    if(!newCategoryName) return toast.error('Enter a category name')
+                    try{
+                        const token = await getToken()
+                        const { data } = await axios.post('/api/store/category', { name: newCategoryName }, { headers: { Authorization: `Bearer ${token}` } })
+                        setCategories(prev => [data.category.name, ...prev])
+                        setProductInfo(prev => ({ ...prev, category: data.category.name }))
+                        setNewCategoryName('')
+                        toast.success('Category created')
+                    }catch(err){
+                        toast.error(err?.response?.data?.error || err.message)
+                    }
+                }} className="bg-slate-800 text-white px-3 py-2 rounded">Create Category</button>
+
+                <button type="button" onClick={async () => {
+                    try{
+                        const token = await getToken()
+                        // call ai-category endpoint with product name/description or image (first image)
+                        const imageFile = images[1]
+                        let base64=null; let mimeType=null
+                        if(imageFile){
+                            const reader = new FileReader()
+                            const p = new Promise((res, rej) => {
+                                reader.onloadend = () => res(reader.result)
+                                reader.onerror = rej
+                            })
+                            reader.readAsDataURL(imageFile)
+                            const result = await p
+                            base64 = result.split(',')[1]
+                            mimeType = imageFile.type
+                        }
+                        const body = { name: productInfo.name, description: productInfo.description, base64Image: base64, mimeType }
+                        const { data } = await axios.post('/api/store/ai-category', body, { headers: { Authorization: `Bearer ${token}` } })
+                        setAiSuggestion(data)
+                        if(data?.category) setProductInfo(prev=>({ ...prev, category: data.category }))
+                        if(data?.suggestedMrp) setProductInfo(prev=>({ ...prev, mrp: data.suggestedMrp }))
+                        if(data?.suggestedPrice) setProductInfo(prev=>({ ...prev, price: data.suggestedPrice }))
+                        toast.success('AI suggested category & prices')
+                    }catch(err){
+                        toast.error(err?.response?.data?.error || err.message)
+                    }
+                }} className="bg-indigo-600 text-white px-3 py-2 rounded">Generate with AI</button>
+            </div>
+
+            {aiSuggestion && (
+                <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded">
+                    <p><strong>AI category:</strong> {aiSuggestion.category}</p>
+                    <p><strong>Suggested MRP:</strong> {aiSuggestion.suggestedMrp}</p>
+                    <p><strong>Suggested Price:</strong> {aiSuggestion.suggestedPrice}</p>
+                </div>
+            )}
 
             <br />
 

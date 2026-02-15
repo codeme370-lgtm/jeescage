@@ -169,3 +169,11 @@ model Store {
     Order   Order[]
     user    User      @relation(fields: [userId], references: [id])
 }
+
+// Categories for products (optional separate table)
+model Category {
+    id        String   @id @default(cuid())
+    name      String   @unique
+    slug      String   @unique
+    createdAt DateTime @default(now())
+}

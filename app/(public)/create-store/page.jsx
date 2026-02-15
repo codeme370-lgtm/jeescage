@@ -123,10 +123,10 @@ export default function CreateStore() {
               Store Logo
               <Image
                 src={storeInfo.image ? URL.createObjectURL(storeInfo.image) : assets.upload_area}
-                className="rounded-lg mt-2 h-16 w-auto"
+                className="rounded-full mt-2 h-16 w-16 object-cover"
                 alt="Store logo preview"
-                width={150}
-                height={100}
+                width={64}
+                height={64}
               />
               <input type="file" accept="image/*" onChange={(e) => setStoreInfo({ ...storeInfo, image: e.target.files[0] })} hidden />
             </label>

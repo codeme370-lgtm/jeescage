@@ -11,6 +11,8 @@ const authSeller = async (userId)=>{
             include:{store:true}
         }
     )
+        console.log('authSeller: lookup userId=', userId, 'foundUser=', !!user)
+        if(user) console.log('authSeller: user.store=', !!user.store, 'storeStatus=', user.store?.status)
     //check if user exists
     if(!user){
         return false

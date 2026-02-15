@@ -30,6 +30,9 @@ export async function GET(request){
             include:{product:true, user:true}
         })
 
+        //get store info
+        const store = await prisma.store.findUnique({ where: { id: storeId } })
+
         //providing ratings on the dashboard
         const dashboardData={
             totalOrders:orders.length,
@@ -37,8 +40,8 @@ export async function GET(request){
             totalProducts:products.length,
             ratings
         }
-        //return the dashboard data
-        return NextResponse.json({dashboardData});
+        //return the dashboard data along with store info
+        return NextResponse.json({dashboardData, store});
     }catch (error){
         console.error(error);
      return NextResponse.json({error:error.code || error.message}, {status:400})

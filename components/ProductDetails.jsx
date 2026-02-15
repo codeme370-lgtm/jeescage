@@ -2,10 +2,12 @@
 
 import { addToCart } from "@/lib/features/cart/cartSlice";
 import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
+import { useUser } from '@clerk/nextjs'
+import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { assets } from "@/assets/assets";
@@ -19,11 +21,16 @@ const ProductDetails = ({ product }) => {
     const cart = useSelector(state => state.cart.cartItems);
     const dispatch = useDispatch();
 
+    const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
+    const { user, isLoaded } = useUser()
     const router = useRouter()
 
-    const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
-
     const addToCartHandler = () => {
+        if (!isLoaded || !user) {
+            toast.error('Please sign in to add items to your cart')
+            router.push('/sign-in')
+            return
+        }
         dispatch(addToCart({ productId }))
     }
 
@@ -74,7 +81,7 @@ const ProductDetails = ({ product }) => {
                 </div>
                 <hr className="border-gray-300 my-5" />
                 <div className="flex flex-col gap-4 text-slate-500">
-                    <p className="flex gap-3"> <EarthIcon className="text-slate-400" /> Free shipping worldwide </p>
+                    <p className="flex gap-3"> <EarthIcon className="text-slate-400" /> Free delivery worldwide </p>
                     <p className="flex gap-3"> <CreditCardIcon className="text-slate-400" /> 100% Secured Payment </p>
                     <p className="flex gap-3"> <UserIcon className="text-slate-400" /> Trusted by top brands </p>
                 </div>

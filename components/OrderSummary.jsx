@@ -17,11 +17,23 @@ const OrderSummary = ({ totalPrice, items }) => {
 
     const addressList = useSelector(state => state.address.list);
 
-    const [paymentMethod, setPaymentMethod] = useState('COD');
+    const [paymentMethod, setPaymentMethod] = useState('PAYSTACK');
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [showAddressModal, setShowAddressModal] = useState(false);
     const [couponCodeInput, setCouponCodeInput] = useState('');
     const [coupon, setCoupon] = useState('');
+
+    // compute delivery fee based on selected address and rules
+    const computeDelivery = () => {
+        if (!selectedAddress) return 0
+        const city = (selectedAddress.city || '').toString().toLowerCase()
+        if (city === 'kumasi') return 0
+        if (totalPrice <= 500) return 20
+        return parseFloat((totalPrice * 0.05).toFixed(2))
+    }
+    const deliveryAmount = computeDelivery()
+    const couponDiscount = coupon ? (coupon.discount / 100 * totalPrice) : 0
+    const displayedTotal = parseFloat((totalPrice + deliveryAmount - couponDiscount).toFixed(2))
 
     const handleCouponCode = async (event) => {
         event.preventDefault();
@@ -67,7 +79,8 @@ const OrderSummary = ({ totalPrice, items }) => {
                             const normalizedItems = items.map(i => ({ productId: i.id || i.productId, quantity: i.quantity || 1 }))
                             const orderData = {
                                 items: normalizedItems,
-                                paymentMethod,
+                                // enforce PAYSTACK on server
+                                paymentMethod: 'PAYSTACK',
                                 addressId: selectedAddress.id,
                                 couponCode: coupon ? coupon.code : null
                             };
@@ -78,20 +91,13 @@ const OrderSummary = ({ totalPrice, items }) => {
                                         Authorization: `Bearer ${token}`
                                 }
                         });
-                        //payment handling can be done here based on payment method
-                        if(paymentMethod === 'PAYSTACK'){
-                                if(!data?.authorizationUrl){
-                                        toast.error(data?.error || 'Payment initialization failed')
-                                        return;
-                                }
-                                window.location.href = data.authorizationUrl;
-                                return;
-                        }else{
-                                //for COD, we can directly show success message
-                                toast.success("Order placed successfully with Cash on Delivery");
-                                router.push('/orders')
-                                dispatch(fetchCart({getToken}));
+                        //payment handling: Paystack only
+                        if(!data?.authorizationUrl){
+                            toast.error(data?.error || 'Payment initialization failed')
+                            return;
                         }
+                        window.location.href = data.authorizationUrl;
+                        return;
         }catch(error){
                         const apiErr = error?.response?.data?.error || error?.response?.data?.message || error?.message
                         toast.error(apiErr || "Something went wrong while placing order")
@@ -105,10 +111,6 @@ const OrderSummary = ({ totalPrice, items }) => {
             <h2 className='text-xl font-medium text-slate-600'>Payment Summary</h2>
             <p className='text-slate-400 text-xs my-4'>Payment Method</p>
             <div className='flex gap-2 items-center'>
-                <input type="radio" id="COD" onChange={() => setPaymentMethod('COD')} checked={paymentMethod === 'COD'} className='accent-gray-500' />
-                <label htmlFor="COD" className='cursor-pointer'>COD</label>
-            </div>
-            <div className='flex gap-2 items-center mt-1'>
                 <input type="radio" id="PAYSTACK" name='payment' onChange={() => setPaymentMethod('PAYSTACK')} checked={paymentMethod === 'PAYSTACK'} className='accent-gray-500' />
                 <label htmlFor="PAYSTACK" className='cursor-pointer'>Paystack Payment</label>
             </div>
@@ -143,13 +145,13 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <div className='flex justify-between'>
                     <div className='flex flex-col gap-1 text-slate-400'>
                         <p>Subtotal:</p>
-                        <p>Shipping:</p>
+                        <p>Delivery:</p>
                         {coupon && <p>Coupon:</p>}
                     </div>
                     <div className='flex flex-col gap-1 font-medium text-right'>
                         <p>{currency}{totalPrice.toLocaleString()}</p>
-                        <p>Free</p>
-                        {coupon && <p>{`-${currency}${(coupon.discount / 100 * totalPrice).toFixed(2)}`}</p>}
+                        <p>{deliveryAmount === 0 ? 'Free' : `${currency}${deliveryAmount.toFixed(2)}`}</p>
+                        {coupon && <p>{`-${currency}${couponDiscount.toFixed(2)}`}</p>}
                     </div>
                 </div>
                 {
@@ -169,10 +171,7 @@ const OrderSummary = ({ totalPrice, items }) => {
             </div>
             <div className='flex justify-between py-4'>
                 <p>Total:</p>
-                <p className='font-medium text-right'>
-                    {currency}{coupon ? (totalPrice + 5 - (coupon.discount / 100 *
-                        totalPrice)).toFixed(2) : totalPrice.toLocaleString()}
-                </p>
+                <p className='font-medium text-right'>{currency}{displayedTotal.toFixed(2)}</p>
             </div>
             <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'placing Order...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Place Order</button>
 

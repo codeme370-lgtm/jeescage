@@ -38,10 +38,13 @@ export async function POST(request) {
 export async function GET(request) {
     try {
         const { userId } = getAuth(request)
+        console.log('GET /api/store/orders userId=', userId)
         const storeId = await authSeller(userId)
+        console.log('GET /api/store/orders resolved storeId=', storeId)
         //suppose no store found
         if (!storeId) {
-            return NextResponse.json({ message: "You are not authorized to perform this action" }, { status: 403 })
+            console.warn('GET /api/store/orders: unauthorized - no store for userId=', userId)
+            return NextResponse.json({ message: "You are not authorized to perform this action or your store is not approved" }, { status: 403 })
         }
         const orders = await prisma.order.findMany({
             where: {
@@ -52,6 +55,7 @@ export async function GET(request) {
             orderBy: { createdAt: 'desc'}
         },
     )
+        console.log('GET /api/store/orders: orders found count=', orders.length)
         return NextResponse.json({ orders }, { status: 200 })
     } catch (error) {
         console.error(error)

@@ -29,22 +29,22 @@ const AboutPage = () => {
 
     const team = [
         {
-            name: "John Doe",
+            name: "Owusu Jemaima",
             role: "CEO & Founder",
             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
         },
         {
-            name: "Jane Smith",
+            name: "Jane Ansah",
             role: "Head of Operations",
             image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop"
         },
         {
-            name: "Mike Johnson",
+            name: "Mike Agyenim",
             role: "Product Manager",
             image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop"
         },
         {
-            name: "Sarah Williams",
+            name: "Yaw Asamoah",
             role: "Customer Service Lead",
             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop"
         }
@@ -107,7 +107,7 @@ const AboutPage = () => {
                 </div>
             </section>
 
-            {/* Team Section */}
+            {/* Team Section 
             <section className="py-16 px-6">
                 <div className="max-w-7xl mx-auto">
                     <h2 className="text-4xl font-bold text-slate-800 text-center mb-12">Our Team</h2>
@@ -126,6 +126,9 @@ const AboutPage = () => {
                     </div>
                 </div>
             </section>
+            
+            */}
+            
 
             {/* CTA Section */}
             <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-16 px-6">

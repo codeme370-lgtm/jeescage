@@ -1,5 +1,6 @@
 'use client'
 import Loading from "@/components/Loading"
+import AddressViewModal from "@/components/AddressViewModal"
 import { CircleDollarSignIcon, ShoppingBasketIcon, StarIcon, TagsIcon } from "lucide-react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
@@ -23,6 +24,11 @@ export default function Dashboard() {
         totalOrders: 0,
         ratings: [],
     })
+    const [storeInfo, setStoreInfo] = useState(null)
+    const [orders, setOrders] = useState([])
+    const [ordersLoading, setOrdersLoading] = useState(true)
+    const [selectedOrder, setSelectedOrder] = useState(null)
+    const [showAddrModal, setShowAddrModal] = useState(false)
 
     const dashboardCardsData = [
         { title: 'Total Products', value: dashboardData?.totalProducts || 0, icon: ShoppingBasketIcon },
@@ -42,6 +48,7 @@ export default function Dashboard() {
             }
         })
         setDashboardData(data.dashboardData)
+        setStoreInfo(data.store || null)
         
         } catch (error) {
             toast.error(error?.response?.data?.message || error.message)
@@ -49,15 +56,44 @@ export default function Dashboard() {
         setLoading(false)
     }
 
+    const fetchOrders = async () => {
+        try {
+            const token = await getToken()
+            if (!token) {
+                setOrdersLoading(false)
+                return
+            }
+            const { data } = await axios.get("/api/store/orders", {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            setOrders(data.orders || [])
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setOrdersLoading(false)
+        }
+    }
+
     useEffect(() => {
         fetchDashboardData()
+        fetchOrders()
     }, [])
 
     if (loading) return <Loading />
 
     return (
         <div className=" text-slate-500 mb-28">
-            <h1 className="text-2xl">Seller <span className="text-slate-800 font-medium">Dashboard</span></h1>
+            <div className="flex items-center gap-4">
+                {storeInfo?.logo ? (
+                    <Image src={storeInfo.logo} alt={storeInfo.name || 'Store logo'} className="w-12 h-12 rounded-full object-cover" width={48} height={48} />
+                ) : (
+                    <div className="w-12 h-12 rounded-full bg-slate-100" />
+                )}
+                <div>
+                    <h1 className="text-2xl">{storeInfo?.name || 'Seller'} <span className="text-slate-800 font-medium">Dashboard</span></h1>
+                    {storeInfo?.description && <p className="text-sm text-slate-500">{storeInfo.description}</p>}
+                </div>
+            </div>
 
             <div className="flex flex-wrap gap-5 my-10 mt-4">
                 {
@@ -105,6 +141,46 @@ export default function Dashboard() {
                     ))
                 }
             </div>
+
+            <h2 className="mt-10 mb-4">Recent Orders</h2>
+            {ordersLoading ? (
+                <Loading />
+            ) : orders.length === 0 ? (
+                <p className="text-sm text-slate-500">No recent orders</p>
+            ) : (
+                <div className="overflow-x-auto max-w-4xl rounded-md shadow border border-gray-200">
+                    <table className="w-full text-sm text-left text-gray-600">
+                        <thead className="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th className="px-4 py-3">#</th>
+                                <th className="px-4 py-3">Customer</th>
+                                <th className="px-4 py-3">Total</th>
+                                <th className="px-4 py-3">Status</th>
+                                <th className="px-4 py-3">Date</th>
+                                <th className="px-4 py-3">Address</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                            {orders.slice(0, 8).map((order, i) => (
+                                <tr key={order.id} className="hover:bg-gray-50">
+                                    <td className="pl-6 text-green-600">{i + 1}</td>
+                                    <td className="px-4 py-3">{order.user?.name || '—'}</td>
+                                    <td className="px-4 py-3 font-medium text-slate-800">{currency} {order.total}</td>
+                                    <td className="px-4 py-3">{order.status}</td>
+                                    <td className="px-4 py-3 text-gray-500">{new Date(order.createdAt).toLocaleString()}</td>
+                                    <td className="px-4 py-3">
+                                        <button onClick={() => { setSelectedOrder(order); setShowAddrModal(true) }} className="text-xs text-slate-500 hover:underline">View</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {showAddrModal && selectedOrder && (
+                <AddressViewModal address={selectedOrder.address} onClose={() => setShowAddrModal(false)} />
+            )}
         </div>
     )
 }
