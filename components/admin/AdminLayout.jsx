@@ -7,13 +7,13 @@ import { ArrowRightIcon } from "lucide-react"
 import AdminNavbar from "./AdminNavbar"
 import AdminSidebar from "./AdminSidebar"
 import AdminDrawer from "./AdminDrawer"
-import { useUser, useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 
 const AdminLayout = ({ children }) => {
     //let's get the user and the auth
-    const { user } = useUser()
-    const {getToken} = useAuth()
+    const { user } = useAuth()
+    const { getToken } = useAuth()
 
     const [isAdmin, setIsAdmin] = useState(false)
     const [loading, setLoading] = useState(true)

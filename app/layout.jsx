@@ -1,8 +1,8 @@
 import { Toaster } from "react-hot-toast";
 import StoreProvider from "@/app/StoreProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
-import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata = {
     metadataBase: new URL("https://www.jeescagemall.com"), // Replace with your live URL
@@ -59,17 +59,17 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
     return (
-        <ClerkProvider afterSignInUrl="/" afterSignUpUrl="/">
-        <html lang="en">
-            <body className="antialiased" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif' }}>
-                <StoreProvider>
-                    <SidebarProvider>
-                        <Toaster />
-                        {children}
-                    </SidebarProvider>
-                </StoreProvider>
-            </body>
-        </html>
-        </ClerkProvider>
+        <AuthProvider>
+            <html lang="en">
+                <body className="antialiased" style={{ fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif' }}>
+                    <StoreProvider>
+                        <SidebarProvider>
+                            <Toaster />
+                            {children}
+                        </SidebarProvider>
+                    </StoreProvider>
+                </body>
+            </html>
+        </AuthProvider>
     );
 }

@@ -5,7 +5,7 @@ import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon, Check, Loader, 
 import { useState } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from "@/context/AuthContext"
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { useDispatch, useSelector } from "react-redux";
@@ -22,13 +22,19 @@ const ProductDetails = ({ product }) => {
     const dispatch = useDispatch();
 
     const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
+    const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
     const [isZoomed, setIsZoomed] = useState(false);
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [cartConfirmed, setCartConfirmed] = useState(false);
-    const { user, isLoaded } = useUser()
+    const { user, isLoaded } = useAuth()
     const router = useRouter()
 
+    // Build media array combining images and video
+    const mediaArray = [
+      ...product?.images?.map(img => ({ type: 'image', url: img })) || [],
+      ...(product?.videoUrl ? [{ type: 'video', url: product.videoUrl }] : [])
+    ];
     const addToCartHandler = async () => {
         if (!isLoaded || !user) {
             toast.error('Please sign in to add items to your cart')
@@ -58,6 +64,16 @@ const ProductDetails = ({ product }) => {
         setIsZoomed(true);
     }
 
+    const handleMediaSwipe = (direction) => {
+        if (mediaArray.length === 0) return;
+        if (direction === 'next') {
+            setCurrentMediaIndex((prev) => (prev + 1) % mediaArray.length);
+        } else {
+            setCurrentMediaIndex((prev) => (prev - 1 + mediaArray.length) % mediaArray.length);
+        }
+    }
+
+    const currentMedia = mediaArray[currentMediaIndex];
     const averageRating = product?.rating && product.rating.length > 0 ? product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length : 0;
 
     const shareProduct = async (platform) => {
@@ -103,41 +119,90 @@ const ProductDetails = ({ product }) => {
             <div className="flex max-sm:flex-col-reverse gap-1 sm:gap-3 w-full">
                 {/* Thumbnail Gallery */}
                 <div className="flex sm:flex-col gap-1 sm:gap-3 max-sm:order-2 flex-shrink-0">
-                    {product?.images && product.images.map((image, index) => (
+                    {mediaArray && mediaArray.map((media, index) => (
                         <div 
                             key={index} 
-                            onClick={() => image && setMainImage(image)} 
-                            className={`bg-slate-100 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg group cursor-pointer border-2 transition-all duration-200 ${mainImage === image ? 'border-green-500 shadow-lg' : 'border-transparent hover:border-slate-300'}`}
+                            onClick={() => setCurrentMediaIndex(index)} 
+                            className={`bg-slate-100 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg group cursor-pointer border-2 transition-all duration-200 ${currentMediaIndex === index ? 'border-green-500 shadow-lg' : 'border-transparent hover:border-slate-300'}`}
                         >
-                            <Image 
-                                src={image || assets.product_placeholder} 
-                                className="group-hover:scale-110 group-active:scale-95 transition duration-300 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20" 
-                                alt={product?.name ? `${product.name} thumbnail ${index + 1}` : 'Product thumbnail'} 
-                                width={80} 
-                                height={80} 
-                            />
+                            {media.type === 'image' ? (
+                                <Image 
+                                    src={media.url || assets.product_placeholder} 
+                                    className="group-hover:scale-110 group-active:scale-95 transition duration-300 w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20" 
+                                    alt={product?.name ? `${product.name} thumbnail ${index + 1}` : 'Product thumbnail'} 
+                                    width={80} 
+                                    height={80} 
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center gap-1 text-xs font-semibold text-orange-600 bg-orange-50 w-full h-full rounded-md">
+                                    <span>▶</span>
+                                    <span>VIDEO</span>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
                 
-                {/* Main Image Gallery with Zoom */}
+                {/* Main Media Display with Swap*/}
                 <div 
                     className="flex justify-center items-center w-full min-h-[300px] sm:min-h-[400px] md:min-h-[450px] 2xl:min-h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg overflow-hidden relative group cursor-zoom-in flex-shrink-0"
-                    onMouseEnter={handleImageHover}
+                    onMouseEnter={currentMedia?.type === 'image' ? handleImageHover : undefined}
                     onMouseLeave={() => setIsZoomed(false)}
                 >
                     <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
-                        <Image 
-                            src={mainImage} 
-                            alt={product?.name ? `${product.name} main image` : 'Product main image'} 
-                            width={500} 
-                            height={500} 
-                            priority
-                            className={`transition-transform duration-300 w-full h-full object-contain max-w-full ${isZoomed ? 'scale-150' : 'scale-100'}`}
-                            style={{ transformOrigin: `${zoomPosition.x}px ${zoomPosition.y}px` }}
-                        />
+                        {currentMedia?.type === 'image' ? (
+                            <Image 
+                                src={currentMedia.url} 
+                                alt={product?.name ? `${product.name} main image` : 'Product main image'} 
+                                width={500} 
+                                height={500} 
+                                priority
+                                className={`transition-transform duration-300 w-full h-full object-contain max-w-full ${isZoomed ? 'scale-150' : 'scale-100'}`}
+                                style={{ transformOrigin: `${zoomPosition.x}px ${zoomPosition.y}px` }}
+                            />
+                        ) : currentMedia?.type === 'video' ? (
+                            <iframe
+                                width="100%"
+                                height="100%"
+                                src={currentMedia.url.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
+                                title="Product Video"
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                            />
+                        ) : null}
                     </div>
-                    {isZoomed && (
+
+                    {/* Navigation Arrows */}
+                    {mediaArray.length > 1 && (
+                        <>
+                            <button
+                                onClick={() => handleMediaSwipe('prev')}
+                                className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-all z-10"
+                                aria-label="Previous media"
+                            >
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => handleMediaSwipe('next')}
+                                className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-all z-10"
+                                aria-label="Next media"
+                            >
+                                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            
+                            {/* Media Counter */}
+                            <div className="absolute bottom-2 sm:bottom-4 right-2 sm:right-4 bg-black/70 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+                                {currentMediaIndex + 1} / {mediaArray.length}
+                            </div>
+                        </>
+                    )}
+
+                    {isZoomed && currentMedia?.type === 'image' && (
                         <div className="absolute top-2 right-2 bg-slate-800 text-white px-3 py-1 rounded-full text-xs font-medium animate-pulse">
                             🔍 Zoom
                         </div>

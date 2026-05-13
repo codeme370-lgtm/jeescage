@@ -1,6 +1,6 @@
 "use client"
 import Link from "next/link"
-import { useUser, UserButton, useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import { Menu, Bell } from "lucide-react"
 import { useEffect, useState, useRef } from "react"
 import Pusher from "pusher-js"
@@ -10,9 +10,7 @@ import { useRouter } from "next/navigation"
 
 
 const StoreNavbar = ({ onMenuClick }) => {
-    // create the user from clerk
-    const { user } = useUser()
-    const { getToken } = useAuth()
+    const { user, signOut } = useAuth()
     const [unreadCount, setUnreadCount] = useState(0)
     const [deliveryReportCount, setDeliveryReportCount] = useState(0)
     const [showDropdown, setShowDropdown] = useState(false)
@@ -200,8 +198,10 @@ const StoreNavbar = ({ onMenuClick }) => {
                         </div>
                     )}
                 </div>
-                <p>Hi, {user?.firstName}</p>
-                <UserButton />
+                <div className="flex items-center gap-3">
+                    <p>Hi, {user?.firstName || user?.fullName?.split(' ')[0] || 'Seller'}</p>
+                    <button onClick={signOut} className="text-xs text-slate-700 hover:text-orange-600">Sign Out</button>
+                </div>
             </div>
         </div>
     )

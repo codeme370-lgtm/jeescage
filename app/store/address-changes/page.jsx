@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Loading from "@/components/Loading"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { ArrowRight, CheckCircle, Clock } from "lucide-react"

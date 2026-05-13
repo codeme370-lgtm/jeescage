@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import authSeller from "@/middlewares/authSeller";
 import { openai } from "@/configs/openai";
 
@@ -45,7 +45,7 @@ async function main({ name, description, base64Image, mimeType }) {
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     const isSeller = await authSeller(userId);
     if (!isSeller) return NextResponse.json({ error: 'Not authorized' }, { status: 403 });
 

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
-import { getAuth } from "@clerk/nextjs/server"
+import { getSessionUserId } from "@/lib/authHelpers";
 import prisma from "@/lib/prisma"
 import { inngest } from '@/lib/inngest'
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request)
+    const userId = getSessionUserId(request)
     if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const { orderId, status } = await request.json()

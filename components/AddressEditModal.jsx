@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import axios from "axios"
 import AddressModal from "./AddressModal"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import toast from "react-hot-toast"
 
 const AddressEditModal = ({ address, orderId, orderStatus, onClose, onAddressUpdated }) => {

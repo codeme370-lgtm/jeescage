@@ -3,7 +3,7 @@
 import PageTitle from "@/components/PageTitle"
 import { useEffect, useState } from "react";
 import OrderItem from "@/components/OrderItem";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Loading from "@/components/Loading";
@@ -11,7 +11,7 @@ import Loading from "@/components/Loading";
 
 export default function Orders() {
 const {getToken}=useAuth();
-const {user, isLoaded}=useUser();
+const {user, isLoaded}=useAuth();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
 

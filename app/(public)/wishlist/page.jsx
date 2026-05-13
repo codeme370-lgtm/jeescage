@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { removeFromWishlist } from "@/lib/features/wishlist/wishlistSlice";
 import { addToCart } from "@/lib/features/cart/cartSlice";
 import { fetchProducts } from "@/lib/features/product/productSlice";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import ProductCard from "@/components/ProductCard";
 
@@ -16,7 +16,7 @@ export default function Wishlist() {
     
     const { wishlistItems } = useSelector(state => state.wishlist);
     const products = useSelector(state => state.product.list);
-    const { user } = useUser();
+    const { user } = useAuth();
 
     const dispatch = useDispatch();
 

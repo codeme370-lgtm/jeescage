@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server"
-import { getAuth } from "@clerk/nextjs/server"
+import { getSessionUserId } from "@/lib/authHelpers";
 import prisma from "@/lib/prisma"
 import authSeller from "@/middlewares/authSeller"
 import pusher from '@/lib/pusher'
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request)
+    const userId = getSessionUserId(request)
     const storeId = await authSeller(userId)
     if (!storeId) return NextResponse.json({ message: "You are not authorized to perform this action" }, { status: 403 })
 

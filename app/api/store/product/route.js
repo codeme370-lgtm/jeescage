@@ -1,4 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
@@ -6,7 +6,7 @@ import authSeller from "@/middlewares/authSeller";
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -27,6 +27,7 @@ export async function POST(request) {
     const mrp = Number(formData.get("mrp"));
     const quantity = Number(formData.get("quantity"));
     const imageUrls = formData.getAll("imageUrls");
+    const videoUrl = formData.get("videoUrl");
 
     if (
       !name ||
@@ -53,6 +54,7 @@ export async function POST(request) {
         mrp,
         price,
         category,
+        videoUrl: videoUrl || null,
         images: imagesUrl,
         quantity,
         storeId,
@@ -72,7 +74,7 @@ export async function POST(request) {
 // Update existing product (store owner)
 export async function PATCH(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -85,7 +87,7 @@ export async function PATCH(request) {
       );
     }
 
-    const { productId, name, price, mrp, description, category, quantity } = await request.json();
+    const { productId, name, price, mrp, description, category, quantity, videoUrl } = await request.json();
 
     if (!productId) {
       return NextResponse.json({ error: "productId is required" }, { status: 400 });
@@ -107,6 +109,7 @@ export async function PATCH(request) {
         mrp: typeof mrp === 'number' ? mrp : existing.mrp,
         description: description ?? existing.description,
         category: category ?? existing.category,
+        videoUrl: videoUrl !== undefined ? videoUrl : existing.videoUrl,
         quantity: typeof quantity === 'number' ? quantity : existing.quantity,
         inStock: typeof quantity === 'number' ? quantity > 0 : existing.inStock,
       },
@@ -125,7 +128,7 @@ export async function PATCH(request) {
 //Get all products for a seller
 export async function GET(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -170,7 +173,7 @@ export async function GET(request) {
 //Delete a product
 export async function DELETE(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }

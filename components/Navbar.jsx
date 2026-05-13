@@ -5,15 +5,14 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useClerk, UserButton, useUser } from "@clerk/nextjs";
+import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import logo from "@/app/logo.jpg";
 import Drawer from './Drawer'
 import "./Navbar.css";
 
 const Navbar = () => {
-    const { user, isLoaded } = useUser();
-    const { openSignIn } = useClerk();
+    const { user, signOut } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const { sidebarOpen, setSidebarOpen } = useSidebar()
@@ -50,9 +49,7 @@ const Navbar = () => {
     }
 
     const handleOpenSignIn = () => {
-        openSignIn({
-            redirectUrl: pathname
-        })
+        router.push('/auth')
     }
 
     return (
@@ -201,13 +198,18 @@ const Navbar = () => {
                         {/* User Profile / Login */}
                         <div className="flex items-center gap-1 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
                             {user ? (
-                                <>
-                                    <UserButton />
+                                <div className="flex items-center gap-2">
                                     <div className="hidden sm:block text-left">
                                         <div className="text-xs text-gray-600">Hello,</div>
-                                        <div className="font-semibold text-gray-900 text-xs">{user.firstName?.substring(0, 8)}</div>
+                                        <div className="font-semibold text-gray-900 text-xs">{user.firstName?.substring(0, 8) || user.fullName?.substring(0, 8)}</div>
                                     </div>
-                                </>
+                                    <button
+                                        onClick={signOut}
+                                        className="bg-gray-100 hover:bg-gray-200 text-slate-700 px-3 py-2 rounded-lg text-xs sm:text-sm transition-all"
+                                    >
+                                        Sign Out
+                                    </button>
+                                </div>
                             ) : (
                                 <button 
                                     onClick={handleOpenSignIn}

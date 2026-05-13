@@ -1,11 +1,11 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 
 //verify coupon
 export async function POST(request) {
     try {
         //let's get the user id
-        const {userId, has}= getAuth(request)
+        const userId = getSessionUserId(request)
         //code
         const {code} = await request.json()
 

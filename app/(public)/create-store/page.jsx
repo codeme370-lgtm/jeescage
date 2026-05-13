@@ -6,13 +6,13 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import Loading from "@/components/Loading";
 import { useRouter } from "next/navigation";
-import { useUser, useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/context/AuthContext";
 import axios from "axios";
 
 
 export default function CreateStore() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user } = useAuth();
   const { getToken } = useAuth();
   const [alreadySubmitted, setAlreadySubmitted] = useState(false);
   const [status, setStatus] = useState("");

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import prisma  from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 
 //Get the data for the dashboard for a seller (total orders, total earnings, total products)
 export async function GET(request){
     try{
-        const {userId}=getAuth(request); // this get the user ID
+        const userId = getSessionUserId(request); // this get the user ID
         //get the store of the user
         const storeId=await authSeller(userId);
 

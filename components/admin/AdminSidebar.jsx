@@ -4,11 +4,11 @@ import { usePathname } from "next/navigation"
 import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import {useUser} from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 
 const AdminSidebar = () => {
 //let's get the user
-const {user}=useUser()
+const { user } = useAuth()
     const pathname = usePathname()
 
     const sidebarLinks = [

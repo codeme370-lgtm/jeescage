@@ -1,11 +1,11 @@
-import { getAuth } from "@clerk/nextjs/server"
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server"
 import pusher from "@/lib/pusher"
 import prisma from "@/lib/prisma"
 
 export async function POST(req) {
   try {
-    const { userId } = getAuth(req)
+    const userId = getSessionUserId(req)
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }

@@ -1,4 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import authAdmin from "@/middlewares/authAdmin";
@@ -10,7 +10,7 @@ import { inngest } from "@/lib/inngest";
 export async function POST(request) {
     try {
        //let's get the user Id
-       const { userId } = getAuth(request);
+       const userId = getSessionUserId(request);
        //check if the user is an admin from the middleware
        const isAdmin = await authAdmin(userId)
        //if it is not an admin, return error
@@ -46,7 +46,7 @@ export async function POST(request) {
 export async function DELETE(request){
     try{
 //let's get the user Id and check if admin
-       const { userId } = getAuth(request);
+       const userId = getSessionUserId(request);
        const isAdmin = await authAdmin(userId)
        //if it is not an admin, return error
        if(!isAdmin){
@@ -72,7 +72,7 @@ export async function DELETE(request){
 export async function GET(request){
     try{
         //get the user and check if admin
-       const { userId } = getAuth(request);
+       const userId = getSessionUserId(request);
        const isAdmin = await authAdmin(userId)
        //if it is not an admin, return error
        if(!isAdmin){

@@ -1,5 +1,5 @@
 import {NextResponse} from 'next/server'
-import {getAuth} from '@clerk/nextjs/server'
+import { getSessionUserId } from "@/lib/authHelpers";
 import authAdmin from '@/middlewares/authAdmin'
 import prisma from "@/lib/prisma"
 
@@ -8,7 +8,7 @@ import prisma from "@/lib/prisma"
 export async function POST(request) {
     try {
         //let's get our user
-        const {userId}=getAuth(request)
+        const userId = getSessionUserId(request)
         const isAdmin= await authAdmin(userId)
 
         //check if  not admin

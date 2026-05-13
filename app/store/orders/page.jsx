@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Loading from "@/components/Loading"
 import AddressViewModal from "@/components/AddressViewModal"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { X, AlertCircle, CheckCircle } from "lucide-react"

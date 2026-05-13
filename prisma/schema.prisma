@@ -10,8 +10,12 @@ model User {
   id                  String               @id
   name                String
   email               String
+  phone               String?
+  password            String?
   image               String
   cart                Json                 @default("{}")
+  authProvider        String               @default("local")
+  providerId          String?
   Address             Address[]
   addressChangeAlerts AddressChangeAlert[]
   buyerOrders         Order[]              @relation("BuyerRelation")
@@ -27,6 +31,7 @@ model Product {
   description String
   mrp         Float
   price       Float
+  videoUrl    String?
   images      String[]
   category    String
   inStock     Boolean     @default(true)

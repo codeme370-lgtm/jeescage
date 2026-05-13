@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { getAuth } from '@clerk/nextjs/server'
+import { getSessionUserId } from "@/lib/authHelpers";
 import prisma from '@/lib/prisma'
 import authSeller from '@/middlewares/authSeller'
 
 export async function GET(request) {
   try {
-    const { userId } = getAuth(request)
+    const userId = getSessionUserId(request)
     const storeId = await authSeller(userId)
     if (!storeId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 

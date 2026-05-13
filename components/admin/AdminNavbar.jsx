@@ -1,13 +1,13 @@
 'use client'
 
 import Link from "next/link"
-import { useUser, UserButton } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import { Menu } from "lucide-react"
 
 
 const AdminNavbar = ({ onMenuClick }) => {
 //let's return the admin
-const {user}=useUser()
+const { user, signOut } = useAuth()
 
     return (
         <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">
@@ -23,8 +23,8 @@ const {user}=useUser()
                 </Link>
             </div>
             <div className="flex items-center gap-3">
-                <p>Hi, {user?.firstName}</p>
-                <UserButton/>
+                <p>Hi, {user?.firstName || user?.fullName?.split(' ')[0] || 'Admin'}</p>
+                <button onClick={signOut} className="text-xs text-slate-700 hover:text-orange-600">Sign Out</button>
             </div>
         </div>
     )

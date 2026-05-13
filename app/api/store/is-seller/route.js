@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import  prisma  from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 
 //checking to see if the logged in user is a seller
 
 export async function GET(request){
     try{
-        const {userId}=getAuth(request); // this get the user ID
+        const userId = getSessionUserId(request); // this get the user ID
         if(!userId){
             console.warn('is-seller: request without userId')
             return NextResponse.json({error:'Not authenticated'}, {status:401})

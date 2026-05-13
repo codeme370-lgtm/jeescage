@@ -1,13 +1,13 @@
 
 import prisma from "@/lib/prisma"
-import { getAuth } from "@clerk/nextjs/server"
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server"
 
 //add new address
 
 export async function POST(request){
     try {
-        const {userId}=getAuth(request)
+        const userId = getSessionUserId(request)
         if(!userId){
             // debug: log headers to help identify missing auth
             try{
@@ -44,7 +44,7 @@ export async function POST(request){
 //get all address for a user
 export async function GET(request){
     try {
-        const {userId}=getAuth(request)
+        const userId = getSessionUserId(request)
         if(!userId){
             return NextResponse.json({error: 'Not authenticated'}, {status: 401})
         }

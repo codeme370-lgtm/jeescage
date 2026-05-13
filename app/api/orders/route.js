@@ -1,4 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import { PaymentMethod } from "@prisma/client";
 import prisma from "@/lib/prisma";
@@ -10,9 +10,9 @@ export async function POST(request) {
         console.log('POST /api/orders incoming')
         const textBody = request ? await request.text().catch(() => null) : null
         if(textBody) console.log('raw body length:', textBody.length)
-        //user and has from clerk
-        const {userId, has} = getAuth(request)
-       //check if the userid is  not there
+        // user is authenticated via session cookie
+        const userId = getSessionUserId(request)
+       //check if the userid is not there
        if(!userId){
         return NextResponse.json({error: "Unauthorized"}, {status: 401})
        }
@@ -62,12 +62,9 @@ export async function POST(request) {
             return NextResponse.json({error: "This coupon is only for new users"}, {status: 403})
         }
        }
-       //check if the coupon has plus plan
+       //check if the coupon is member-only
        if(couponCode && coupon.forMember){
-        const hasPlusPlan = has({plan: "plus"})
-        if(!hasPlusPlan){
-            return NextResponse.json({error: "This coupon is only for Plus members"}, {status: 403})
-        }
+            return NextResponse.json({error: "This coupon is only for members"}, {status: 403})
        }
 
     //Group orders by storeId using a map
@@ -240,7 +237,7 @@ return NextResponse.json({message: "Order placed successfully", orderIds, totalO
 export async function GET(request) {
     try {
         //userid
-        const {userId} = getAuth(request)
+        const userId = getSessionUserId(request)
         //find many orders
         const orders = await prisma.order.findMany({
             where: {

@@ -1,11 +1,11 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 
 
 //update user cart
 export async function POST(request){
     try {
-        const {userId}=getAuth(request)
+        const userId = getSessionUserId(request)
         const {cart} = await request.json()
 
         //save the cart to the user object
@@ -23,7 +23,7 @@ export async function POST(request){
 //get user cart
 export async function GET(request){
     try {
-        const {userId}=getAuth(request)
+        const userId = getSessionUserId(request)
         //let's find the user
 
         const user = await prisma.user.findUnique({

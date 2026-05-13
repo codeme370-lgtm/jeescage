@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 import React, { useState } from 'react'
 import { XIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { useAuth } from '@clerk/nextjs';
+import { useAuth } from "@/context/AuthContext";
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
 import { addRating } from '@/lib/features/ratings/ratingsSlice';

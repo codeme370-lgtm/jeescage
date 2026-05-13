@@ -5,12 +5,12 @@ import StoreInfo from "@/components/admin/StoreInfo"
 import Loading from "@/components/Loading"
 import { useEffect, useState } from "react"
 import toast from "react-hot-toast"
-import { useUser, useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 
 export default function AdminApprove() {
     //let's get the user
-    const {user}=useUser()
+    const {user}=useAuth()
     const {getToken} = useAuth()
 
     const [stores, setStores] = useState([])

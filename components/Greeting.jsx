@@ -1,10 +1,10 @@
 'use client'
 
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from "@/context/AuthContext"
 import { useEffect, useState } from 'react'
 
 const Greeting = () => {
-    const { user } = useUser()
+    const { user } = useAuth()
     const [greeting, setGreeting] = useState('')
     const [timeOfDay, setTimeOfDay] = useState('')
 

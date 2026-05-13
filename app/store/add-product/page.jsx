@@ -4,7 +4,7 @@ import { assets } from "@/assets/assets"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import React from "react"
 import { useEffect } from 'react'
@@ -27,6 +27,7 @@ export default function StoreAddProduct() {
         price: 0,
         category: "",
         quantity: 0,
+        videoUrl: "",
     })
     const [loading, setLoading] = useState(false)
      const [aiUsed, setAiUsed] = useState(false)
@@ -138,6 +139,9 @@ export default function StoreAddProduct() {
             imageUrls.forEach((url) => {
                 formData.append("imageUrls", url)
             })
+            if (productInfo.videoUrl) {
+                formData.append("videoUrl", productInfo.videoUrl)
+            }
 
             //send the form data to the api
             const response = await axios.post("/api/store/product", formData, {
@@ -158,6 +162,7 @@ export default function StoreAddProduct() {
                 price: 0,
                 category: "",
                 quantity: 0,
+                videoUrl: "",
             })
             //reset images
             setImages({ 1: null, 2: null, 3: null, 4: null })
@@ -194,6 +199,12 @@ export default function StoreAddProduct() {
             <label htmlFor="" className="flex flex-col gap-2 my-6 ">
                 Description
                 <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
+            </label>
+
+            <label htmlFor="" className="flex flex-col gap-2 my-6 ">
+                Product Video URL (optional)
+                <input type="url" name="videoUrl" onChange={onChangeHandler} value={productInfo.videoUrl} placeholder="https://" className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" />
+                <span className="text-xs text-slate-400">Add a video link for product usage, installment details, or buyer guidance.</span>
             </label>
 
             <div className="flex gap-5">

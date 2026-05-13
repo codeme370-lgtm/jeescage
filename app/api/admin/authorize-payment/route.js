@@ -1,4 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import axios from "axios";
@@ -6,7 +6,7 @@ import axios from "axios";
 // Authorize payment when order is delivered
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

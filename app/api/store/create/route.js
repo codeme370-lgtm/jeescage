@@ -1,4 +1,4 @@
-import { getAuth } from "@clerk/nextjs/server";
+import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import ensureUser from "@/lib/ensureUser";
@@ -6,7 +6,7 @@ import ensureUser from "@/lib/ensureUser";
 
 export async function POST(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
@@ -86,7 +86,7 @@ export async function POST(request) {
 //Get seller/store status
 export async function GET(request) {
   try {
-    const { userId } = getAuth(request);
+    const userId = getSessionUserId(request);
     if (!userId) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }

@@ -1,45 +1,8 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-const isPublicRoute = createRouteMatcher([
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/',
-  '/shop(.*)',
-  '/category(.*)',
-  '/search(.*)',
-  '/product(.*)',
-  '/create-store',
-  '/seller(.*)',
-  '/cart(.*)',
-  '/wishlist(.*)',
-  '/orders(.*)',
-  '/paystack(.*)',
-  '/about',
-  '/policy',
-  '/contact',
-  '/pricing',
-  '/api(.*)',
-  '/store(.*)',
-  '/admin(.*)',
-]);
-
-export default clerkMiddleware((auth, req) => {
-  // Allow public routes
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
-  }
-
-  // Protect other routes - redirect to sign-in if not authenticated
-  const { userId } = auth();
-  if (!userId) {
-    const signInUrl = new URL('/sign-in', req.url);
-    signInUrl.searchParams.set('redirect_url', req.url);
-    return NextResponse.redirect(signInUrl);
-  }
-
+export default function middleware(req) {
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [

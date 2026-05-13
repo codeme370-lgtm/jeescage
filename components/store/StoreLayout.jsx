@@ -6,7 +6,7 @@ import { ArrowRightIcon } from "lucide-react"
 import SellerNavbar from "./StoreNavbar"
 import SellerSidebar from "./StoreSidebar"
 import StoreDrawer from "./StoreDrawer"
-import { useAuth } from "@clerk/nextjs"
+import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 
 
@@ -15,8 +15,7 @@ const StoreLayout = ({ children }) => {
     //check if the login user is a seller
     //get the token from authenticated user
 
-
-const {getToken} = useAuth()
+    const { getToken } = useAuth()
 
     const [isSeller, setIsSeller] = useState(false)
     const [loading, setLoading] = useState(true)

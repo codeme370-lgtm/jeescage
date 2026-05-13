@@ -7,7 +7,7 @@ import { assets } from '@/assets/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '@/lib/features/cart/cartSlice'
 import { addToWishlist, removeFromWishlist } from '@/lib/features/wishlist/wishlistSlice'
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from "@/context/AuthContext"
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 
@@ -17,7 +17,7 @@ const ProductCard = ({ product, hideAddToCart = false }) => {
     const [isAdding, setIsAdding] = useState(false)
     const [addedSuccess, setAddedSuccess] = useState(false)
     const dispatch = useDispatch()
-    const { user } = useUser()
+    const { user } = useAuth()
     const router = useRouter()
     const cart = useSelector(state => state.cart.cartItems)
     const wishlistItems = useSelector(state => state.wishlist.wishlistItems)

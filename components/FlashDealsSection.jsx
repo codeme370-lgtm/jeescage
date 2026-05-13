@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useSelector } from 'react-redux'
-import { useUser } from '@clerk/nextjs'
+import { useAuth } from "@/context/AuthContext"
 import ProductCard from './ProductCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
@@ -9,7 +9,7 @@ import { useSidebar } from '@/context/SidebarContext'
 
 const FlashDealsSection = () => {
     const { sidebarOpen } = useSidebar()
-    const { user } = useUser()
+    const { user } = useAuth()
     const products = useSelector(state => state.product.list)
     const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 15, seconds: 22 })
     const [scrollPos, setScrollPos] = useState(0)
