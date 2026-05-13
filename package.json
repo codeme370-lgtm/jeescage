@@ -18,7 +18,7 @@
     "axios": "^1.13.2",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
-    "inngest": "^3.19.0",
+    "inngest": "^3.54.0",
     "lucide-react": "^0.525.0",
     "next": "^16.0.7",
     "openai": "^6.10.0",

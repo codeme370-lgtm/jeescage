@@ -20,6 +20,7 @@ export default function StoreAddProduct() {
     const [aiSuggestion, setAiSuggestion] = useState(null)
 
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
+    const [video, setVideo] = useState(null)
     const [productInfo, setProductInfo] = useState({
         name: "",
         description: "",
@@ -27,7 +28,6 @@ export default function StoreAddProduct() {
         price: 0,
         category: "",
         quantity: 0,
-        videoUrl: "",
     })
     const [loading, setLoading] = useState(false)
      const [aiUsed, setAiUsed] = useState(false)
@@ -126,6 +126,21 @@ export default function StoreAddProduct() {
                 }
             }
 
+            //upload video if provided
+            let videoUrl = null
+            if (video) {
+                const videoFormData = new FormData()
+                videoFormData.append("file", video)
+                
+                const videoResponse = await axios.post('/api/store/upload', videoFormData, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                videoUrl = videoResponse.data.mediaUrl
+            }
+
             //create a form data that will be sent to the api
             const formData = new FormData()
             formData.append("name", productInfo.name)
@@ -139,8 +154,8 @@ export default function StoreAddProduct() {
             imageUrls.forEach((url) => {
                 formData.append("imageUrls", url)
             })
-            if (productInfo.videoUrl) {
-                formData.append("videoUrl", productInfo.videoUrl)
+            if (videoUrl) {
+                formData.append("videoUrl", videoUrl)
             }
 
             //send the form data to the api
@@ -162,10 +177,11 @@ export default function StoreAddProduct() {
                 price: 0,
                 category: "",
                 quantity: 0,
-                videoUrl: "",
             })
             //reset images
             setImages({ 1: null, 2: null, 3: null, 4: null })
+            //reset video
+            setVideo(null)
         } catch (error) {
             toast.error(error.response?.data?.message || "Something went wrong while adding the product")
         }finally {
@@ -202,9 +218,10 @@ export default function StoreAddProduct() {
             </label>
 
             <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-                Product Video URL (optional)
-                <input type="url" name="videoUrl" onChange={onChangeHandler} value={productInfo.videoUrl} placeholder="https://" className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" />
-                <span className="text-xs text-slate-400">Add a video link for product usage, installment details, or buyer guidance.</span>
+                Product Video (optional)
+                <input type="file" accept="video/*" onChange={e => setVideo(e.target.files[0])} className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" />
+                <span className="text-xs text-slate-400">Upload a video for product usage, installment details, or buyer guidance.</span>
+                {video && <span className="text-xs text-green-600">Selected: {video.name}</span>}
             </label>
 
             <div className="flex gap-5">

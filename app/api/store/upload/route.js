@@ -64,9 +64,13 @@ export async function POST(request) {
     cloudinaryFormData.append("signature", signature);
     cloudinaryFormData.append("folder", "jeeshop/products");
 
+    // Determine upload endpoint based on file type
+    const isVideo = file.type.startsWith('video/');
+    const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
+
     try {
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        `https://api.cloudinary.com/v1_1/${cloudName}/${uploadEndpoint}`,
         {
           method: "POST",
           body: cloudinaryFormData,
@@ -79,16 +83,16 @@ export async function POST(request) {
       }
 
       const result = await response.json();
-      const imageUrl = result.secure_url;
+      const mediaUrl = result.secure_url;
 
       return NextResponse.json(
-        { imageUrl, message: "Image uploaded successfully" },
+        { mediaUrl, message: `${isVideo ? 'Video' : 'Image'} uploaded successfully` },
         { status: 200 }
       );
     } catch (uploadError) {
       console.error("Cloudinary upload error:", uploadError);
       return NextResponse.json(
-        { error: uploadError.message || "Failed to upload image to Cloudinary" },
+        { error: uploadError.message || `Failed to upload ${isVideo ? 'video' : 'image'} to Cloudinary` },
         { status: 500 }
       );
     }

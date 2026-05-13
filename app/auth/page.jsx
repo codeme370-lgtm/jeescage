@@ -1,9 +1,11 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Facebook, Instagram, Goal, Eye, EyeOff, User, Mail, Smartphone, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import logo from '@/app/logo.jpg'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -57,19 +59,23 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f6f0e8] px-4 py-8 md:px-8">
-      <div className="mx-auto grid max-w-6xl overflow-hidden rounded-[32px] bg-white shadow-2xl md:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#f7e9d9] via-[#fff4e8] to-[#fef7f0] p-10 text-slate-900 md:block">
+    <main className="relative min-h-screen overflow-hidden px-4 py-8 md:px-8">
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${logo.src})` }} />
+      <div className="absolute inset-0 bg-slate-950/80" />
+      <div className="relative mx-auto grid max-w-6xl overflow-hidden rounded-[32px] bg-white/10 shadow-2xl backdrop-blur-xl md:grid-cols-[1.05fr_0.95fr]">
+        <section className="relative hidden overflow-hidden bg-[rgba(255,255,255,0.08)] p-10 text-white md:block">
           <div className="absolute inset-y-0 left-0 w-full bg-[radial-gradient(circle_at_top_left,_rgba(239,167,72,0.22),_transparent_35%)]" />
           <div className="relative z-10 flex h-full flex-col justify-between">
             <div>
-              <div className="inline-flex items-center gap-3 rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm shadow-slate-200">
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-white">J</span>
+              <div className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-slate-800">
+                <div className="relative h-10 w-10 overflow-hidden rounded-full bg-white/20">
+                  <Image src={logo} alt="Jeescage Logo" fill className="object-cover" />
+                </div>
                 jeescagemall
               </div>
 
-              <h1 className="mt-10 max-w-sm text-4xl font-semibold tracking-tight text-slate-900">Shop more, save more.</h1>
-              <p className="mt-6 max-w-sm text-base leading-7 text-slate-600">Everything you love, all in one place. Discover the best deals on home essentials, fashion, and everyday needs.</p>
+              <h1 className="mt-10 max-w-sm text-4xl font-semibold tracking-tight text-white">Shop more, save more.</h1>
+              <p className="mt-6 max-w-sm text-base leading-7 text-slate-200">Everything you love, all in one place. Discover the best deals on home essentials, fashion, and everyday needs.</p>
             </div>
 
             <div className="relative mt-8 flex items-center justify-center rounded-[32px] border border-white/80 bg-white/90 p-6 shadow-xl shadow-orange-200/40">
