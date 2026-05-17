@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from "next/navigation"
-import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon } from "lucide-react"
+import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, User as UserIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
@@ -21,8 +21,14 @@ const { user } = useAuth()
     return user && (
         <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 sm:min-w-60">
             <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
-                <Image className="w-14 h-14 rounded-full" src={user.imageUrl} alt={user?.fullName ? `${user.fullName} avatar` : 'Admin avatar'} width={80} height={80} />
-                <p className="text-slate-700">{user.fullName}</p> 
+                {user.imageUrl ? (
+                    <Image className="w-14 h-14 rounded-full" src={user.imageUrl} alt={user?.fullName ? `${user.fullName} avatar` : 'Admin avatar'} width={80} height={80} />
+                ) : (
+                    <div className="flex items-center justify-center w-14 h-14 rounded-full bg-orange-500 text-white">
+                        <UserIcon size={28} />
+                    </div>
+                )}
+                <p className="text-slate-700">{user.fullName || user.name}</p> 
             </div>
 
             <div className="max-sm:mt-6">
