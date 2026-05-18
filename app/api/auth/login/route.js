@@ -5,14 +5,14 @@ import { createSessionCookie, verifyPassword } from '@/lib/authHelpers'
 export async function POST(request) {
   try {
     const body = await request.json()
-    const { name, password } = body
+    const { email, password } = body
 
-    if (!name || !password) {
-      return NextResponse.json({ error: 'Name and password are required' }, { status: 400 })
+    if (!email || !password) {
+      return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
     const user = await prisma.user.findFirst({
-      where: { name, authProvider: 'local' },
+      where: { email, authProvider: 'local' },
     })
 
     if (!user) {
@@ -20,7 +20,7 @@ export async function POST(request) {
     }
 
     if (!verifyPassword(password, user.password)) {
-      return NextResponse.json({ error: 'Invalid name or password' }, { status: 401 })
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
     const response = NextResponse.json({ message: 'Login successful', user })

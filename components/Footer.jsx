@@ -42,76 +42,75 @@ const Footer = () => {
     ]
 
     return (
-        <footer className="mx-0 bg-slate-900 text-slate-200">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="flex flex-col lg:flex-row items-start justify-between gap-8 py-12 border-b border-slate-700">
-
-                    {/* Left: Contact block (narrow) */}
-                    <div className="w-full lg:w-1/3 lg:pr-8">
-                        <div className="flex-shrink-0">
-                            <div className="flex flex-col items-start gap-6">
-                                {/* Address */}
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
-                                        <MapPinIcon />
-                                    </div>
-                                    <div>
-                                        <div className="text-base font-semibold text-white">Accra, Ghana</div>
-                                    </div>
+        <footer className="bg-slate-900 text-slate-200">
+            <div className="max-w-7xl mx-auto px-6 py-12">
+                <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
+                    <div className="space-y-6">
+                        <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Contact</div>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
+                                    <MapPinIcon />
                                 </div>
-
-                                {/* Phone */}
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
-                                        <PhoneIcon />
-                                    </div>
-                                    <div>
-                                        <div className="text-base font-semibold text-white">+233 248608602</div>
-                                        <div className="text-slate-300">Mon - Fri: 9:00 - 17:00</div>
-                                    </div>
+                                <div>
+                                    <div className="text-base font-semibold text-white">Accra, Ghana</div>
                                 </div>
+                            </div>
 
-                                {/* Email */}
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
-                                        <MailIcon />
-                                    </div>
-                                    <div>
-                                        <a href="mailto:support@company.com" className="text-base font-semibold text-sky-400">support@company.com</a>
-                                        <div className="text-slate-300">Support</div>
-                                    </div>
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
+                                    <PhoneIcon />
+                                </div>
+                                <div>
+                                    <div className="text-base font-semibold text-white">+233 248608602</div>
+                                    <div className="text-slate-300">Mon - Fri: 9:00 - 17:00</div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center">
+                                    <MailIcon />
+                                </div>
+                                <div>
+                                    <a href="mailto:support@company.com" className="text-base font-semibold text-sky-400">support@company.com</a>
+                                    <div className="text-slate-300">Support</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Middle: About block */}
-                    <div className="w-full lg:w-1/3">
-                        <h3 className="text-2xl font-semibold text-white">About the company</h3>
-                        <p className="mt-4 text-slate-300 max-w-xl">Welcome to jeescage — your smart destination for the latest gadgets and tech accessories. We source quality products and make shopping fast and secure.</p>
-
-                        <div className="mt-6 flex items-center gap-3">
-                            {socialIcons.map((item, i) => (
-                                <a key={i} href={item.link} className="w-10 h-10 flex items-center justify-center rounded-md shadow-sm bg-slate-800 hover:opacity-90 transition" aria-label={`social-${i}`}>
-                                    <item.icon color={item.color} />
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Right: Useful links (moved to right) */}
-                    <div className="w-full lg:w-1/3 lg:pl-8">
+                    <div className="space-y-6">
+                        <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Useful links</div>
                         <ul className="space-y-3 text-slate-300">
-                            <li className="text-right"><Link href="/" className="hover:text-white">Home</Link></li>
-                            <li className="text-right"><Link href="/about" className="hover:text-white">About Us</Link></li>
-                            <li className="text-right"><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
-                            <li className="text-right"><Link href="/policy" className="hover:text-white">Privacy & Policy</Link></li>
+                            <li><Link href="/" className="hover:text-white">Home</Link></li>
+                            <li><Link href="/about" className="hover:text-white">About Us</Link></li>
+                            <li><Link href="/contact" className="hover:text-white">Contact Us</Link></li>
+                            <li><Link href="/policy" className="hover:text-white">Privacy & Policy</Link></li>
                         </ul>
                     </div>
-
                 </div>
 
-                <div className="py-6 text-sm text-slate-400 text-center">
+                <div className="mt-10 border-t border-slate-800 pt-10">
+                    <div className="space-y-10 lg:grid lg:grid-cols-2 lg:gap-10 lg:space-y-0">
+                        <div className="space-y-6">
+                            <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">About</div>
+                            <p className="text-slate-300 leading-7">Welcome to jeescage — your smart destination for the latest gadgets and tech accessories. We source quality products and make shopping fast and secure.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Follow us</div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                {socialIcons.map((item, i) => (
+                                    <a key={i} href={item.link} className="w-10 h-10 flex items-center justify-center rounded-md bg-slate-800 hover:bg-slate-700 transition" aria-label={`social-${i}`}>
+                                        <item.icon color={item.color} />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-10 pt-6 border-t border-slate-800 text-sm text-slate-400 text-center">
                     © {new Date().getFullYear()} jeescage. All rights reserved.
                 </div>
             </div>

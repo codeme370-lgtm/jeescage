@@ -13,18 +13,19 @@ export async function GET(request){
             return NextResponse.json({error:'Not authenticated'}, {status:401})
         }
 
-        const isSeller = await authSeller(userId);
+        const storeId = await authSeller(userId);
 
-        //if the user is not a seller
-        if(!isSeller){
-            return NextResponse.json({error:'you are not a seller'}, {status:401});
+        // if the user is not a seller / store owner
+        if (!storeId) {
+            return NextResponse.json({ error: 'you are not a seller' }, { status: 401 });
         }
 
-        //if the user is a seller, return success
-        const storeInfo =await prisma.store.findUnique({
-            where:{userId}})
-            //returning the store response
-            return NextResponse.json({isSeller, storeInfo});
+        // if the user is a seller, return the approved store info
+        const storeInfo = await prisma.store.findUnique({
+            where: { id: storeId }
+        })
+
+        return NextResponse.json({ isSeller: true, storeInfo });
     }catch (error){
         console.error(error);
      return NextResponse.json({error:error.code || error.message}, {status:400})

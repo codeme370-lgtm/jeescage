@@ -7,12 +7,15 @@ import { getSessionUserId } from "@/lib/authHelpers";
 export async function GET(request){
     try{
         const userId = getSessionUserId(request); // this get the user ID
-        //get the store of the user
-        const storeId=await authSeller(userId);
+        // get the store of the user
+        const storeId = await authSeller(userId);
+        if (!storeId) {
+            return NextResponse.json({ error: 'Not authorized' }, { status: 401 });
+        }
 
-        //get all orders for a seller
-        const orders=await prisma.order.findMany({
-            where:{storeId}
+        // get all orders for a seller
+        const orders = await prisma.order.findMany({
+            where: { storeId }
         })
 
         //get all products with ratings for a seller

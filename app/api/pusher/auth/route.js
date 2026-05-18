@@ -2,6 +2,7 @@ import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server"
 import pusher from "@/lib/pusher"
 import prisma from "@/lib/prisma"
+import authAdmin from "@/middlewares/authAdmin"
 
 export async function POST(req) {
   try {
@@ -21,8 +22,28 @@ export async function POST(req) {
     }
 
     const storeId = channel_name.replace('private-store-', '')
-    const store = await prisma.store.findUnique({ where: { id: storeId } })
-    if (!store || store.userId !== userId) {
+    const store = await prisma.store.findUnique({ where: { id: storeId }, include: { user: true } })
+    const currentUser = await prisma.user.findUnique({ where: { id: userId } })
+
+    if (!store) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const normalizedUserEmail = currentUser?.email?.trim().toLowerCase()
+    const normalizedStoreUserEmail = store.user?.email?.trim().toLowerCase()
+    const normalizedStoreEmail = store.email?.trim().toLowerCase()
+
+    const isAdmin = await authAdmin(userId)
+    const envEmails = process.env.STORE_OWNER_EMAILS || ''
+    const allowedEmails = envEmails.split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
+    const envMatch = normalizedUserEmail && allowedEmails.includes(normalizedUserEmail)
+
+    const emailMatch = normalizedUserEmail && (
+      normalizedStoreUserEmail === normalizedUserEmail ||
+      normalizedStoreEmail === normalizedUserEmail
+    )
+
+    if (store.userId !== userId && !emailMatch && !envMatch && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 

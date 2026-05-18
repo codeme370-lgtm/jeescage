@@ -42,7 +42,7 @@ export default function AuthPage() {
 
     try {
       const payload = mode === 'signin'
-        ? { name: form.name, password: form.password }
+        ? { email: form.email, password: form.password }
         : { name: form.name, email: form.email, phone: form.phone, password: form.password }
 
       const action = mode === 'signin' ? signIn : signUp
@@ -143,23 +143,44 @@ export default function AuthPage() {
 
             <div className="rounded-[32px] bg-white p-8 shadow-xl shadow-slate-950/10 ring-1 ring-slate-200/40">
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-3">
-                  <label htmlFor="name" className="text-sm font-medium text-slate-700">{mode === 'signin' ? 'Username' : 'Full Name'}</label>
-                  <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      <User size={18} />
-                    </span>
-                    <input
-                      id="name"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                      placeholder={mode === 'signin' ? 'Enter your username' : 'Enter your full name'}
-                      required
-                    />
+                  {mode === 'signin' ? (
+                  <div className="space-y-3">
+                    <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Mail size={18} />
+                      </span>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-3">
+                    <label htmlFor="name" className="text-sm font-medium text-slate-700">Full Name</label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <User size={18} />
+                      </span>
+                      <input
+                        id="name"
+                        name="name"
+                        value={form.name}
+                        onChange={handleChange}
+                        className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {mode === 'signup' && (
                   <>
