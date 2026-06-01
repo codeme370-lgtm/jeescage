@@ -26,7 +26,6 @@ export async function POST(request) {
     const category = formData.get("category");
     const mrp = Number(formData.get("mrp"));
     const quantity = Number(formData.get("quantity"));
-    const storeId = formData.get("storeId");
     const imageUrls = formData.getAll("imageUrls");
     const videoUrl = formData.get("videoUrl");
 
@@ -37,7 +36,6 @@ export async function POST(request) {
       !category ||
       isNaN(mrp) ||
       isNaN(quantity) ||
-      !storeId ||
       imageUrls.length < 1
     ) {
       return NextResponse.json(
@@ -46,9 +44,14 @@ export async function POST(request) {
       );
     }
 
-    const store = await prisma.store.findUnique({ where: { id: storeId } });
+    // Get the default admin store
+    const store = await prisma.store.findFirst({
+      where: { approved: true },
+      orderBy: { createdAt: 'asc' }
+    });
+    
     if (!store) {
-      return NextResponse.json({ error: "Selected store not found" }, { status: 404 });
+      return NextResponse.json({ error: "No approved store found. Please create a store first." }, { status: 404 });
     }
 
     // Use the uploaded image URLs directly
@@ -64,7 +67,7 @@ export async function POST(request) {
         videoUrl: videoUrl || null,
         images: imagesUrl,
         quantity,
-        storeId,
+        storeId: store.id,
       },
     });
 

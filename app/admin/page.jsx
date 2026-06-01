@@ -2,7 +2,7 @@
 
 import Loading from "@/components/Loading"
 import OrdersAreaChart from "@/components/OrdersAreaChart"
-import { CircleDollarSignIcon, ShoppingBasketIcon, StoreIcon, TagsIcon } from "lucide-react"
+import { CircleDollarSignIcon, ShoppingBasketIcon, TagsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
 import toast from "react-hot-toast"
@@ -18,7 +18,6 @@ export default function AdminDashboard() {
         products: 0,
         revenue: 0,
         orders: 0,
-        stores: 0,
         allOrders: [],
     })
 
@@ -26,7 +25,6 @@ export default function AdminDashboard() {
         { title: 'Total Products', value: dashboardData?.products || 0, icon: ShoppingBasketIcon },
         { title: 'Total Revenue', value: currency + (dashboardData?.revenue || 0), icon: CircleDollarSignIcon },
         { title: 'Total Orders', value: dashboardData?.orders || 0, icon: TagsIcon },
-        { title: 'Total Stores', value: dashboardData?.stores || 0, icon: StoreIcon },
     ]
 
     const fetchDashboardData = async () => {

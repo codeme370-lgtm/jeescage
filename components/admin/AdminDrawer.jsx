@@ -7,8 +7,6 @@ import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag } from 'lucide-
 const AdminDrawer = ({ open, onClose, userImage, userName }) => {
     const drawerLinks = [
         { name: 'Dashboard', href: '/admin', icon: Home },
-        { name: 'Stores', href: '/admin/stores', icon: Store },
-        { name: 'Approve Store', href: '/admin/approve', icon: ShieldCheck },
         { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent },
         { name: 'Back to Shop', href: '/shop', icon: ShoppingBag },
     ]

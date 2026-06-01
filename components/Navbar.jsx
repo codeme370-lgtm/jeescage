@@ -62,7 +62,7 @@ const Navbar = () => {
                         <button 
                             aria-label="Open menu" 
                             onClick={() => setDrawerOpen(true)} 
-                            className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 lg:hidden flex-shrink-0"
+                            className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 flex-shrink-0"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -225,7 +225,7 @@ const Navbar = () => {
             <Drawer 
                 open={drawerOpen} 
                 onClose={() => setDrawerOpen(false)} 
-                isSidebarMode={!isMobile}
+                isSidebarMode={false}
                 isSidebarOpen={sidebarOpen}
                 onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
             />

@@ -10,12 +10,10 @@ import { useAuth } from "@/context/AuthContext";
 import { fetchCart,uploadCart } from "@/lib/features/cart/cartSlice";
 import { fetchAddress } from "@/lib/features/address/addressSlice";
 import { fetchUserRatings } from "@/lib/features/rating/ratingSlice";
-import { useSidebar } from "@/context/SidebarContext";
 
 
 export default function PublicLayout({ children }) {
 const dispatch = useDispatch()
-const { sidebarOpen } = useSidebar()
 const [isMobile, setIsMobile] = useState(true)
 //get the user and token
 const { user, getToken } = useAuth()
@@ -54,7 +52,7 @@ if(user){
     return (
         <>
             <Navbar />
-            <div className="transition-all duration-300" style={{ marginLeft: !isMobile ? `${sidebarOpen ? '320px' : '80px'}` : '0' }}>
+            <div className="transition-all duration-300">
                 {children}
             </div>
             <Footer />

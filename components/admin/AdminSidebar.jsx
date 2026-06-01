@@ -16,8 +16,6 @@ const { user } = useAuth()
         { name: 'Add Product', href: '/admin/add-product', icon: SquarePlusIcon },
         { name: 'Manage Products', href: '/admin/manage-product', icon: SquarePenIcon },
         { name: 'Orders', href: '/admin/orders', icon: LayoutListIcon },
-        { name: 'Stores', href: '/admin/stores', icon: StoreIcon },
-        { name: 'Approve Store', href: '/admin/approve', icon: ShieldCheckIcon },
         { name: 'Coupons', href: '/admin/coupons', icon: TicketPercentIcon  },
     ]
 

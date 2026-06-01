@@ -7,12 +7,10 @@ import Loading from "@/components/Loading"
 import { toast } from 'react-hot-toast'
 import Image from "next/image"
 import axios from "axios"
-import { useSidebar } from "@/context/SidebarContext"
 
 export default function StoreShop() {
 
     const { username } = useParams()
-    const { sidebarOpen } = useSidebar()
     const [products, setProducts] = useState([])
     const [storeInfo, setStoreInfo] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -68,7 +66,7 @@ export default function StoreShop() {
             {/* Products */}
             <div className=" max-w-7xl mx-auto mb-40">
                 <h1 className="text-2xl mt-12">Shop <span className="text-slate-800 font-medium">Products</span></h1>
-                <div className={`mt-5 grid gap-2 sm:gap-4 lg:gap-6 grid-cols-4 ${sidebarOpen ? 'md:grid-cols-5 lg:grid-cols-5' : 'md:grid-cols-6 lg:grid-cols-6'} mx-auto`}>
+                <div className={`mt-5 grid gap-2 sm:gap-4 lg:gap-6 grid-cols-4 md:grid-cols-6 lg:grid-cols-6 mx-auto`}>
                     {products.map((product) => <ProductCard key={product.id} product={product} />)}
                 </div>
             </div>

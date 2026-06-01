@@ -69,10 +69,10 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
             {!isSidebarMode && (
                 <>
                     {/* Overlay */}
-                    <div className={`fixed inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={onClose} style={{ zIndex: 40 }} />
+                    <div className={`fixed inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={onClose} style={{ zIndex: 70 }} />
 
                     {/* Drawer panel (left side) */}
-                    <aside className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`} aria-hidden={!open} style={{ zIndex: 50 }}>
+                    <aside className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`} aria-hidden={!open} style={{ zIndex: 80 }}>
                         <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} />
                     </aside>
                 </>
@@ -96,7 +96,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
                     </div>
 
                     {/* Sidebar */}
-                    <aside className={`hidden md:flex fixed left-0 top-20 h-[calc(100vh-80px)] bg-white border-r border-gray-200 transition-all duration-300 flex-col ${isSidebarOpen ? 'w-80' : 'w-20'}`} style={{ zIndex: 40 }}>
+                    <aside className={`hidden md:flex fixed left-0 top-20 h-[calc(100vh-80px)] bg-white border-r border-gray-200 transition-all duration-300 flex-col ${isSidebarOpen ? 'w-80' : 'w-20'}`} style={{ zIndex: 70 }}>
                         {/* Minimize button */}
                         <button
                             onClick={onSidebarToggle}
@@ -136,7 +136,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
 
                     {/* Overlay for mobile drawer when open */}
                     {open && (
-                        <div className={`fixed inset-0 bg-black/40 transition-opacity md:hidden`} onClick={onClose} style={{ zIndex: 40 }} />
+                        <div className={`fixed inset-0 bg-black/40 transition-opacity md:hidden`} onClick={onClose} style={{ zIndex: 70 }} />
                     )}
                 </>
             )}

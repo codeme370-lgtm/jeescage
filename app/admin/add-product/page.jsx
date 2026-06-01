@@ -31,8 +31,6 @@ export default function AdminAddProduct() {
     })
     const [loading, setLoading] = useState(false)
     const [aiUsed, setAiUsed] = useState(false)
-    const [stores, setStores] = useState([])
-    const [selectedStore, setSelectedStore] = useState('')
 
     const {getToken} = useAuth()
     const dispatch = useDispatch()
@@ -44,22 +42,7 @@ export default function AdminAddProduct() {
                 if (data?.categories) setCategories(prev => Array.from(new Set([...data.categories.map(c=>c.name), ...prev])))
             } catch (e) { /* ignore */ }
         }
-
-        const fetchStores = async () => {
-            try {
-                const token = await getToken()
-                const { data } = await axios.get('/api/admin/stores', {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-                setStores(data.stores || [])
-                if (data.stores?.length) setSelectedStore(data.stores[0].id)
-            } catch (e) {
-                console.warn('Unable to fetch stores for admin product creation', e?.message || e)
-            }
-        }
-
         fetchCats()
-        fetchStores()
     }, [])
 
 
@@ -158,12 +141,6 @@ export default function AdminAddProduct() {
             }
 
             //create a form data that will be sent to the api
-            if (!selectedStore) {
-                toast.error("Please select a store for this product")
-                setLoading(false)
-                return
-            }
-
             const formData = new FormData()
             formData.append("name", productInfo.name)
             formData.append("description", productInfo.description)
@@ -171,7 +148,6 @@ export default function AdminAddProduct() {
             formData.append("price", productInfo.price)
             formData.append("category", productInfo.category)
             formData.append("quantity", productInfo.quantity)
-            formData.append("storeId", selectedStore)
 
             //adding image URLs to form data instead of files
             imageUrls.forEach((url) => {
@@ -261,13 +237,6 @@ export default function AdminAddProduct() {
                     <input type="number" name="quantity" onChange={onChangeHandler} value={productInfo.quantity} placeholder="0" min="0" className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
                 </label>
             </div>
-
-            <select onChange={e => setSelectedStore(e.target.value)} value={selectedStore} className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded" required>
-                <option value="">Select a store to assign the product</option>
-                {stores.map((store) => (
-                    <option key={store.id} value={store.id}>{store.name || store.username || store.id}</option>
-                ))}
-            </select>
 
             <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded" required>
                 <option value="">Select a category</option>
