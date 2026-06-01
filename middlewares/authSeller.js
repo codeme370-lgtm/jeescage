@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import authAdmin from "@/middlewares/authAdmin";
 
-// Let's find the user's seller store via a Prisma query.
+// Find the user's seller store primarily by email.
 const authSeller = async (userId) => {
   try {
     if (!userId) {
@@ -9,69 +9,61 @@ const authSeller = async (userId) => {
       return false
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { store: true },
-    })
-
-    console.log('authSeller: lookup userId=', userId, 'foundUser=', !!user)
-    if (user) console.log('authSeller: user.store=', !!user.store, 'storeStatus=', user.store?.status)
-
+    const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
+      console.warn('authSeller: user not found for userId=', userId)
       return false
     }
 
-    const email = user.email?.toLowerCase() || ''
+    const email = user.email?.toLowerCase().trim()
     const isAdmin = await authAdmin(userId)
 
-    // If the user owns an approved store, return its store id.
-    if (user.store && user.store.status === 'approved') {
-      return user.store.id
-    }
-
-    // If the user is an admin email, allow store access for any matching store or the first available store.
-    if (isAdmin) {
-      let adminStore = null
-
-      if (email) {
-        adminStore = await prisma.store.findFirst({
-          where: {
-            OR: [
-              { user: { email } },
-              { email },
-            ],
-          },
-          orderBy: { createdAt: 'asc' },
-        })
-      }
-
-      if (!adminStore) {
-        adminStore = await prisma.store.findFirst({
-          orderBy: { createdAt: 'asc' },
-        })
-      }
-
-      if (adminStore) {
-        console.log('authSeller: admin bypass granted storeId=', adminStore.id, 'for user.email=', user.email)
-        return adminStore.id
-      }
-    }
-
-    // If the user doesn't have a linked store, allow access if the email matches any approved store.
+    // Prefer matching any store by the user's email on the store record or the joined user.
     if (email) {
       const storeByEmail = await prisma.store.findFirst({
         where: {
-          status: 'approved',
           OR: [
-            { user: { email } },
-            { email },
+            {
+              user: {
+                email: {
+                  equals: email,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
+              email: {
+                equals: email,
+                mode: 'insensitive',
+              },
+            },
           ],
         },
+        orderBy: { createdAt: 'asc' },
       })
 
       if (storeByEmail) {
-        console.log('authSeller: matched store by email for user.email=', user.email)
+        console.log('authSeller: matched store by email for user.email=', email)
         return storeByEmail.id
+      }
+    }
+
+
+    // Fallback: if the user has any linked store, return it.
+    const linkedStore = await prisma.store.findUnique({ where: { userId } })
+    if (linkedStore) {
+      console.log('authSeller: matched linked store for userId=', userId)
+      return linkedStore.id
+    }
+
+    // Admins may access any available store.
+    if (isAdmin) {
+      const adminStore = await prisma.store.findFirst({
+        orderBy: { createdAt: 'asc' },
+      })
+      if (adminStore) {
+        console.log('authSeller: admin bypass granted storeId=', adminStore.id, 'for user.email=', email)
+        return adminStore.id
       }
     }
 

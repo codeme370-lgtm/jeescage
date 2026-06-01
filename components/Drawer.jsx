@@ -256,13 +256,6 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
 
             {/* Spacer */}
             <div className="flex-1" />
-
-            {/* Become a Seller Button */}
-            <Link href="/create-store" onClick={onClose} className="block w-full">
-                <button className="w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-bold text-center transition-all duration-200 shadow-md hover:shadow-lg">
-                    Become a Seller
-                </button>
-            </Link>
         </div>
     )
 }

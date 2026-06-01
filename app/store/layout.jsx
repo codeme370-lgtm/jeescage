@@ -1,4 +1,4 @@
-import StoreLayout from "@/components/store/StoreLayout";
+import { redirect } from "next/navigation";
 
 export const metadata = {
     title: "JeesCage. - Store Dashboard",
@@ -13,10 +13,7 @@ export const metadata = {
     }
 };
 
-export default function RootAdminLayout({ children }) {
-    return (
-        <StoreLayout>
-            {children}
-        </StoreLayout>
-    );
+export default function StoreLayoutRedirect({ children }) {
+    redirect("/admin");
+    return null;
 }

@@ -23,57 +23,7 @@ export async function POST(request) {
     const image = formData.get("image");
 
     // image is optional; use default general logo when not provided
-    if (!name || !username || !description || !email || !contacts || !address) {
-      return NextResponse.json({ error: "missing store info" }, { status: 400 });
-    }
-
-    const existingStore = await prisma.store.findFirst({ where: { userId } });
-    if (existingStore) {
-      return NextResponse.json({ status: existingStore.status });
-    }
-
-    const isUsernameTaken = await prisma.store.findFirst({
-      where: { username: username.toLowerCase().trim() },
-    });
-
-    if (isUsernameTaken) {
-      return NextResponse.json({ error: "username is already taken" }, { status: 400 });
-    }
-
-    // Do not upload/store custom logos. Use a general default logo instead.
-    const logoUrl = "/favicon.ico";
-
-    let newStore;
-    try {
-      newStore = await prisma.store.create({
-        data: {
-          userId,
-          name,
-          description,
-          username: username.toLowerCase().trim(),
-          email,
-          contact: contacts,
-          address,
-          logo: logoUrl,
-        },
-      });
-
-      await prisma.user.update({
-        where: { id: userId },
-        data: { store: { connect: { id: newStore.id } } },
-      });
-    } catch (err) {
-      // Handle unique-constraint race (user already has a store)
-      if (err?.code === 'P2002') {
-        const existing = await prisma.store.findFirst({ where: { userId } });
-        if (existing) {
-          return NextResponse.json({ status: existing.status });
-        }
-      }
-      throw err;
-    }
-
-    return NextResponse.json({ message: "applied, waiting for approval" });
+    return NextResponse.json({ error: "Store creation is disabled. Please contact the administrator." }, { status: 403 });
   } catch (error) {
     console.error("store:create error:", error);
     return NextResponse.json(

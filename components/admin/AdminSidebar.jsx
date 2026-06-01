@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from "next/navigation"
-import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, User as UserIcon } from "lucide-react"
+import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, User as UserIcon, SquarePlusIcon, SquarePenIcon, LayoutListIcon } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
@@ -13,6 +13,9 @@ const { user } = useAuth()
 
     const sidebarLinks = [
         { name: 'Dashboard', href: '/admin', icon: HomeIcon },
+        { name: 'Add Product', href: '/admin/add-product', icon: SquarePlusIcon },
+        { name: 'Manage Products', href: '/admin/manage-product', icon: SquarePenIcon },
+        { name: 'Orders', href: '/admin/orders', icon: LayoutListIcon },
         { name: 'Stores', href: '/admin/stores', icon: StoreIcon },
         { name: 'Approve Store', href: '/admin/approve', icon: ShieldCheckIcon },
         { name: 'Coupons', href: '/admin/coupons', icon: TicketPercentIcon  },
