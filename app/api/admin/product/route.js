@@ -1,8 +1,7 @@
-import { getSessionUserId } from "@/lib/authHelpers";
+import { getSessionUserId, ensureAdminStore } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import authAdmin from "@/middlewares/authAdmin";
-
 
 export async function POST(request) {
   try {
@@ -44,17 +43,8 @@ export async function POST(request) {
       );
     }
 
-    // Get the default admin store
-    const store = await prisma.store.findFirst({
-      where: { approved: true },
-      orderBy: { createdAt: 'asc' }
-    });
-    
-    if (!store) {
-      return NextResponse.json({ error: "No approved store found. Please create a store first." }, { status: 404 });
-    }
+    const adminStore = await ensureAdminStore(userId);
 
-    // Use the uploaded image URLs directly
     const imagesUrl = imageUrls;
 
     const product = await prisma.product.create({
@@ -67,7 +57,7 @@ export async function POST(request) {
         videoUrl: videoUrl || null,
         images: imagesUrl,
         quantity,
-        storeId: store.id,
+        storeId: adminStore.id,
       },
     });
 

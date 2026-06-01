@@ -36,11 +36,11 @@ model Product {
   category    String
   inStock     Boolean     @default(true)
   quantity    Int         @default(0)
-  storeId     String
+  storeId     String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   orderItems  OrderItem[]
-  store       Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  store       Store?      @relation(fields: [storeId], references: [id], onDelete: Cascade)
   rating      Rating[]
 }
 
@@ -49,7 +49,7 @@ model Order {
   total               Float
   status              OrderStatus          @default(ORDER_PLACED)
   userId              String
-  storeId             String
+  storeId             String?
   addressId           String
   isPaid              Boolean              @default(false)
   paymentMethod       PaymentMethod
@@ -61,7 +61,7 @@ model Order {
   coupon              Json                 @default("{}")
   addressChangeAlerts AddressChangeAlert[]
   address             Address              @relation(fields: [addressId], references: [id])
-  store               Store                @relation(fields: [storeId], references: [id])
+  store               Store?               @relation(fields: [storeId], references: [id])
   user                User                 @relation("BuyerRelation", fields: [userId], references: [id])
   orderItems          OrderItem[]
   ratings             Rating[]

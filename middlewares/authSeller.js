@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import authAdmin from "@/middlewares/authAdmin";
+import { ensureAdminStore } from "@/lib/authHelpers";
 
 // Find the user's seller store primarily by email.
 const authSeller = async (userId) => {
@@ -56,11 +57,9 @@ const authSeller = async (userId) => {
       return linkedStore.id
     }
 
-    // Admins may access any available store.
+    // Admins may access or create an admin store when none exists.
     if (isAdmin) {
-      const adminStore = await prisma.store.findFirst({
-        orderBy: { createdAt: 'asc' },
-      })
+      const adminStore = await ensureAdminStore(userId)
       if (adminStore) {
         console.log('authSeller: admin bypass granted storeId=', adminStore.id, 'for user.email=', email)
         return adminStore.id
