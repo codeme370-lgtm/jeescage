@@ -2,7 +2,7 @@
 
 import { addToCart } from "@/lib/features/cart/cartSlice";
 import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon, Check, Loader, Share2, Facebook, Twitter, MessageCircle, Copy } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Counter from "./Counter";
 import { useAuth } from "@/context/AuthContext"
@@ -28,7 +28,8 @@ const ProductDetails = ({ product }) => {
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [cartConfirmed, setCartConfirmed] = useState(false);
     const [touchStart, setTouchStart] = useState(0);
-    const [touchEnd, setTouchEnd] = useState(0);
+    const [isMuted, setIsMuted] = useState(true);
+    const videoRef = useRef(null);
     const { user, isLoaded } = useAuth()
     const router = useRouter()
 
@@ -80,29 +81,53 @@ const ProductDetails = ({ product }) => {
     }
 
     const handleTouchEnd = (e) => {
-        setTouchEnd(e.changedTouches[0].clientX);
-        handleSwipe();
-    }
-
-    const handleSwipe = () => {
-        if (!touchStart || !touchEnd) return;
-        
-        const distance = touchStart - touchEnd;
+        const endX = e.changedTouches[0].clientX;
+        const startX = touchStart || 0;
+        const distance = startX - endX;
         const minSwipeDistance = 50;
-        
-        if (Math.abs(distance) < minSwipeDistance) return;
-        
+
+        if (Math.abs(distance) < minSwipeDistance) {
+            setTouchStart(0);
+            return;
+        }
+
         if (distance > 0) {
-            // Swiped left, show next media
+            // Swiped left (finger moved left) => next media
             handleMediaSwipe('next');
         } else {
-            // Swiped right, show previous media
+            // Swiped right => previous media
             handleMediaSwipe('prev');
         }
+
+        setTouchStart(0);
     }
 
     const currentMedia = mediaArray[currentMediaIndex];
     const averageRating = product?.rating && product.rating.length > 0 ? product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length : 0;
+
+    useEffect(() => {
+        // When switching media by index, if it's a video autoplay muted, pause other media
+        const mediaAtIndex = mediaArray[currentMediaIndex];
+        if (mediaAtIndex && mediaAtIndex.type === 'video') {
+            // ensure video starts muted when navigated to
+            setIsMuted(true);
+            const v = videoRef.current;
+            if (v) {
+                try {
+                    v.muted = true;
+                    v.currentTime = 0;
+                    const playPromise = v.play();
+                    if (playPromise && typeof playPromise.then === 'function') playPromise.catch(() => {});
+                } catch (err) {
+                    // ignore autoplay errors
+                }
+            }
+        } else {
+            // pause video when not active
+            const v = videoRef.current;
+            if (v && !v.paused) v.pause();
+        }
+    }, [currentMediaIndex]);
 
     const shareProduct = async (platform) => {
         const url = window.location.href;
@@ -150,7 +175,7 @@ const ProductDetails = ({ product }) => {
                     {mediaArray && mediaArray.map((media, index) => (
                         <div 
                             key={index} 
-                            onClick={() => setCurrentMediaIndex(index)} 
+                            onClick={() => { if (media.type === 'video') setIsMuted(true); setCurrentMediaIndex(index); }} 
                             className={`bg-slate-100 flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-lg group cursor-pointer border-2 transition-all duration-200 ${currentMediaIndex === index ? 'border-green-500 shadow-lg' : 'border-transparent hover:border-slate-300'}`}
                         >
                             {media.type === 'image' ? (
@@ -191,15 +216,30 @@ const ProductDetails = ({ product }) => {
                                 style={{ transformOrigin: `${zoomPosition.x}px ${zoomPosition.y}px` }}
                             />
                         ) : currentMedia?.type === 'video' ? (
-                            <iframe
-                                width="100%"
-                                height="100%"
-                                src={currentMedia.url.replace('youtu.be/', 'youtube.com/embed/').replace('watch?v=', 'embed/')}
-                                title="Product Video"
-                                className="w-full h-full"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
+                            <div className="relative w-full h-full">
+                                <video
+                                    ref={videoRef}
+                                    src={currentMedia.url}
+                                    className="w-full h-full object-contain bg-black"
+                                    playsInline
+                                    muted={isMuted}
+                                    controls={false}
+                                />
+
+                                {/* Unmute / Mute Button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsMuted(prev => !prev);
+                                        const v = videoRef.current;
+                                        if (v) v.muted = !isMuted;
+                                    }}
+                                    className="absolute bottom-3 right-3 bg-black/60 text-white px-3 py-1 rounded-full text-sm backdrop-blur"
+                                    aria-label={isMuted ? 'Unmute video' : 'Mute video'}
+                                >
+                                    {isMuted ? '🔇 Unmute' : '🔊 Mute'}
+                                </button>
+                            </div>
                         ) : null}
                     </div>
 

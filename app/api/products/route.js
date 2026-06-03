@@ -21,6 +21,7 @@ export async function GET(request) {
           category: true,
           description: true,
           images: true,
+          videoUrl: true,
           inStock: true,
           quantity: true,
           rating: true,
@@ -45,6 +46,7 @@ export async function GET(request) {
           category: true,
           description: true,
           images: true,
+          videoUrl: true,
           inStock: true,
           quantity: true,
           rating: true,
@@ -60,7 +62,12 @@ export async function GET(request) {
       });
     }
 
-    return NextResponse.json({ products }, { status: 200 });
+    const productsWithVideoFlag = products.map((product) => ({
+      ...product,
+      hasVideo: Boolean(product.videoUrl),
+    }));
+
+    return NextResponse.json({ products: productsWithVideoFlag }, { status: 200 });
   } catch (error) {
     console.error("products:get error:", error);
     return NextResponse.json(
