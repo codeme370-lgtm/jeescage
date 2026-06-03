@@ -38,6 +38,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     refreshUser()
+    // Ensure axios sends cookies for same-origin API requests
+    try {
+      axios.defaults.withCredentials = true
+    } catch (e) {
+      /* ignore in non-browser environments */
+    }
   }, [])
 
   const signIn = async (payload) => {

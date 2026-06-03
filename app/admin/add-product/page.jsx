@@ -64,9 +64,7 @@ export default function AdminAddProduct() {
                 //make the api call
                 try {
                     await toast.promise(
-                        axios.post('/api/admin/product/ai',{base64Image: base64String, mimeType},{
-                            headers:{Authorization: `Bearer ${token}`}
-                        }),
+                        axios.post('/api/admin/product/ai',{base64Image: base64String, mimeType}),
                         {
                             loading:"Analyzing image with AI....",
                             success: (res)=>{
@@ -115,12 +113,7 @@ export default function AdminAddProduct() {
                     const uploadFormData = new FormData()
                     uploadFormData.append("file", images[key])
                     
-                    const uploadResponse = await axios.post('/api/admin/product/upload', uploadFormData, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'multipart/form-data'
-                        }
-                    })
+                    const uploadResponse = await axios.post('/api/admin/product/upload', uploadFormData)
                     imageUrls.push(uploadResponse.data.imageUrl)
                 }
             }
@@ -131,12 +124,7 @@ export default function AdminAddProduct() {
                 const videoFormData = new FormData()
                 videoFormData.append("file", video)
                 
-                const videoResponse = await axios.post('/api/admin/product/upload', videoFormData, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data'
-                    }
-                })
+                const videoResponse = await axios.post('/api/admin/product/upload', videoFormData)
                 videoUrl = videoResponse.data.mediaUrl
             }
 
@@ -158,11 +146,7 @@ export default function AdminAddProduct() {
             }
 
             //send the form data to the api
-            const response = await axios.post("/api/admin/product", formData, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            const response = await axios.post("/api/admin/product", formData)
             toast.success("Product added successfully")
             // Add the new product to the Redux store
             if (response.data.product) {
@@ -250,8 +234,7 @@ export default function AdminAddProduct() {
                 <button type="button" onClick={async () => {
                     if(!newCategoryName) return toast.error('Enter a category name')
                     try{
-                        const token = await getToken()
-                        const { data } = await axios.post('/api/admin/product/category', { name: newCategoryName }, { headers: { Authorization: `Bearer ${token}` } })
+                        const { data } = await axios.post('/api/admin/product/category', { name: newCategoryName })
                         setCategories(prev => [data.category.name, ...prev])
                         setProductInfo(prev => ({ ...prev, category: data.category.name }))
                         setNewCategoryName('')
@@ -263,7 +246,6 @@ export default function AdminAddProduct() {
 
                 <button type="button" onClick={async () => {
                     try{
-                        const token = await getToken()
                         // call ai-category endpoint with product name/description or image (first image)
                         const imageFile = images[1]
                         let base64=null; let mimeType=null
@@ -279,7 +261,7 @@ export default function AdminAddProduct() {
                             mimeType = imageFile.type
                         }
                         const body = { name: productInfo.name, description: productInfo.description, base64Image: base64, mimeType }
-                        const { data } = await axios.post('/api/admin/product/ai-category', body, { headers: { Authorization: `Bearer ${token}` } })
+                        const { data } = await axios.post('/api/admin/product/ai-category', body)
                         setAiSuggestion(data)
                         if(data?.category) setProductInfo(prev=>({ ...prev, category: data.category }))
                         if(data?.suggestedMrp) setProductInfo(prev=>({ ...prev, mrp: data.suggestedMrp }))

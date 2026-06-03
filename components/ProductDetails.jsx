@@ -27,6 +27,8 @@ const ProductDetails = ({ product }) => {
     const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [cartConfirmed, setCartConfirmed] = useState(false);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
     const { user, isLoaded } = useAuth()
     const router = useRouter()
 
@@ -73,6 +75,32 @@ const ProductDetails = ({ product }) => {
         }
     }
 
+    const handleTouchStart = (e) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    }
+
+    const handleTouchEnd = (e) => {
+        setTouchEnd(e.changedTouches[0].clientX);
+        handleSwipe();
+    }
+
+    const handleSwipe = () => {
+        if (!touchStart || !touchEnd) return;
+        
+        const distance = touchStart - touchEnd;
+        const minSwipeDistance = 50;
+        
+        if (Math.abs(distance) < minSwipeDistance) return;
+        
+        if (distance > 0) {
+            // Swiped left, show next media
+            handleMediaSwipe('next');
+        } else {
+            // Swiped right, show previous media
+            handleMediaSwipe('prev');
+        }
+    }
+
     const currentMedia = mediaArray[currentMediaIndex];
     const averageRating = product?.rating && product.rating.length > 0 ? product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length : 0;
 
@@ -116,7 +144,7 @@ const ProductDetails = ({ product }) => {
     
     return (
         <div className="flex max-lg:flex-col gap-4 sm:gap-6 lg:gap-12 w-full">
-            <div className="flex max-sm:flex-col-reverse gap-1 sm:gap-3 w-full">
+            <div className="flex max-sm:flex-col-reverse gap-1 sm:gap-3 flex-1 min-w-0 lg:max-w-2xl">
                 {/* Thumbnail Gallery */}
                 <div className="flex sm:flex-col gap-1 sm:gap-3 max-sm:order-2 flex-shrink-0">
                     {mediaArray && mediaArray.map((media, index) => (
@@ -145,9 +173,11 @@ const ProductDetails = ({ product }) => {
                 
                 {/* Main Media Display with Swap*/}
                 <div 
-                    className="flex justify-center items-center w-full min-h-[300px] sm:min-h-[400px] md:min-h-[450px] 2xl:min-h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg overflow-hidden relative group cursor-zoom-in flex-shrink-0"
+                    className="flex justify-center items-center w-full min-h-[300px] sm:min-h-[400px] md:min-h-[450px] 2xl:min-h-[500px] bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg overflow-hidden relative group cursor-zoom-in flex-1 min-w-0"
                     onMouseEnter={currentMedia?.type === 'image' ? handleImageHover : undefined}
                     onMouseLeave={() => setIsZoomed(false)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
                 >
                     <div className="relative w-full h-full flex items-center justify-center p-2 sm:p-4">
                         {currentMedia?.type === 'image' ? (
@@ -211,7 +241,7 @@ const ProductDetails = ({ product }) => {
             </div>
             
             {/* Product Details */}
-            <div className="w-full">
+            <div className="w-full flex-1 min-w-0">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent line-clamp-3">{product.name}</h1>
                 
                 {/* Rating Section */}
