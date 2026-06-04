@@ -2,7 +2,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, ShoppingCart, Zap, Flame, TrendingUp, Sparkles, UtensilsCrossed, Heart, Smartphone, Shirt, Home, Dumbbell, ShoppingBag, Baby, Car, BookOpen, Grid, ChevronLeft, Package } from 'lucide-react'
+import { X, ShoppingCart, Zap, Flame, TrendingUp, Sparkles, UtensilsCrossed, Heart, Smartphone, Shirt, Home, Dumbbell, ShoppingBag, Baby, Car, BookOpen, Grid, ChevronLeft, Package, User } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import logo from '@/app/logo.jpg'
 
@@ -151,9 +151,17 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
     // Navigation items for mobile (Home, Orders, Wishlist, Cart)
     const mobileNav = [
         { name: 'Home', icon: Home, href: '/', color: 'green' },
+        { name: 'Profile', icon: User, href: '/profile', color: 'purple' },
         { name: 'Orders', icon: Package, href: '/orders', color: 'blue' },
         { name: 'Wishlist', icon: Heart, href: '/wishlist', color: 'red', badge: wishlistCount > 0 ? wishlistCount : null },
         { name: 'Cart', icon: ShoppingCart, href: '/cart', color: 'orange', badge: cartCount > 0 ? cartCount : null },
+    ]
+
+    const accountLinks = [
+        { name: 'Profile', icon: User, href: '/profile' },
+        { name: 'Orders', icon: Package, href: '/orders' },
+        { name: 'Wishlist', icon: Heart, href: '/wishlist', badge: wishlistCount > 0 ? wishlistCount : null },
+        { name: 'Cart', icon: ShoppingCart, href: '/cart', badge: cartCount > 0 ? cartCount : null },
     ]
     
     return (
@@ -247,6 +255,33 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                     </svg>
+                                </div>
+                            </Link>
+                        )
+                    })}
+                </nav>
+            </div>
+
+            {/* Account Section */}
+            <div className="mb-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 px-2">Account</h3>
+                <nav className="space-y-2">
+                    {accountLinks.map((item, idx) => {
+                        const Icon = item.icon
+                        return (
+                            <Link key={idx} href={item.href} onClick={onClose}>
+                                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition text-gray-800 font-medium">
+                                    <div className="flex items-center gap-3">
+                                        <Icon size={20} className="text-gray-700" />
+                                        <span>{item.name}</span>
+                                    </div>
+                                    {item.badge ? (
+                                        <span className="rounded-full bg-red-600 px-2 py-1 text-[10px] font-semibold text-white">{item.badge}</span>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    )}
                                 </div>
                             </Link>
                         )

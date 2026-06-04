@@ -44,12 +44,18 @@ const formatDate = (value) => {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, signOut, isLoaded } = useAuth();
+  const { user, signOut, isLoaded, refreshUser } = useAuth();
   const wishlistCount = useSelector((state) => state.wishlist?.total ?? 0);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [selectedMethod, setSelectedMethod] = useState("PAYSTACK");
   const [saving, setSaving] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -69,6 +75,11 @@ export default function ProfilePage() {
         return;
       }
       setProfile(data);
+      setProfileForm({
+        name: data.user?.name || "",
+        email: data.user?.email || "",
+        phone: data.user?.phone || "",
+      });
       const preferred = data?.user?.cart?.preferredPaymentMethod || data?.stats?.lastPaymentMethod || "PAYSTACK";
       setSelectedMethod(preferred);
     } catch (error) {
@@ -106,10 +117,40 @@ export default function ProfilePage() {
     }
   };
 
+  const handleProfileChange = (field, value) => {
+    setProfileForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const { data } = await axios.patch("/api/user/profile", {
+        name: profileForm.name,
+        email: profileForm.email,
+        phone: profileForm.phone,
+      });
+      if (data?.error) {
+        toast.error(data.error || "Could not update profile");
+        return;
+      }
+      toast.success("Profile updated successfully");
+      await refreshUser();
+      fetchProfile();
+    } catch (error) {
+      toast.error(error?.response?.data?.error || "Unable to save profile");
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
   if (loading || !profile) {
     return <Loading />;
   }
 
+  const activeUser = profile.user || user;
   const defaultAddress = profile.addresses?.[0] || null;
   const stats = profile.stats || {};
   const preferredPaymentMethod = profile.user?.cart?.preferredPaymentMethod || stats.lastPaymentMethod || "PAYSTACK";
@@ -185,7 +226,7 @@ export default function ProfilePage() {
                 <p className="text-sm uppercase tracking-[0.2em] text-slate-400">My Profile</p>
                 <h2 className="mt-2 text-3xl font-semibold text-slate-900">Manage your personal information</h2>
               </div>
-              <Link href="/profile" className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">
+              <Link href="#profile-details" className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700">
                 Edit Profile
               </Link>
             </div>
@@ -196,12 +237,12 @@ export default function ProfilePage() {
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-4">
                       <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-amber-100 text-3xl font-bold uppercase text-amber-700">
-                        {getInitials(user.fullName || user.name)}
+                        {getInitials(activeUser?.fullName || activeUser?.name)}
                       </div>
                       <div>
                         <p className="text-sm text-slate-500">Logged in as</p>
-                        <h3 className="text-2xl font-semibold text-slate-900">{user.fullName || user.name}</h3>
-                        <p className="mt-1 text-sm text-slate-500">{user.email}</p>
+                        <h3 className="text-2xl font-semibold text-slate-900">{activeUser?.fullName || activeUser?.name}</h3>
+                        <p className="mt-1 text-sm text-slate-500">{activeUser?.email}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -232,23 +273,49 @@ export default function ProfilePage() {
                       <h3 className="mt-2 text-xl font-semibold text-slate-900">Profile details</h3>
                     </div>
                   </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-2" id="profile-details">
                     <div className="rounded-3xl bg-slate-50 p-5">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Full Name</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900">{user.fullName || user.name}</p>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-500" htmlFor="name">Full Name</label>
+                      <input
+                        id="name"
+                        value={profileForm.name}
+                        onChange={(e) => handleProfileChange('name', e.target.value)}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400"
+                      />
                     </div>
                     <div className="rounded-3xl bg-slate-50 p-5">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Email Address</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900">{user.email}</p>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-500" htmlFor="email">Email Address</label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) => handleProfileChange('email', e.target.value)}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400"
+                      />
                     </div>
                     <div className="rounded-3xl bg-slate-50 p-5">
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Phone Number</p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900">{user.phone || "Not provided"}</p>
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-500" htmlFor="phone">Phone Number</label>
+                      <input
+                        id="phone"
+                        value={profileForm.phone}
+                        onChange={(e) => handleProfileChange('phone', e.target.value)}
+                        className="mt-2 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-orange-400"
+                      />
                     </div>
                     <div className="rounded-3xl bg-slate-50 p-5">
                       <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Member Since</p>
                       <p className="mt-2 text-sm font-semibold text-slate-900">{joinedDate}</p>
                     </div>
+                  </div>
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                      onClick={handleSaveProfile}
+                      disabled={savingProfile}
+                      className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {savingProfile ? 'Saving...' : 'Save Profile'}
+                    </button>
+                    <p className="text-sm text-slate-500">Update your name, email, and phone number instantly.</p>
                   </div>
                 </div>
 

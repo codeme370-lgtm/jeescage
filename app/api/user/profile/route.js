@@ -62,3 +62,42 @@ export async function GET(request) {
     return NextResponse.json({ error: error.message || "Failed to fetch profile" }, { status: 500 });
   }
 }
+
+export async function PATCH(request) {
+  try {
+    const userId = getSessionUserId(request);
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { name, email, phone } = await request.json();
+    if (!name || !email) {
+      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        name,
+        email,
+        phone,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        image: true,
+        cart: true,
+      },
+    });
+
+    return NextResponse.json({ user: updatedUser });
+  } catch (error) {
+    console.error("PATCH /api/user/profile error:", error);
+    const message = error?.code === "P2002" && error?.meta?.target?.includes("email")
+      ? "Email is already in use"
+      : error.message || "Failed to update profile";
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
