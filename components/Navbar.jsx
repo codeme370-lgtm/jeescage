@@ -25,6 +25,13 @@ const Navbar = () => {
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [showLocationDropdown, setShowLocationDropdown] = useState(false)
 
+    const getInitials = (name) => {
+        if (!name) return 'U'
+        const parts = name.trim().split(' ').filter(Boolean)
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+        return (parts[0][0] + parts[1][0]).toUpperCase()
+    }
+
     useEffect(() => {
         const handleResize = () => {
             const mobile = window.innerWidth < 768
@@ -196,20 +203,25 @@ const Navbar = () => {
                         </Link>
 
                         {/* User Profile / Login */}
-                        <div className="flex items-center gap-1 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
+                        <div className="flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
                             {user ? (
-                                <div className="flex items-center gap-2">
-                                    <div className="hidden sm:block text-left">
-                                        <div className="text-xs text-gray-600">Hello,</div>
-                                        <div className="font-semibold text-gray-900 text-xs">{user.firstName?.substring(0, 8) || user.fullName?.substring(0, 8)}</div>
-                                    </div>
+                                <>
+                                    <Link href="/profile" className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">
+                                            {getInitials(user.fullName || user.name)}
+                                        </div>
+                                        <div className="hidden sm:flex flex-col text-left">
+                                            <span className="text-[10px] text-gray-500">Hello,</span>
+                                            <span className="font-semibold text-gray-900 text-sm">{user.firstName || user.fullName || user.name}</span>
+                                        </div>
+                                    </Link>
                                     <button
                                         onClick={signOut}
                                         className="bg-gray-100 hover:bg-gray-200 text-slate-700 px-3 py-2 rounded-lg text-xs sm:text-sm transition-all"
                                     >
                                         Sign Out
                                     </button>
-                                </div>
+                                </>
                             ) : (
                                 <button 
                                     onClick={handleOpenSignIn}

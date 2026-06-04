@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 
 export async function GET(request) {
   try {
+    console.log('API: GET /api/auth/me called')
     const session = getSessionFromRequest(request)
     if (!session || !session.id) return NextResponse.json({ user: null })
 

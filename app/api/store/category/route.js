@@ -5,6 +5,7 @@ import authSeller from "@/middlewares/authSeller";
 
 export async function GET(request) {
   try {
+    console.log('API: GET /api/store/category called')
     const categories = await prisma.category.findMany({ orderBy: { createdAt: 'desc' } });
     return NextResponse.json({ categories });
   } catch (error) {

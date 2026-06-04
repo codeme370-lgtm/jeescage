@@ -6,6 +6,9 @@ import { NextResponse } from "next/server";
 export async function POST(request){
     try {
         const userId = getSessionUserId(request)
+        if (!userId) {
+            return NextResponse.json({error: 'Not authenticated'}, {status: 401})
+        }
         const {cart} = await request.json()
 
         //save the cart to the user object
@@ -24,6 +27,9 @@ export async function POST(request){
 export async function GET(request){
     try {
         const userId = getSessionUserId(request)
+        if (!userId) {
+            return NextResponse.json({error: 'Not authenticated'}, {status: 401})
+        }
         //let's find the user
 
         const user = await prisma.user.findUnique({

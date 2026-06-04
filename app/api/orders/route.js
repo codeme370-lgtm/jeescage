@@ -238,6 +238,9 @@ export async function GET(request) {
     try {
         //userid
         const userId = getSessionUserId(request)
+        if (!userId) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
         //find many orders
         const orders = await prisma.order.findMany({
             where: {
