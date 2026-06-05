@@ -2,15 +2,15 @@
 
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
-import { Menu } from "lucide-react"
+import { Menu, User } from "lucide-react"
 
 
 const AdminNavbar = ({ onMenuClick }) => {
 //let's return the admin
-const { user, signOut } = useAuth()
+const { user } = useAuth()
 
     return (
-        <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">
+        <div className="flex items-center justify-between gap-4 px-12 py-3 border-b border-slate-200 transition-all">
             <div className="flex items-center gap-4">
                 <button onClick={onMenuClick} className="p-2 hover:bg-slate-100 rounded-md md:hidden" aria-label="Open menu">
                     <Menu size={24} />
@@ -22,9 +22,31 @@ const { user, signOut } = useAuth()
                     </p>
                 </Link>
             </div>
-            <div className="flex items-center gap-3">
-                <p>Hi, {user?.firstName || user?.fullName?.split(' ')[0] || 'Admin'}</p>
-                <button onClick={signOut} className="text-xs text-slate-700 hover:text-orange-600">Sign Out</button>
+
+            <div className="flex items-center gap-3 flex-wrap justify-end">
+                <Link href="/" className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-white bg-sky-500 hover:bg-sky-600 transition">
+                    Home
+                </Link>
+                <Link href="/category" className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-white bg-emerald-500 hover:bg-emerald-600 transition">
+                    Categories
+                </Link>
+                <Link href="/shop" className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-white bg-violet-500 hover:bg-violet-600 transition">
+                    Shop
+                </Link>
+                <Link href="/search" className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-white bg-orange-500 hover:bg-orange-600 transition">
+                    Search
+                </Link>
+                <Link href="/cart" className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold text-white bg-fuchsia-500 hover:bg-fuchsia-600 transition">
+                    Cart
+                </Link>
+                <p className="text-sm font-medium">Hi, {user?.firstName || user?.fullName?.split(' ')[0] || 'Admin'}</p>
+                <Link 
+                    href="/admin/profile" 
+                    className="flex items-center justify-center w-12 h-12 rounded-full bg-purple-600 hover:bg-purple-700 transition text-white shadow-md"
+                    aria-label="Go to admin profile"
+                >
+                    <User size={24} />
+                </Link>
             </div>
         </div>
     )

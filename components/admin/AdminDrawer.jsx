@@ -6,12 +6,13 @@ import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag, BarChart3, Use
 
 const AdminDrawer = ({ open, onClose, userImage, userName }) => {
     const drawerLinks = [
-        { name: 'Dashboard', href: '/admin', icon: Home },
-        { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
-        { name: 'Analytics Charts', href: '/admin/analytics-charts', icon: BarChart3 },
-        { name: 'Customers', href: '/admin/customers', icon: Users },
-        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent },
-        { name: 'Back to Shop', href: '/shop', icon: ShoppingBag },
+        { name: 'Dashboard', href: '/admin', icon: Home, color: '#0ea5e9' },
+        { name: 'Profile', href: '/admin/profile', icon: Users, color: '#7c3aed' },
+        { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, color: '#06b6d4' },
+        { name: 'Analytics Charts', href: '/admin/analytics-charts', icon: BarChart3, color: '#d946ef' },
+        { name: 'Customers', href: '/admin/customers', icon: Users, color: '#f59e0b' },
+        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent, color: '#ef4444' },
+        { name: 'Back to Shop', href: '/shop', icon: ShoppingBag, color: '#10b981' },
     ]
 
     return (
@@ -64,7 +65,7 @@ const AdminDrawer = ({ open, onClose, userImage, userName }) => {
                                         className="flex items-center gap-3 p-3 rounded-md hover:bg-slate-100 text-slate-700 font-medium transition"
                                         onClick={onClose}
                                     >
-                                        <link.icon size={20} /> 
+                                        <link.icon size={20} style={{ color: link.color }} /> 
                                         <span>{link.name}</span>
                                     </Link>
                                 </li>
