@@ -13,8 +13,8 @@ export async function GET(request) {
         // Fetch all customers with their order data
         const customers = await prisma.user.findMany({
             where: {
-                NOT: {
-                    orders: undefined
+                buyerOrders: {
+                    some: {}
                 }
             },
             select: {
@@ -22,11 +22,10 @@ export async function GET(request) {
                 name: true,
                 email: true,
                 image: true,
-                createdAt: true,
-                orders: {
+                buyerOrders: {
                     select: {
                         id: true,
-                        totalPrice: true,
+                        total: true,
                         createdAt: true,
                         orderItems: {
                             select: {
@@ -41,9 +40,9 @@ export async function GET(request) {
 
         // Calculate metrics for each customer
         const customerMetrics = customers.map(customer => {
-            const orders = customer.orders || []
+            const orders = customer.buyerOrders || []
             const totalOrders = orders.length
-            const totalSpent = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0)
+            const totalSpent = orders.reduce((sum, order) => sum + (order.total || 0), 0)
             const totalQuantity = orders.reduce((sum, order) => {
                 return sum + order.orderItems.reduce((itemSum, item) => itemSum + (item.quantity || 0), 0)
             }, 0)
@@ -54,7 +53,7 @@ export async function GET(request) {
                 name: customer.name,
                 email: customer.email,
                 image: customer.image,
-                joinDate: customer.createdAt,
+                joinDate: orders.length > 0 ? orders[0].createdAt : null,
                 totalOrders,
                 totalSpent,
                 totalQuantity,
