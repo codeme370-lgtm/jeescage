@@ -103,7 +103,7 @@ export default function AnalyticsCharts() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-600 text-sm font-medium mb-2">Total Revenue</h3>
           <p className="text-3xl font-bold text-green-600">
-            {loading ? '...' : `₦${stats.totalRevenue.toLocaleString()}`}
+            {loading ? '...' : `GHS ${stats.totalRevenue.toLocaleString()}`}
           </p>
           <p className="text-gray-500 text-xs mt-2">All time</p>
         </div>
@@ -121,7 +121,7 @@ export default function AnalyticsCharts() {
         <div className="bg-white rounded-lg shadow p-6">
           <h3 className="text-gray-600 text-sm font-medium mb-2">Avg Order Value</h3>
           <p className="text-3xl font-bold text-purple-600">
-            {loading ? '...' : `₦${stats.averageOrderValue.toLocaleString()}`}
+            {loading ? '...' : `GHS ${stats.averageOrderValue.toLocaleString()}`}
           </p>
           <p className="text-gray-500 text-xs mt-2">Per order</p>
         </div>

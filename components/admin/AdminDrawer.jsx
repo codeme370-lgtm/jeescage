@@ -8,6 +8,7 @@ const AdminDrawer = ({ open, onClose, userImage, userName }) => {
     const drawerLinks = [
         { name: 'Dashboard', href: '/admin', icon: Home },
         { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+        { name: 'Analytics Charts', href: '/admin/analytics-charts', icon: BarChart3 },
         { name: 'Customers', href: '/admin/customers', icon: Users },
         { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent },
         { name: 'Back to Shop', href: '/shop', icon: ShoppingBag },
