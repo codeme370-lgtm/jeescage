@@ -12,7 +12,7 @@ import Drawer from './Drawer'
 import "./Navbar.css";
 
 const Navbar = () => {
-    const { user, signOut } = useAuth();
+    const { user } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
     const { sidebarOpen, setSidebarOpen } = useSidebar()
@@ -69,7 +69,7 @@ const Navbar = () => {
                         <button 
                             aria-label="Open menu" 
                             onClick={() => setDrawerOpen(true)} 
-                            className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 flex-shrink-0"
+                            className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 flex-shrink-0 md:hidden"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -205,23 +205,15 @@ const Navbar = () => {
                         {/* User Profile / Login */}
                         <div className="flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
                             {user ? (
-                                <>
-                                    <Link href="/profile" className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">
-                                            {getInitials(user.fullName || user.name)}
-                                        </div>
-                                        <div className="hidden sm:flex flex-col text-left">
-                                            <span className="text-[10px] text-gray-500">Hello,</span>
-                                            <span className="font-semibold text-gray-900 text-sm">{user.firstName || user.fullName || user.name}</span>
-                                        </div>
-                                    </Link>
-                                    <button
-                                        onClick={signOut}
-                                        className="bg-gray-100 hover:bg-gray-200 text-slate-700 px-3 py-2 rounded-lg text-xs sm:text-sm transition-all"
-                                    >
-                                        Sign Out
-                                    </button>
-                                </>
+                                <Link href="/profile" className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all">
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">
+                                        {getInitials(user.fullName || user.name)}
+                                    </div>
+                                    <div className="hidden sm:flex flex-col text-left">
+                                        <span className="text-[10px] text-gray-500">Hello,</span>
+                                        <span className="font-semibold text-gray-900 text-sm">{user.firstName || user.fullName || user.name}</span>
+                                    </div>
+                                </Link>
                             ) : (
                                 <button 
                                     onClick={handleOpenSignIn}
@@ -237,7 +229,7 @@ const Navbar = () => {
             <Drawer 
                 open={drawerOpen} 
                 onClose={() => setDrawerOpen(false)} 
-                isSidebarMode={false}
+                isSidebarMode={true}
                 isSidebarOpen={sidebarOpen}
                 onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
             />

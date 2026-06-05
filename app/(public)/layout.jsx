@@ -7,6 +7,7 @@ import { useDispatch,useSelector } from "react-redux";
 import { fetchProducts } from "@/lib/features/product/productSlice";
 import { fetchCategories } from "@/lib/features/category/categorySlice";
 import { useAuth } from "@/context/AuthContext";
+import { useSidebar } from "@/context/SidebarContext";
 import { fetchCart,uploadCart } from "@/lib/features/cart/cartSlice";
 import { fetchAddress } from "@/lib/features/address/addressSlice";
 import { fetchUserRatings } from "@/lib/features/rating/ratingSlice";
@@ -19,6 +20,7 @@ const [isMobile, setIsMobile] = useState(true)
 const { user, getToken } = useAuth()
 //get cart items on load
 const {cartItems} = useSelector((state) => state.cart);
+const { sidebarOpen } = useSidebar()
 
 useEffect(() => {
     const handleResize = () => {
@@ -52,7 +54,7 @@ if(user){
     return (
         <>
             <Navbar />
-            <div className="transition-all duration-300">
+            <div className={`transition-all duration-300 ${sidebarOpen ? 'md:pl-80' : 'md:pl-20'}`}>
                 {children}
             </div>
             <Footer />

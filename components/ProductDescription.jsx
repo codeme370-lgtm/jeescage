@@ -75,7 +75,7 @@ const ProductDescription = ({ product }) => {
             {selectedTab === 'Videos' && (
                 <div className="max-w-3xl mt-4">
                     {product?.videoUrl ? (
-                        <video src={product.videoUrl} controls className="w-full rounded-lg" />
+                        <video src={product.videoUrl} controls autoPlay loop muted playsInline className="w-full rounded-lg" />
                     ) : (
                         <p className="text-slate-500">No product videos</p>
                     )}

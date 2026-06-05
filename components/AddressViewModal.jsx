@@ -27,14 +27,8 @@ const AddressViewModal = ({ address, onClose, orderId, orderStatus, onAddressUpd
                 </div>
 
                 <div className="text-sm space-y-2">
-                    <p><span className="font-medium">Name:</span> {address?.name || '—'}</p>
-                    <p><span className="font-medium">Email:</span> {address?.email || '—'}</p>
-                    <p><span className="font-medium">Street:</span> {address?.street || '—'}</p>
-                    <p><span className="font-medium">City:</span> {address?.city || '—'}</p>
-                    <p><span className="font-medium">State:</span> {address?.state || '—'}</p>
-                    <p><span className="font-medium">Zip:</span> {address?.zip || '—'}</p>
-                    <p><span className="font-medium">Country:</span> {address?.country || '—'}</p>
-                    <p><span className="font-medium">Phone:</span> {address?.phone || '—'}</p>
+                    <p><span className="font-medium">Delivery Location:</span> {address?.city || address?.street || address?.name || '—'}</p>
+                    <p className="text-xs text-slate-500">Only the delivery location is used for shipping — name, street and phone are no longer collected.</p>
                 </div>
 
                 {canEditAddress && (

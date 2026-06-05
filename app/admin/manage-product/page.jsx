@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import Image from "next/image"
 import Loading from "@/components/Loading"
-import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import { Pencil, Check, X } from "lucide-react"
 import { Trash2 } from "lucide-react"
@@ -13,8 +12,6 @@ import { Trash2 } from "lucide-react"
 export default function AdminManageProducts() {
 
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || 'GHS'
-
-    const {getToken} = useAuth()
 
     const [loading, setLoading] = useState(true)
     const [products, setProducts] = useState([])
@@ -25,35 +22,22 @@ export default function AdminManageProducts() {
 
     const fetchProducts = async () => {
         try {
-            //let's get the token
-            const token = await getToken()
-            const {data} = await axios.get("/api/admin/product", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            const { data } = await axios.get("/api/admin/product", { withCredentials: true })
             setProducts(data.products.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)))
         } catch (error) {
             toast.error(error?.response?.data?.message || "Something went wrong while fetching products")
-        } 
-        setLoading(false)
+        } finally {
+            setLoading(false)
+        }
     }
 
     const toggleStock = async (productId) => {
-        // Logic to toggle the stock of a product
         try {
-            const token = await getToken()
-            const {data} = await axios.post(`/api/admin/product/stock-toggle`, {productId}, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            setProducts(prevProducts => prevProducts.map(product => product.id === productId ? {...product, inStock: !product.inStock} : product))
+            const { data } = await axios.post(`/api/admin/product/stock-toggle`, { productId }, { withCredentials: true })
+            setProducts(prevProducts => prevProducts.map(product => product.id === productId ? { ...product, inStock: !product.inStock } : product))
             toast.success(data.message)
-
-
         } catch (error) {
-            toast.error(error?.response?.data?.message || "Something went wrong while updating stock status") 
+            toast.error(error?.response?.data?.message || "Something went wrong while updating stock status")
         }
     }
 
@@ -81,17 +65,12 @@ export default function AdminManageProducts() {
 
         try {
             setSavingEdit(true)
-            const token = await getToken()
             const { data } = await axios.patch('/api/admin/product', {
                 productId,
                 name: editValues.name,
                 price: Number(editValues.price),
                 quantity: Number(editValues.quantity)
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
+            }, { withCredentials: true })
 
             setProducts(prevProducts => prevProducts.map(product => product.id === productId ? data.product : product))
             toast.success(data.message)
@@ -106,11 +85,8 @@ export default function AdminManageProducts() {
     const deleteProduct = async (productId) => {
         if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
         try {
-            const token = await getToken()
-            const {data} = await axios.delete(`/api/admin/product`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
+            const { data } = await axios.delete(`/api/admin/product`, {
+                withCredentials: true,
                 data: { productId }
             })
             setProducts(prevProducts => prevProducts.filter(product => product.id !== productId))

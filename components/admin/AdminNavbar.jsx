@@ -12,7 +12,7 @@ const { user, signOut } = useAuth()
     return (
         <div className="flex items-center justify-between px-12 py-3 border-b border-slate-200 transition-all">
             <div className="flex items-center gap-4">
-                <button onClick={onMenuClick} className="p-2 hover:bg-slate-100 rounded-md" aria-label="Open menu">
+                <button onClick={onMenuClick} className="p-2 hover:bg-slate-100 rounded-md md:hidden" aria-label="Open menu">
                     <Menu size={24} />
                 </button>
                 <Link href="/" className="relative text-5xl md:text-6xl font-semibold text-slate-700">

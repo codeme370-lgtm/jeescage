@@ -2,11 +2,13 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag } from 'lucide-react'
+import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag, BarChart3, Users } from 'lucide-react'
 
 const AdminDrawer = ({ open, onClose, userImage, userName }) => {
     const drawerLinks = [
         { name: 'Dashboard', href: '/admin', icon: Home },
+        { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+        { name: 'Customers', href: '/admin/customers', icon: Users },
         { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent },
         { name: 'Back to Shop', href: '/shop', icon: ShoppingBag },
     ]
@@ -15,14 +17,14 @@ const AdminDrawer = ({ open, onClose, userImage, userName }) => {
         <>
             {/* Overlay */}
             <div 
-                className={`fixed inset-0 bg-black/40 transition-opacity ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} 
+                className={`fixed inset-0 bg-black/40 transition-opacity md:hidden ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} 
                 onClick={onClose} 
                 style={{ zIndex: 40 }} 
             />
 
             {/* Drawer panel (left side) */}
             <aside 
-                className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 backdrop-blur-sm ${open ? 'translate-x-0' : '-translate-x-full'}`} 
+                className={`fixed top-0 left-0 h-full w-80 sm:w-96 md:hidden bg-white shadow-2xl transform transition-transform duration-300 backdrop-blur-sm ${open ? 'translate-x-0' : '-translate-x-full'}`} 
                 aria-hidden={!open} 
                 style={{ zIndex: 50 }}
             >

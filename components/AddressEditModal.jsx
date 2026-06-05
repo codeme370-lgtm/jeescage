@@ -113,9 +113,9 @@ const AddressEditModal = ({ address, orderId, orderStatus, onClose, onAddressUpd
                 ) : (
                     <div className="space-y-4">
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                            <p className="text-xs text-blue-600 font-medium">📦 Current Address</p>
-                            <p className="text-sm font-medium mt-1">{address.name}</p>
-                            <p className="text-xs text-slate-600">{address.street}, {address.city}, {address.state}</p>
+                            <p className="text-xs text-blue-600 font-medium">📦 Current Delivery Location</p>
+                            <p className="text-sm font-medium mt-1">{address.city || address.street || address.name}</p>
+                            <p className="text-xs text-slate-600">Use this location for delivery</p>
                         </div>
 
                         <div className="space-y-2">
@@ -148,12 +148,10 @@ const AddressEditModal = ({ address, orderId, orderStatus, onClose, onAddressUpd
                                                 onChange={(e) => setSelectedAddressId(e.target.value)}
                                                 className="mt-1 accent-orange-500"
                                             />
-                                            <div className="flex-1 text-sm">
-                                                <p className="font-medium text-slate-700">{addr.name}</p>
-                                                <p className="text-xs text-slate-600">{addr.street}</p>
-                                                <p className="text-xs text-slate-600">{addr.city}</p>
-                                                <p className="text-xs text-slate-600">{addr.phone}</p>
-                                            </div>
+                                                    <div className="flex-1 text-sm">
+                                                        <p className="font-medium text-slate-700">{addr.city || addr.street || addr.name}</p>
+                                                        <p className="text-xs text-slate-600">Delivery location</p>
+                                                    </div>
                                         </label>
                                     ))}
                                 </div>
@@ -174,10 +172,7 @@ const AddressEditModal = ({ address, orderId, orderStatus, onClose, onAddressUpd
                         <div className="bg-gray-50 rounded-lg p-3 mt-4">
                                 <p className="text-xs text-slate-600 font-medium mb-2">📍 New Address Preview</p>
                                 <div className="text-xs space-y-1">
-                                    <p><span className="font-medium">Name:</span> {displayAddress?.name || '—'}</p>
-                                    <p><span className="font-medium">Street:</span> {displayAddress?.street || '—'}</p>
-                                    <p><span className="font-medium">City:</span> {displayAddress?.city || '—'}</p>
-                                    <p><span className="font-medium">Phone:</span> {displayAddress?.phone || '—'}</p>
+                                    <p><span className="font-medium">Delivery Location:</span> {displayAddress?.city || displayAddress?.street || displayAddress?.name || '—'}</p>
                                 </div>
                             </div>
                         <div className="flex gap-2 pt-4 border-t border-gray-200">

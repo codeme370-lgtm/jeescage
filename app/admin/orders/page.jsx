@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react"
 import Loading from "@/components/Loading"
 import AddressViewModal from "@/components/AddressViewModal"
-import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import toast from "react-hot-toast"
 import { X, AlertCircle, CheckCircle } from "lucide-react"
@@ -21,88 +20,40 @@ export default function AdminOrders() {
     const [deliveryMessage, setDeliveryMessage] = useState('')
     const [sendingSms, setSendingSms] = useState(false)
 
-    const {getToken} = useAuth()
-
-
     const fetchOrders = async () => {
        try {
-        const token = await getToken()
-        if (!token) {
-            toast.error("Authentication required. Please sign in.")
-            setLoading(false)
-            return
-        }
-        const {data} = await axios.get("/api/admin/orders", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        const {data} = await axios.get("/api/admin/orders", { withCredentials: true })
         setOrders(data.orders)
-        setLoading(false)
        } catch (error) {
         toast.error(error?.response?.data?.message || "Something went wrong while fetching orders")
-       }finally {
+       } finally {
         setLoading(false)
        }
     }
 
     const fetchAddressAlerts = async () => {
         try {
-            let token
-            try {
-                token = await getToken()
-            } catch (tErr) {
-                console.warn('getToken failed in fetchAddressAlerts', tErr?.message)
-            }
-            if (!token) {
-                // Not authenticated - clear alerts and return
+            const resp = await fetch('/api/admin/address-alerts?unreadOnly=true', {
+                credentials: 'include'
+            })
+            if (resp.status === 200) {
+                const body = await resp.json()
+                setAlerts(body.alerts || [])
+            } else if (resp.status === 401 || resp.status === 403 || resp.status === 404) {
                 setAlerts([])
-                return
-            }
-
-            // use fetch instead of axios to avoid Axios throwing on 401 and spamming console
-            try {
-                const resp = await fetch('/api/admin/address-alerts?unreadOnly=true', {
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-                if (resp.status === 200) {
-                    const body = await resp.json()
-                    setAlerts(body.alerts || [])
-                } else if (resp.status === 401) {
-                    // token expired or unauthorized - clear alerts silently
-                    console.warn('Address alerts unauthorized (401) — clearing alerts')
-                    setAlerts([])
-                } else if (resp.status === 404) {
-                    setAlerts([])
-                } else {
-                    console.error('Unexpected status fetching address alerts', resp.status)
-                    setAlerts([])
-                }
-            } catch (fetchErr) {
-                console.error('Network error fetching address alerts', fetchErr)
+            } else {
+                console.error('Unexpected status fetching address alerts', resp.status)
                 setAlerts([])
             }
         } catch (error) {
-            // Handle 404 (no route or no store) gracefully
-            const status = error?.response?.status
-            if (status === 404) {
-                setAlerts([])
-                console.warn('Address alerts endpoint returned 404')
-                return
-            }
-            console.error("Error fetching address alerts:", error)
+            console.error('Error fetching address alerts:', error)
             setAlerts([])
         }
     }
 
     const markAlertAsRead = async (alertId) => {
         try {
-            const token = await getToken()
-            if (!token) return
-
-            await axios.patch("/api/admin/address-alerts", { alertId }, {
-                headers: { Authorization: `Bearer ${token}` }
-            })
+            await axios.patch("/api/admin/address-alerts", { alertId }, { withCredentials: true })
             setAlerts(prevAlerts => prevAlerts.filter(alert => alert.id !== alertId))
             toast.success("Alert marked as checked")
         } catch (error) {
@@ -116,25 +67,13 @@ export default function AdminOrders() {
     }
 
     const updateOrderStatus = async (orderId, status) => {
-        // Logic to update the status of an order
         try {
-            const token = await getToken()
-            if (!token) {
-                toast.error("Authentication required. Please sign in.")
-                return
-            }
-            await axios.post("/api/admin/orders", {orderId, status}, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? {...order, status} : order))
+            await axios.post("/api/admin/orders", { orderId, status }, { withCredentials: true })
+            setOrders(prevOrders => prevOrders.map(order => order.id === orderId ? { ...order, status } : order))
             toast.success("Order status updated successfully")
         } catch (error) {
-            
+            toast.error(error?.response?.data?.message || "Failed to update order status")
         }
-
-
     }
 
     const openModal = (order) => {
@@ -367,10 +306,7 @@ export default function AdminOrders() {
                                     onClick={async (e) => { e.stopPropagation(); if (!selectedOrder) return; if (!selectedOrder.address?.phone) { toast.error('Customer phone number is missing'); return };
                                         try {
                                             setSendingSms(true)
-                                            const token = await getToken()
-                                            if (!token) { toast.error('Authentication required'); setSendingSms(false); return }
-                                            const { data: resp } = await axios.post('/api/admin/send-delivery-sms', { orderId: selectedOrder.id, hours: deliveryHours, message: deliveryMessage }, { headers: { Authorization: `Bearer ${token}` } })
-                                            // if API returned updated order, update UI immediately
+                                            const { data: resp } = await axios.post('/api/admin/send-delivery-sms', { orderId: selectedOrder.id, hours: deliveryHours, message: deliveryMessage }, { withCredentials: true })
                                             if (resp?.order) {
                                                 setOrders(prev => prev.map(o => o.id === resp.order.id ? resp.order : o))
                                                 setSelectedOrder(resp.order)

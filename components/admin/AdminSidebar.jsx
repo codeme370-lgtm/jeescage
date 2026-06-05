@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from "next/navigation"
-import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, User as UserIcon, SquarePlusIcon, SquarePenIcon, LayoutListIcon } from "lucide-react"
+import { HomeIcon, ShieldCheckIcon, StoreIcon, TicketPercentIcon, User as UserIcon, SquarePlusIcon, SquarePenIcon, LayoutListIcon, BarChart3, Users } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useAuth } from "@/context/AuthContext"
@@ -16,12 +16,14 @@ const { user } = useAuth()
         { name: 'Add Product', href: '/admin/add-product', icon: SquarePlusIcon },
         { name: 'Manage Products', href: '/admin/manage-product', icon: SquarePenIcon },
         { name: 'Orders', href: '/admin/orders', icon: LayoutListIcon },
-        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercentIcon  },
+        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercentIcon },
+        { name: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
+        { name: 'Customers', href: '/admin/customers', icon: Users },
     ]
 
     return user && (
-        <div className="inline-flex h-full flex-col gap-5 border-r border-slate-200 sm:min-w-60">
-            <div className="flex flex-col gap-3 justify-center items-center pt-8 max-sm:hidden">
+        <div className="hidden md:flex h-full flex-col gap-5 border-r border-slate-200 md:w-72">
+            <div className="flex flex-col gap-3 justify-center items-center pt-8 md:block">
                 {user.imageUrl ? (
                     <Image className="w-14 h-14 rounded-full" src={user.imageUrl} alt={user?.fullName ? `${user.fullName} avatar` : 'Admin avatar'} width={80} height={80} />
                 ) : (

@@ -4,7 +4,6 @@ import { assets } from "@/assets/assets"
 import Image from "next/image"
 import { useState } from "react"
 import { toast } from "react-hot-toast"
-import { useAuth } from "@/context/AuthContext"
 import axios from "axios"
 import React from "react"
 import { useEffect } from 'react'
@@ -32,7 +31,6 @@ export default function AdminAddProduct() {
     const [loading, setLoading] = useState(false)
     const [aiUsed, setAiUsed] = useState(false)
 
-    const {getToken} = useAuth()
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -59,12 +57,10 @@ export default function AdminAddProduct() {
             reader.onloadend=async () => {
                 const base64String = reader.result.split(",")[1]
                 const mimeType = file.type
-                const token = await getToken()
 
-                //make the api call
                 try {
                     await toast.promise(
-                        axios.post('/api/admin/product/ai',{base64Image: base64String, mimeType}),
+                        axios.post('/api/admin/product/ai', { base64Image: base64String, mimeType }, { withCredentials: true }),
                         {
                             loading:"Analyzing image with AI....",
                             success: (res)=>{
@@ -103,28 +99,23 @@ export default function AdminAddProduct() {
             }
             setLoading(true)
 
-            //get the token
-            const token = await getToken()
-
-            //upload images first and get URLs
             const imageUrls = []
             for(const key in images){
                 if(images[key]){
                     const uploadFormData = new FormData()
                     uploadFormData.append("file", images[key])
                     
-                    const uploadResponse = await axios.post('/api/admin/product/upload', uploadFormData)
+                    const uploadResponse = await axios.post('/api/admin/product/upload', uploadFormData, { withCredentials: true })
                     imageUrls.push(uploadResponse.data.imageUrl)
                 }
             }
 
-            //upload video if provided
             let videoUrl = null
             if (video) {
                 const videoFormData = new FormData()
                 videoFormData.append("file", video)
                 
-                const videoResponse = await axios.post('/api/admin/product/upload', videoFormData)
+                const videoResponse = await axios.post('/api/admin/product/upload', videoFormData, { withCredentials: true })
                 videoUrl = videoResponse.data.mediaUrl
             }
 
@@ -146,7 +137,7 @@ export default function AdminAddProduct() {
             }
 
             //send the form data to the api
-            const response = await axios.post("/api/admin/product", formData)
+            const response = await axios.post("/api/admin/product", formData, { withCredentials: true })
             toast.success("Product added successfully")
             // Add the new product to the Redux store
             if (response.data.product) {

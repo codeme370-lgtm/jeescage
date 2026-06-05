@@ -222,6 +222,8 @@ const ProductDetails = ({ product }) => {
                                     src={currentMedia.url}
                                     className="w-full h-full object-contain bg-black"
                                     playsInline
+                                    autoPlay
+                                    loop
                                     muted={isMuted}
                                     controls={false}
                                 />

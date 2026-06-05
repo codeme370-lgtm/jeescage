@@ -81,6 +81,12 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
             {/* Sidebar Mode (Medium+ screens) */}
             {isSidebarMode && (
                 <>
+                            {/* Mobile Drawer panel (small screens) */}
+                    <div className={`fixed inset-0 bg-black/40 transition-opacity md:hidden ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={onClose} style={{ zIndex: 70 }} />
+                    <aside className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 md:hidden ${open ? 'translate-x-0' : '-translate-x-full'}`} aria-hidden={!open} style={{ zIndex: 80 }}>
+                        <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} />
+                    </aside>
+
                     {/* Sidebar Header (Top Logo) */}
                     <div className={`hidden md:flex fixed left-0 top-0 h-20 bg-white border-b border-gray-200 flex items-center transition-all duration-300 z-50 ${isSidebarOpen ? 'w-80' : 'w-20'}`}>
                         <div className={`flex items-center gap-3 p-4 w-full ${isSidebarOpen ? '' : 'justify-center'}`}>
@@ -128,16 +134,11 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
                                         <Link key={idx} href={link.href} title={link.name} className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-700">
                                             <Icon size={20} />
                                         </Link>
-                                    )
-                                })}
+                                    )}
+                                )}
                             </div>
                         )}
                     </aside>
-
-                    {/* Overlay for mobile drawer when open */}
-                    {open && (
-                        <div className={`fixed inset-0 bg-black/40 transition-opacity md:hidden`} onClick={onClose} style={{ zIndex: 70 }} />
-                    )}
                 </>
             )}
         </>

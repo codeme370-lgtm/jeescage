@@ -4,13 +4,10 @@ import Loading from "@/components/Loading"
 import OrdersAreaChart from "@/components/OrdersAreaChart"
 import { CircleDollarSignIcon, ShoppingBasketIcon, TagsIcon } from "lucide-react"
 import { useEffect, useState } from "react"
-import { useAuth } from "@/context/AuthContext"
 import toast from "react-hot-toast"
 import axios from "axios"
 
 export default function AdminDashboard() {
-    //we need the token for making api calls for the dashboard data
-    const {getToken} = useAuth();
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || 'GHS'
 
     const [loading, setLoading] = useState(true)
@@ -29,20 +26,13 @@ export default function AdminDashboard() {
 
     const fetchDashboardData = async () => {
         try {
-            //let's get the dashboard data from the api
-            const token = await getToken();
-            //make the api call here and set the data
-            const response = await axios.get('/api/admin/dashboard', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            setDashboardData(response.data.dashboardData);
-           
+            const response = await axios.get('/api/admin/dashboard', { withCredentials: true })
+            setDashboardData(response.data.dashboardData)
         } catch (error) {
-            toast.error(error?.response?.data?.error || error.message);
+            toast.error(error?.response?.data?.error || error.message)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }
 
     useEffect(() => {

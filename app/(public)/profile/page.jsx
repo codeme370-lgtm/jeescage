@@ -245,21 +245,21 @@ export default function ProfilePage() {
                         <p className="mt-1 text-sm text-slate-500">{activeUser?.email}</p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                      <div className="rounded-3xl bg-slate-50 p-4 text-center">
-                        <p className="text-2xl font-semibold text-slate-900">{stats.totalOrders}</p>
+                    <div className="flex gap-4 w-full">
+                      <div className="flex-1 min-w-[90px] rounded-3xl bg-slate-50 p-4 text-center">
+                        <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.totalOrders ?? 0}</p>
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total Orders</p>
                       </div>
-                      <div className="rounded-3xl bg-slate-50 p-4 text-center">
-                        <p className="text-2xl font-semibold text-slate-900">{formatCurrency(stats.totalSpent)}</p>
+                      <div className="flex-1 min-w-[90px] rounded-3xl bg-slate-50 p-4 text-center">
+                        <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{formatCurrency(stats.totalSpent || 0)}</p>
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total Spent</p>
                       </div>
-                      <div className="rounded-3xl bg-slate-50 p-4 text-center">
-                        <p className="text-2xl font-semibold text-slate-900">{totalSaved}</p>
+                      <div className="flex-1 min-w-[90px] rounded-3xl bg-slate-50 p-4 text-center">
+                        <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{totalSaved ?? 0}</p>
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Saved Items</p>
                       </div>
-                      <div className="rounded-3xl bg-slate-50 p-4 text-center">
-                        <p className="text-2xl font-semibold text-slate-900">{stats.reviewsCount}</p>
+                      <div className="flex-1 min-w-[90px] rounded-3xl bg-slate-50 p-4 text-center">
+                        <p className="text-2xl sm:text-3xl font-semibold text-slate-900">{stats.reviewsCount ?? 0}</p>
                         <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Reviews</p>
                       </div>
                     </div>
@@ -384,10 +384,7 @@ export default function ProfilePage() {
                   <div className="mt-6 space-y-3 text-sm text-slate-700">
                     {defaultAddress ? (
                       <>
-                        <p className="font-semibold text-slate-900">{defaultAddress.name}</p>
-                        <p>{defaultAddress.street}</p>
-                        <p>{defaultAddress.city}</p>
-                        <p>{defaultAddress.phone}</p>
+                        <p className="font-semibold text-slate-900">{defaultAddress.city || defaultAddress.street || defaultAddress.name}</p>
                       </>
                     ) : (
                       <p className="text-slate-500">No saved address yet.</p>
