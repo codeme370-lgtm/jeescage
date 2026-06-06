@@ -150,6 +150,15 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
     const wishlistCount = useSelector(state => state.wishlist.total)
     
     // Navigation items for mobile (Home, Orders, Wishlist, Cart)
+    const colorClasses = {
+        green: 'bg-green-50 text-green-700 hover:bg-green-600 hover:text-white',
+        purple: 'bg-purple-50 text-purple-700 hover:bg-purple-600 hover:text-white',
+        blue: 'bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white',
+        red: 'bg-red-50 text-red-700 hover:bg-red-600 hover:text-white',
+        orange: 'bg-orange-50 text-orange-700 hover:bg-orange-600 hover:text-white',
+        slate: 'bg-slate-50 text-slate-700 hover:bg-slate-700 hover:text-white',
+    }
+
     const mobileNav = [
         { name: 'Home', icon: Home, href: '/', color: 'green' },
         { name: 'Profile', icon: User, href: '/profile', color: 'purple' },
@@ -159,10 +168,10 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
     ]
 
     const accountLinks = [
-        { name: 'Profile', icon: User, href: '/profile' },
-        { name: 'Orders', icon: Package, href: '/orders' },
-        { name: 'Wishlist', icon: Heart, href: '/wishlist', badge: wishlistCount > 0 ? wishlistCount : null },
-        { name: 'Cart', icon: ShoppingCart, href: '/cart', badge: cartCount > 0 ? cartCount : null },
+        { name: 'Profile', icon: User, href: '/profile', color: 'purple' },
+        { name: 'Orders', icon: Package, href: '/orders', color: 'blue' },
+        { name: 'Wishlist', icon: Heart, href: '/wishlist', color: 'red', badge: wishlistCount > 0 ? wishlistCount : null },
+        { name: 'Cart', icon: ShoppingCart, href: '/cart', color: 'orange', badge: cartCount > 0 ? cartCount : null },
     ]
     
     return (
@@ -191,10 +200,10 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                     <div className="grid grid-cols-4 gap-2">
                         {mobileNav.map((item, idx) => {
                             const Icon = item.icon
-                            const bgColorClass = `hover:bg-${item.color}-600`
+                            const colorStyle = colorClasses[item.color] || colorClasses.slate
                             return (
                                 <Link key={idx} href={item.href} onClick={onClose}>
-                                    <div className={`relative flex flex-col items-center justify-center p-3 rounded-lg bg-gray-50 hover:bg-${item.color}-600 hover:text-white transition-all text-gray-700`}>
+                                    <div className={`relative flex flex-col items-center justify-center p-3 rounded-xl border border-gray-200 ${colorStyle} transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg`}> 
                                         <Icon size={20} className="mb-1" />
                                         <span className="text-[10px] font-semibold text-center leading-tight">{item.name}</span>
                                         {item.badge && (
@@ -223,11 +232,22 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                 <nav className="space-y-2">
                     {categories.map((category, idx) => {
                         const Icon = category.icon
+                        const palette = [
+                            'bg-sky-100 text-sky-700',
+                            'bg-rose-100 text-rose-700',
+                            'bg-emerald-100 text-emerald-700',
+                            'bg-orange-100 text-orange-700',
+                            'bg-violet-100 text-violet-700',
+                            'bg-amber-100 text-amber-700',
+                        ]
+                        const accent = palette[idx % palette.length]
                         return (
                             <Link key={idx} href={`/category?category=${encodeURIComponent(category.name)}`} onClick={onClose} title={category.name}>
-                                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition text-gray-800 font-medium">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 transition-all duration-300 hover:bg-slate-100 hover:-translate-x-1 hover:shadow-sm text-gray-800 font-medium">
                                     <div className="flex items-center gap-3">
-                                        <Icon size={20} className="text-gray-700" />
+                                        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${accent}`}>
+                                            <Icon size={18} />
+                                        </span>
                                         <span>{category.name}</span>
                                     </div>
                                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -246,11 +266,14 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                 <nav className="space-y-2">
                     {quickLinks.map((link, idx) => {
                         const Icon = link.icon
+                        const quickAccent = ['bg-slate-100 text-slate-800','bg-orange-100 text-orange-700','bg-cyan-100 text-cyan-700','bg-fuchsia-100 text-fuchsia-700','bg-emerald-100 text-emerald-700'][idx % 5]
                         return (
                             <Link key={idx} href={link.href} onClick={onClose}>
-                                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition text-gray-800 font-medium">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 transition-all duration-300 hover:bg-slate-100 hover:-translate-x-1 hover:shadow-sm text-gray-800 font-medium">
                                     <div className="flex items-center gap-3">
-                                        <Icon size={20} className="text-gray-700" />
+                                        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${quickAccent}`}>
+                                            <Icon size={18} />
+                                        </span>
                                         <span>{link.name}</span>
                                     </div>
                                     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,11 +292,14 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                 <nav className="space-y-2">
                     {accountLinks.map((item, idx) => {
                         const Icon = item.icon
+                        const accent = colorClasses[item.color] ? colorClasses[item.color].split(' ')[0] : 'bg-slate-100'
                         return (
                             <Link key={idx} href={item.href} onClick={onClose}>
-                                <div className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition text-gray-800 font-medium">
+                                <div className="flex items-center justify-between p-3 rounded-xl bg-gray-50 transition-all duration-300 hover:bg-slate-100 hover:-translate-x-1 hover:shadow-sm text-gray-800 font-medium">
                                     <div className="flex items-center gap-3">
-                                        <Icon size={20} className="text-gray-700" />
+                                        <span className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl ${accent}`}>
+                                            <Icon size={18} />
+                                        </span>
                                         <span>{item.name}</span>
                                     </div>
                                     {item.badge ? (

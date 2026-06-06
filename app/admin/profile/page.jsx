@@ -50,6 +50,15 @@ export default function AdminProfilePage() {
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState(null)
 
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.push('/')
+    } catch (error) {
+      toast.error('Unable to sign out.')
+    }
+  }
+
   useEffect(() => {
     if (!isLoaded) return
     if (!user) {
@@ -101,7 +110,7 @@ export default function AdminProfilePage() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={signOut}
+                onClick={handleSignOut}
                 className="rounded-lg border border-red-200 bg-white px-5 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
               >
                 Sign Out

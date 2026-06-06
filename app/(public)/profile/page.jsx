@@ -48,6 +48,15 @@ export default function ProfilePage() {
   const wishlistCount = useSelector((state) => state.wishlist?.total ?? 0);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      router.push('/');
+    } catch (error) {
+      toast.error('Unable to sign out.');
+    }
+  };
   const [selectedMethod, setSelectedMethod] = useState("PAYSTACK");
   const [saving, setSaving] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -215,7 +224,7 @@ export default function ProfilePage() {
               </button>
             </div>
 
-            <button onClick={signOut} className="mt-6 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-red-400 hover:text-red-600">
+            <button onClick={handleSignOut} className="mt-6 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-red-400 hover:text-red-600 hover:bg-red-50">
               Log Out
             </button>
           </aside>
