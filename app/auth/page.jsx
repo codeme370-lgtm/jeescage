@@ -1,11 +1,10 @@
-'use client'
+﻿'use client'
 
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Facebook, Instagram, Goal, Eye, EyeOff, User, Mail, Smartphone, Lock } from 'lucide-react'
+import { Facebook, Eye, EyeOff, Mail, Smartphone, Lock, User, Instagram } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import logo from '@/app/logo.jpg'
+import loginBg from '@/assets/login-background.png'
 
 export default function AuthPage() {
   const router = useRouter()
@@ -64,117 +63,79 @@ export default function AuthPage() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-8 md:px-8">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-16 top-12 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
-        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-sky-500/15 blur-3xl" />
-        <div className="absolute left-1/2 top-20 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-violet-500/15 blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(148,163,184,0.18),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(251,146,60,0.14),_transparent_24%)]" />
-      </div>
-
-      <div className="relative mx-auto grid max-w-6xl overflow-hidden rounded-[32px] border border-white/10 bg-white/5 shadow-2xl backdrop-blur-xl md:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden bg-slate-950/85 p-10 text-white md:block">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.08),_transparent_26%),radial-gradient(circle_at_bottom_right,_rgba(248,113,113,0.12),_transparent_26%)]" />
-          <div className="relative z-10 flex h-full flex-col justify-between">
-            <div>
-              <div className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-slate-900/30">
-                <div className="relative h-10 w-10 overflow-hidden rounded-full bg-white/20">
-                  <Image src={logo} alt="Jeescage Logo" fill className="object-cover" />
+    <main
+      className="relative min-h-screen w-full overflow-hidden bg-slate-950"
+      style={{
+        backgroundImage: `url(${loginBg.src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40" />
+      <div className="relative mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
+        <div className="w-full rounded-[32px] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl sm:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10">
+            <div className="hidden flex-col justify-between rounded-3xl bg-slate-950 p-8 text-white shadow-lg shadow-slate-950/30 lg:flex">
+              <div className="space-y-6">
+                <div className="inline-flex items-center gap-3 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white shadow-sm shadow-black/10">
+                  <span className="h-10 w-10 rounded-full bg-white/20" />
+                  ShopNest
                 </div>
-                jeescagemall
-              </div>
-
-              <div className="mt-10 max-w-[420px] space-y-6">
-                <h1 className="text-4xl font-semibold tracking-tight text-white">Sell smarter and shop better.</h1>
-                <p className="text-base leading-7 text-slate-300">A premium marketplace for modern shoppers: curated deals, trusted sellers, and a standout checkout experience.</p>
-
-                <div className="grid gap-3 text-sm text-slate-300">
-                  <div className="flex items-start gap-3 rounded-3xl bg-white/5 p-4">
+                <div className="space-y-5">
+                  <h2 className="text-3xl font-semibold">Great quality, better living.</h2>
+                  <p className="text-sm leading-6 text-slate-300">Discover products that make life better. Enjoy a premium shopping experience across categories, trusted sellers, and fast checkout.</p>
+                </div>
+                <div className="space-y-3 text-sm text-slate-300">
+                  <div className="flex gap-3 rounded-3xl bg-white/5 p-4">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-orange-400" />
-                    <span>High-converting product listings with polished visuals.</span>
+                    <span>Beautiful product discovery</span>
                   </div>
-                  <div className="flex items-start gap-3 rounded-3xl bg-white/5 p-4">
+                  <div className="flex gap-3 rounded-3xl bg-white/5 p-4">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-sky-400" />
-                    <span>Fast, secure onboarding for buyers and sellers.</span>
+                    <span>Secure onboarding with fast access</span>
                   </div>
-                  <div className="flex items-start gap-3 rounded-3xl bg-white/5 p-4">
+                  <div className="flex gap-3 rounded-3xl bg-white/5 p-4">
                     <span className="mt-1 h-2.5 w-2.5 rounded-full bg-violet-400" />
-                    <span>Built to feel premium on desktop and mobile.</span>
+                    <span>Designed for desktop and mobile</span>
                   </div>
                 </div>
               </div>
-            </div>
-
-            <div className="relative mt-8 overflow-hidden rounded-[32px] border border-white/10 bg-white/10 p-6 shadow-xl shadow-slate-950/30">
-              <div className="absolute -left-8 -top-8 h-24 w-24 rounded-full bg-orange-100 blur-3xl" />
-              <div className="absolute -right-8 -bottom-8 h-28 w-28 rounded-full bg-amber-100 blur-3xl" />
-              <div className="relative flex w-full max-w-[280px] flex-col items-center gap-4">
-                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-orange-500 text-white shadow-lg shadow-orange-300/70">
-                  <User size={40} />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm uppercase tracking-[0.24em] text-orange-300">Premium marketplace</p>
-                  <h2 className="mt-3 text-xl font-semibold text-white">Beautiful buying experience</h2>
-                  <p className="mt-2 text-sm text-slate-300">From discovery to checkout, every step feels crafted and trustworthy.</p>
-                </div>
+              <div className="rounded-[28px] bg-white/10 p-6 text-slate-100 shadow-xl shadow-slate-950/20">
+                <p className="text-xs uppercase tracking-[0.3em] text-orange-300">Premium marketplace</p>
+                <h3 className="mt-4 text-xl font-semibold">Beautiful buying experience</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">From browse to checkout, every step feels crafted and trustworthy.</p>
               </div>
             </div>
-          </div>
-        </section>
 
-        <section className="p-8 sm:p-10 md:p-12">
-          <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-8">
-            <div className="rounded-[32px] bg-slate-950/95 p-8 text-center shadow-2xl shadow-slate-950/30 ring-1 ring-white/10">
-              <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-[26px] bg-[#fff4e5] text-orange-600 shadow-sm shadow-orange-200/80">
-                <User size={28} />
+            <div className="rounded-[28px] bg-white p-8 shadow-xl shadow-slate-950/10 sm:p-10">
+              <div className="mb-8 text-center">
+                <p className="text-sm font-semibold uppercase tracking-[0.32em] text-orange-600">{mode === 'signin' ? 'Sign in' : 'Sign up'}</p>
+                <h1 className="mt-4 text-3xl font-bold text-slate-900">
+                  {mode === 'signin' ? 'Welcome back!' : 'Create your account'}
+                </h1>
+                <p className="mt-3 text-sm leading-6 text-slate-600">
+                  {mode === 'signin'
+                    ? 'Sign in to continue shopping and managing your orders.'
+                    : 'Join ShopNest today and start exploring the best products.'}
+                </p>
               </div>
-              <p className="text-sm font-semibold uppercase tracking-[0.32em] text-orange-500">{mode === 'signin' ? 'Welcome Back' : 'Create Account'}</p>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                {mode === 'signin'
-                  ? 'Sign in to continue shopping'
-                  : 'Create your account'}
-              </h1>
-              <p className="mx-auto mt-3 max-w-[320px] text-sm leading-6 text-slate-400">
-                {mode === 'signin'
-                  ? 'Access your dashboard, orders, and favorites quickly.'
-                  : 'Enter your details below to start shopping and selling.'}
-              </p>
-            </div>
 
-            <div className="rounded-[32px] bg-white p-8 shadow-xl shadow-slate-950/10 ring-1 ring-slate-200/40">
-              <form onSubmit={handleSubmit} className="space-y-5">
-                  {mode === 'signin' ? (
-                  <div className="space-y-3">
-                    <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {mode === 'signup' && (
+                  <div>
+                    <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-700">Full Name</label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Mail size={18} />
-                      </span>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                        placeholder="Enter your email address"
-                        required
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    <label htmlFor="name" className="text-sm font-medium text-slate-700">Full Name</label>
-                    <div className="relative">
-                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <User size={18} />
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <User className="h-5 w-5" />
                       </span>
                       <input
                         id="name"
                         name="name"
+                        type="text"
                         value={form.name}
                         onChange={handleChange}
-                        className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pl-12 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                         placeholder="Enter your full name"
                         required
                       />
@@ -182,52 +143,56 @@ export default function AuthPage() {
                   </div>
                 )}
 
-                {mode === 'signup' && (
-                  <>
-                    <div className="space-y-3">
-                      <label htmlFor="email" className="text-sm font-medium text-slate-700">Email</label>
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                          <Mail size={18} />
-                        </span>
-                        <input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={form.email}
-                          onChange={handleChange}
-                          className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                          placeholder="Enter your email address"
-                          required
-                        />
-                      </div>
-                    </div>
+                <div>
+                  <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">Email address</label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Mail className="h-5 w-5" />
+                    </span>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pl-12 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+                </div>
 
-                    <div className="space-y-3">
-                      <label htmlFor="phone" className="text-sm font-medium text-slate-700">Phone Number</label>
-                      <div className="relative">
-                        <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                          <Smartphone size={18} />
-                        </span>
-                        <input
-                          id="phone"
-                          name="phone"
-                          value={form.phone}
-                          onChange={handleChange}
-                          className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
-                          placeholder="Enter your phone number"
-                          required
-                        />
-                      </div>
+                {mode === 'signup' && (
+                  <div>
+                    <label htmlFor="phone" className="mb-2 block text-sm font-medium text-slate-700">Phone number</label>
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Smartphone className="h-5 w-5" />
+                      </span>
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={handleChange}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pl-12 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                        placeholder="Enter your phone"
+                        required
+                      />
                     </div>
-                  </>
+                  </div>
                 )}
 
-                <div className="space-y-3">
-                  <label htmlFor="password" className="text-sm font-medium text-slate-700">Password</label>
+                <div>
+                  <div className="mb-2 flex items-center justify-between gap-4">
+                    <label htmlFor="password" className="block text-sm font-medium text-slate-700">Password</label>
+                    {mode === 'signin' && (
+                      <a href="#" className="text-sm font-semibold text-orange-600 hover:text-orange-700">Forgot password?</a>
+                    )}
+                  </div>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                      <Lock size={18} />
+                    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Lock className="h-5 w-5" />
                     </span>
                     <input
                       id="password"
@@ -235,27 +200,26 @@ export default function AuthPage() {
                       type={showPassword ? 'text' : 'password'}
                       value={form.password}
                       onChange={handleChange}
-                      className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 pr-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pl-12 pr-12 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                       placeholder="Enter your password"
                       required
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
                 </div>
 
                 {mode === 'signup' && (
-                  <div className="space-y-3">
-                    <label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700">Confirm Password</label>
+                  <div>
+                    <label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-slate-700">Confirm password</label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                        <Lock size={18} />
+                      <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <Lock className="h-5 w-5" />
                       </span>
                       <input
                         id="confirmPassword"
@@ -263,93 +227,78 @@ export default function AuthPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={form.confirmPassword}
                         onChange={handleChange}
-                        className="w-full rounded-[28px] border border-slate-200 bg-white px-4 py-4 pl-12 pr-12 text-sm text-slate-900 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pl-12 pr-12 text-sm text-slate-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                         placeholder="Confirm your password"
                         required
                       />
                       <button
                         type="button"
-                        onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-600"
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
                     </div>
                   </div>
                 )}
 
-                {mode === 'signin' && (
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <label className="inline-flex items-center gap-2 text-sm text-slate-600">
-                      <input type="checkbox" className="h-4 w-4 rounded border-slate-300 text-orange-500 focus:ring-orange-500" />
-                      Remember me
-                    </label>
-                    <a href="#" className="text-sm font-semibold text-orange-600 transition hover:text-orange-700">Forgot Password?</a>
-                  </div>
-                )}
+                {error && <p className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+                {success && <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p>}
 
                 <button
                   type="submit"
-                  className="flex w-full items-center justify-center rounded-[28px] bg-orange-600 px-4 py-4 text-sm font-semibold text-white shadow-lg shadow-orange-200 transition hover:bg-orange-700"
+                  className="w-full rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-900"
                 >
                   {mode === 'signin' ? 'Sign In' : 'Create Account'}
                 </button>
-
-                {mode === 'signup' && (
-                  <p className="text-center text-xs text-slate-500">By creating an account, you agree to our <span className="font-semibold text-orange-600">Terms of Service</span> and <span className="font-semibold text-orange-600">Privacy Policy</span>.</p>
-                )}
-
-                {error && <p className="rounded-[28px] bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-                {success && <p className="rounded-[28px] bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{success}</p>}
               </form>
 
-              <div className="mt-6 flex items-center gap-3 text-sm text-slate-400">
-                <span className="h-px flex-1 bg-slate-200" />
-                OR
-                <span className="h-px flex-1 bg-slate-200" />
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-slate-200" />
+                </div>
+                <div className="relative flex justify-center text-sm text-slate-500">
+                  <span className="bg-white px-3">OR</span>
+                </div>
               </div>
 
-              <div className="mt-6 grid gap-3">
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => handleSocialLogin('google')}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
+                >
+                  Continue with Google
+                </button>
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('facebook')}
-                  className="flex items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
                 >
-                  <Facebook size={18} className="text-[#1877F2]" />
                   Continue with Facebook
                 </button>
                 <button
                   type="button"
                   onClick={() => handleSocialLogin('instagram')}
-                  className="flex items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
                 >
-                  <Instagram size={18} className="text-[#E1306C]" />
                   Continue with Instagram
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('google')}
-                  className="flex items-center justify-center gap-3 rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-                >
-                  <Goal size={18} className="text-[#4285F4]" />
-                  Continue with Gmail
                 </button>
               </div>
 
-              <div className="mt-6 text-center text-sm text-slate-600">
-                {mode === 'signin' ? 'Don’t have an account?' : 'Already have an account?'}{' '}
+              <p className="mt-6 text-center text-sm text-slate-600">
+                {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
                 <button
                   type="button"
                   onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
                   className="font-semibold text-orange-600 hover:text-orange-700"
                 >
-                  {mode === 'signin' ? 'Sign Up' : 'Sign In'}
+                  {mode === 'signin' ? 'Sign up' : 'Sign in'}
                 </button>
-              </div>
+              </p>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </main>
   )

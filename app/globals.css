@@ -94,3 +94,60 @@
         }
     }
 }
+
+@layer base {
+    :root {
+        color-scheme: light;
+    }
+
+    *, *::before, *::after {
+        transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    }
+
+    body {
+        min-height: 100vh;
+        background-color: #f8fafc;
+        -webkit-font-smoothing: antialiased;
+        scroll-behavior: smooth;
+    }
+
+    a, button, input, textarea, select {
+        will-change: transform, opacity;
+    }
+
+    button, a {
+        transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover, a:hover {
+        transform: translateY(-1px);
+    }
+
+    input:focus, textarea:focus, select:focus {
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.08);
+    }
+
+    img {
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    img:hover {
+        transform: scale(1.01);
+    }
+
+    .page-transition {
+        animation: pageFade 0.45s ease-out;
+    }
+
+    @keyframes pageFade {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}

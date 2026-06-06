@@ -2,6 +2,7 @@ import { Toaster } from "react-hot-toast";
 import StoreProvider from "@/app/StoreProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { AuthProvider } from "@/context/AuthContext";
+import PageTransition from "@/app/PageTransition";
 import "./globals.css";
 
 export const metadata = {
@@ -65,7 +66,7 @@ export default function RootLayout({ children }) {
                     <StoreProvider>
                         <SidebarProvider>
                             <Toaster />
-                            {children}
+                            <PageTransition>{children}</PageTransition>
                         </SidebarProvider>
                     </StoreProvider>
                 </body>
