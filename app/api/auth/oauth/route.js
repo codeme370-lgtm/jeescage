@@ -11,7 +11,8 @@ export async function GET(request) {
     return NextResponse.json({ error: 'Invalid provider' }, { status: 400 })
   }
 
-  const state = randomUUID()
+  const rawState = randomUUID()
+  const state = `${provider}:${rawState}`
   const redirectUri = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/oauth/callback`
 
   let authUrl = ''
@@ -23,7 +24,7 @@ export async function GET(request) {
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `response_type=code&` +
         `scope=openid%20email%20profile&` +
-        `state=${state}&` +
+        `state=${encodeURIComponent(state)}&` +
         `access_type=offline`
       break
     case 'facebook':
@@ -32,7 +33,7 @@ export async function GET(request) {
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `response_type=code&` +
         `scope=email,public_profile&` +
-        `state=${state}`
+        `state=${encodeURIComponent(state)}`
       break
     case 'instagram':
       authUrl = `https://api.instagram.com/oauth/authorize?` +
@@ -40,7 +41,7 @@ export async function GET(request) {
         `redirect_uri=${encodeURIComponent(redirectUri)}&` +
         `response_type=code&` +
         `scope=user_profile,user_media&` +
-        `state=${state}`
+        `state=${encodeURIComponent(state)}`
       break
   }
 
