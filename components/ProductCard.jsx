@@ -40,7 +40,7 @@ const ProductCard = ({ product, hideAddToCart = false }) => {
         }
 
         setIsAdding(true)
-        dispatch(addToCart({ productId: product.id }))
+        dispatch(addToCart({ productId: product.id, selectedColor: product.availableColors?.[0] || null }))
 
         setTimeout(() => {
             setIsAdding(false)

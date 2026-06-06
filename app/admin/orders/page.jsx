@@ -270,6 +270,7 @@ export default function AdminOrders() {
                                         />
                                         <div className="flex-1">
                                             <p className="text-slate-800">{item.product?.name}</p>
+                                            {item.selectedColor && <p className="text-xs text-slate-500">Color: {item.selectedColor}</p>}
                                             <p>Qty: {item.quantity}</p>
                                             <p>Price: GHS{item.price}</p>
                                         </div>

@@ -27,20 +27,25 @@ export default function Cart() {
         setTotalPrice(0);
         const cartArray = [];
         for (const [key, value] of Object.entries(cartItems)) {
-            const product = products.find(product => product.id === key);
+            const cartItem = typeof value === 'number'
+                ? { productId: key, quantity: value, selectedColor: null, cartKey: key }
+                : { ...value, cartKey: key, quantity: value.quantity || 0, selectedColor: value.selectedColor || null };
+            const product = products.find(product => product.id === cartItem.productId);
             if (product) {
                 cartArray.push({
                     ...product,
-                    quantity: value,
+                    quantity: cartItem.quantity,
+                    selectedColor: cartItem.selectedColor,
+                    cartKey: cartItem.cartKey,
                 });
-                setTotalPrice(prev => prev + product.price * value);
+                setTotalPrice(prev => prev + product.price * cartItem.quantity);
             }
         }
         setCartArray(cartArray);
     }
 
-    const handleDeleteItemFromCart = (productId) => {
-        dispatch(deleteItemFromCart({ productId }))
+    const handleDeleteItemFromCart = (cartKey) => {
+        dispatch(deleteItemFromCart({ cartKey }))
     }
 
     useEffect(() => {
@@ -82,15 +87,16 @@ export default function Cart() {
                                                 <div>
                                                     <p className="max-sm:text-sm">{item.name}</p>
                                                     <p className="text-xs text-slate-500">{item.category}</p>
+                                                    {item.selectedColor && <p className="text-xs text-slate-500">Color: {item.selectedColor}</p>}
                                                     <p>{currency}{item.price}</p>
                                                 </div>
                                             </td>
                                             <td className="text-center">
-                                                <Counter productId={item.id} />
+                                                <Counter cartKey={item.cartKey} productId={item.id} selectedColor={item.selectedColor} />
                                             </td>
                                             <td className="text-center">{currency}{(item.price * item.quantity).toLocaleString()}</td>
                                             <td className="text-center max-md:hidden">
-                                                <button onClick={() => handleDeleteItemFromCart(item.id)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
+                                                <button onClick={() => handleDeleteItemFromCart(item.cartKey)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
                                                     <Trash2Icon size={18} />
                                                 </button>
                                             </td>

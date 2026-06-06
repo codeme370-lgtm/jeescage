@@ -25,6 +25,7 @@ export async function POST(request) {
     const category = formData.get("category");
     const mrp = Number(formData.get("mrp"));
     const quantity = Number(formData.get("quantity"));
+    const availableColors = formData.getAll("availableColors").filter(Boolean);
     const imageUrls = formData.getAll("imageUrls");
     const videoUrl = formData.get("videoUrl");
 
@@ -54,6 +55,7 @@ export async function POST(request) {
         mrp,
         price,
         category,
+        availableColors: availableColors.length > 0 ? availableColors : [],
         videoUrl: videoUrl || null,
         images: imagesUrl,
         quantity,
@@ -87,7 +89,7 @@ export async function PATCH(request) {
       );
     }
 
-    const { productId, name, price, mrp, description, category, quantity, videoUrl } = await request.json();
+    const { productId, name, price, mrp, description, category, quantity, videoUrl, availableColors } = await request.json();
 
     if (!productId) {
       return NextResponse.json({ error: "productId is required" }, { status: 400 });
@@ -109,6 +111,7 @@ export async function PATCH(request) {
         mrp: typeof mrp === 'number' ? mrp : existing.mrp,
         description: description ?? existing.description,
         category: category ?? existing.category,
+        availableColors: Array.isArray(availableColors) ? availableColors.filter(Boolean) : existing.availableColors,
         videoUrl: videoUrl !== undefined ? videoUrl : existing.videoUrl,
         quantity: typeof quantity === 'number' ? quantity : existing.quantity,
         inStock: typeof quantity === 'number' ? quantity > 0 : existing.inStock,

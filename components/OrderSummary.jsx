@@ -76,7 +76,11 @@ const OrderSummary = ({ totalPrice, items }) => {
                         //suppose the user is available and address is selected
                         const token = await getToken();
                             // normalize items to what the API expects
-                            const normalizedItems = items.map(i => ({ productId: i.id || i.productId, quantity: i.quantity || 1 }))
+                            const normalizedItems = items.map(i => ({
+                                productId: i.id || i.productId,
+                                quantity: i.quantity || 1,
+                                selectedColor: i.selectedColor || null,
+                            }))
                             const orderData = {
                                 items: normalizedItems,
                                 // enforce PAYSTACK on server

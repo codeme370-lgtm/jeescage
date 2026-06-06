@@ -144,7 +144,8 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
                         create: orderItems.map(item => ({
                             productId: item.productId,
                             quantity: item.quantity,
-                            price: item.price
+                            price: item.price,
+                            selectedColor: item.selectedColor || null
                         }))
                     }
                 }

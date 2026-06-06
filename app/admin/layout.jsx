@@ -1,4 +1,5 @@
 import AdminLayout from "@/components/admin/AdminLayout";
+import PageTransition from "@/app/PageTransition";
 
 export const metadata = {
     title: "jeesCage. - Admin",
@@ -16,7 +17,7 @@ export const metadata = {
 export default function RootAdminLayout({ children }) {
     return (
         <AdminLayout>
-            {children}
+            <PageTransition>{children}</PageTransition>
         </AdminLayout>
     );
 }

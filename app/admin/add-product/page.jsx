@@ -18,6 +18,33 @@ export default function AdminAddProduct() {
     const [newCategoryName, setNewCategoryName] = useState('')
     const [aiSuggestion, setAiSuggestion] = useState(null)
 
+    const colorPalette = [
+        { name: 'Black', hex: '#000000' },
+        { name: 'White', hex: '#FFFFFF' },
+        { name: 'Gray', hex: '#9CA3AF' },
+        { name: 'Red', hex: '#EF4444' },
+        { name: 'Pink', hex: '#F472B6' },
+        { name: 'Orange', hex: '#F59E0B' },
+        { name: 'Yellow', hex: '#EAB308' },
+        { name: 'Lime', hex: '#84CC16' },
+        { name: 'Green', hex: '#22C55E' },
+        { name: 'Teal', hex: '#14B8A6' },
+        { name: 'Cyan', hex: '#06B6D4' },
+        { name: 'Blue', hex: '#3B82F6' },
+        { name: 'Indigo', hex: '#6366F1' },
+        { name: 'Violet', hex: '#8B5CF6' },
+        { name: 'Purple', hex: '#A855F7' },
+        { name: 'Fuchsia', hex: '#D946EF' },
+        { name: 'Rose', hex: '#FB7185' },
+        { name: 'Brown', hex: '#92400E' },
+        { name: 'Tan', hex: '#D8B4FE' },
+        { name: 'Beige', hex: '#F5F5DC' },
+        { name: 'Navy', hex: '#1D4ED8' },
+        { name: 'Olive', hex: '#6B7280' },
+        { name: 'Maroon', hex: '#7F1D1D' },
+        { name: 'Gold', hex: '#D97706' }
+    ]
+
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
     const [video, setVideo] = useState(null)
     const [productInfo, setProductInfo] = useState({
@@ -27,9 +54,22 @@ export default function AdminAddProduct() {
         price: 0,
         category: "",
         quantity: 0,
+        availableColors: [],
     })
     const [loading, setLoading] = useState(false)
     const [aiUsed, setAiUsed] = useState(false)
+
+    const toggleColor = (color) => {
+        setProductInfo((prev) => {
+            const hasColor = prev.availableColors.includes(color)
+            return {
+                ...prev,
+                availableColors: hasColor
+                    ? prev.availableColors.filter((item) => item !== color)
+                    : [...prev.availableColors, color],
+            }
+        })
+    }
 
     const dispatch = useDispatch()
 
@@ -127,6 +167,9 @@ export default function AdminAddProduct() {
             formData.append("price", productInfo.price)
             formData.append("category", productInfo.category)
             formData.append("quantity", productInfo.quantity)
+            productInfo.availableColors.forEach((color) => {
+                formData.append("availableColors", color)
+            })
 
             //adding image URLs to form data instead of files
             imageUrls.forEach((url) => {
@@ -151,6 +194,7 @@ export default function AdminAddProduct() {
                 price: 0,
                 category: "",
                 quantity: 0,
+                availableColors: [],
             })
             //reset images
             setImages({ 1: null, 2: null, 3: null, 4: null })
@@ -211,6 +255,45 @@ export default function AdminAddProduct() {
                     Quantity
                     <input type="number" name="quantity" onChange={onChangeHandler} value={productInfo.quantity} placeholder="0" min="0" className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
                 </label>
+            </div>
+
+            <div className="mb-6 max-w-sm">
+                <label className="block text-sm font-semibold text-slate-700 mb-2">Available Colors</label>
+
+                <div className="grid grid-cols-6 gap-2 mb-3 max-w-md">
+                    {colorPalette.map((color) => {
+                        const selected = productInfo.availableColors.includes(color.name)
+                        return (
+                            <button
+                                key={color.name}
+                                type="button"
+                                onClick={() => toggleColor(color.name)}
+                                className={`h-10 w-10 rounded-full border transition-all ${selected ? 'border-slate-900 ring-2 ring-slate-900' : 'border-slate-200'}`}
+                                style={{ backgroundColor: color.hex }}
+                                aria-label={color.name}
+                            >
+                                <span className="sr-only">{color.name}</span>
+                            </button>
+                        )
+                    })}
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-3">
+                    {productInfo.availableColors.map((color) => (
+                        <span key={color} className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-sm text-slate-700">
+                            {color}
+                            <button
+                                type="button"
+                                onClick={() => toggleColor(color)}
+                                className="text-red-500 hover:text-red-700 focus:outline-none"
+                            >
+                                ×
+                            </button>
+                        </span>
+                    ))}
+                </div>
+
+                <p className="text-xs text-slate-500 mt-2">Select one or more colors from the palette.</p>
             </div>
 
             <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded" required>

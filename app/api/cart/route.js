@@ -1,5 +1,6 @@
 import { getSessionUserId } from "@/lib/authHelpers";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 
 //update user cart
@@ -9,12 +10,13 @@ export async function POST(request){
         if (!userId) {
             return NextResponse.json({error: 'Not authenticated'}, {status: 401})
         }
-        const {cart} = await request.json()
+        const { cartItems, cart } = await request.json()
+        const payload = cartItems || cart || {}
 
         //save the cart to the user object
         await prisma.user.update({
             where: {id: userId},
-            data: {cart: cart}
+            data: {cart: payload}
         })
         return NextResponse.json({message: "Cart Updated Successfully"})
     } catch (error) {

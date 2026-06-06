@@ -26,22 +26,23 @@ model User {
 }
 
 model Product {
-  id          String      @id @default(cuid())
-  name        String
-  description String
-  mrp         Float
-  price       Float
-  videoUrl    String?
-  images      String[]
-  category    String
-  inStock     Boolean     @default(true)
-  quantity    Int         @default(0)
-  storeId     String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
-  store       Store?      @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  rating      Rating[]
+  id              String      @id @default(cuid())
+  name            String
+  description     String
+  mrp             Float
+  price           Float
+  videoUrl        String?
+  images          String[]
+  availableColors String[]    @default([])
+  category        String
+  inStock         Boolean     @default(true)
+  quantity        Int         @default(0)
+  storeId         String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  orderItems      OrderItem[]
+  store           Store?      @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  rating          Rating[]
 }
 
 model Order {
@@ -72,14 +73,16 @@ model Order {
 }
 
 model OrderItem {
-  orderId   String
-  productId String
-  quantity  Int
-  price     Float
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
+  id            String   @id @default(cuid())
+  orderId       String
+  productId     String
+  quantity      Int
+  price         Float
+  selectedColor String?
+  order         Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product       Product  @relation(fields: [productId], references: [id])
 
-  @@id([orderId, productId])
+  @@index([orderId, productId])
 }
 
 model Rating {

@@ -1,6 +1,6 @@
 'use client'
 
-import { addToCart } from "@/lib/features/cart/cartSlice";
+import { addToCart, getCartKey } from "@/lib/features/cart/cartSlice";
 import { StarIcon, TagIcon, EarthIcon, CreditCardIcon, UserIcon, Check, Loader, Share2, Facebook, Twitter, MessageCircle, Copy } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
@@ -20,6 +20,11 @@ const ProductDetails = ({ product }) => {
 
     const cart = useSelector(state => state.cart.cartItems);
     const dispatch = useDispatch();
+
+    const [selectedColor, setSelectedColor] = useState(product?.availableColors?.[0] || null);
+    const cartKey = getCartKey(productId, selectedColor)
+    const rawCartItem = cart[cartKey] || (selectedColor === null ? cart[productId] : undefined)
+    const cartQuantity = rawCartItem ? (typeof rawCartItem === 'number' ? rawCartItem : rawCartItem.quantity) : 0
 
     const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -44,7 +49,7 @@ const ProductDetails = ({ product }) => {
             return
         }
         setIsAddingToCart(true)
-        dispatch(addToCart({ productId }))
+        dispatch(addToCart({ productId, selectedColor }))
         
         // Simulate processing
         setTimeout(() => {
@@ -104,6 +109,10 @@ const ProductDetails = ({ product }) => {
 
     const currentMedia = mediaArray[currentMediaIndex];
     const averageRating = product?.rating && product.rating.length > 0 ? product.rating.reduce((acc, item) => acc + item.rating, 0) / product.rating.length : 0;
+
+    useEffect(() => {
+        setSelectedColor(product?.availableColors?.[0] || null)
+    }, [product?.availableColors])
 
     useEffect(() => {
         // When switching media by index, if it's a video autoplay muted, pause other media
@@ -305,23 +314,42 @@ const ProductDetails = ({ product }) => {
                 
                 <hr className="border-gray-300 my-6" />
                 
+                {/* Color Picker */}
+                {product.availableColors?.length > 0 && (
+                    <div className="mb-4">
+                        <p className="text-sm sm:text-base font-semibold text-slate-800 mb-2">Choose a Color</p>
+                        <div className="flex flex-wrap gap-2">
+                            {product.availableColors.map((color) => (
+                                <button
+                                    key={color}
+                                    type="button"
+                                    onClick={() => setSelectedColor(color)}
+                                    className={`px-3 py-2 rounded-full border transition ${selectedColor === color ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'}`}
+                                >
+                                    {color}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
                 {/* Quantity and Add to Cart */}
                 <div className="flex flex-wrap items-end gap-2 sm:gap-3 md:gap-5 mb-4 sm:mb-6">
                     {
-                        cart[productId] && (
+                        cartQuantity > 0 && (
                             <div className="flex flex-col gap-2 sm:gap-3">
                                 <p className="text-sm sm:text-base md:text-lg text-slate-800 font-semibold">Quantity</p>
-                                <Counter productId={productId} />
+                                <Counter cartKey={cartKey} productId={productId} selectedColor={selectedColor} />
                             </div>
                         )
                     }
                     <button 
-                        onClick={() => !cart[productId] ? addToCartHandler() : router.push('/cart')} 
+                        onClick={() => cartQuantity === 0 ? addToCartHandler() : router.push('/cart')} 
                         disabled={isAddingToCart}
                         className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 md:px-10 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
                             cartConfirmed 
                                 ? 'bg-green-500 text-white' 
-                                : !cart[productId]
+                                : cartQuantity === 0
                                     ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:shadow-lg hover:from-slate-900 hover:to-black active:scale-95'
                                     : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg active:scale-95'
                         } ${isAddingToCart ? 'opacity-80' : ''}`}
@@ -337,7 +365,7 @@ const ProductDetails = ({ product }) => {
                                 Added to Cart!
                             </>
                         ) : (
-                            !cart[productId] ? 'Add to Cart' : 'View Cart'
+                            cartQuantity === 0 ? 'Add to Cart' : 'View Cart'
                         )}
                     </button>
                 </div>
