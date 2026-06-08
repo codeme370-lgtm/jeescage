@@ -12,6 +12,40 @@ import { useDispatch, useSelector } from "react-redux";
 import React from "react";
 import { assets } from "@/assets/assets";
 
+const getTextColorForBackground = (backgroundColor) => {
+    if (!backgroundColor) return '#fff';
+    const color = backgroundColor.trim().toLowerCase();
+    const lightNames = new Set([
+        'white', 'snow', 'ivory', 'beige', 'linen', 'honeydew', 'mintcream', 'azure', 'aliceblue',
+        'lightyellow', 'lemonchiffon', 'floralwhite', 'oldlace', 'lightgoldenrodyellow', 'papayawhip',
+        'peachpuff', 'blanchedalmond', 'lavender', 'lightpink', 'lightgray', 'gainsboro', 'whitesmoke'
+    ]);
+    const darkTextNames = new Set(['yellow', 'gold', 'khaki', 'palegoldenrod', 'lightyellow', 'ivory']);
+    if (lightNames.has(color) || darkTextNames.has(color)) return '#000';
+
+    const hexMatch = color.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (hexMatch) {
+        const hex = hexMatch[1].length === 3
+            ? hexMatch[1].split('').map((ch) => ch + ch).join('')
+            : hexMatch[1];
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 160 ? '#000' : '#fff';
+    }
+
+    const rgbMatch = color.match(/^rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+    if (rgbMatch) {
+        const r = Number(rgbMatch[1]);
+        const g = Number(rgbMatch[2]);
+        const b = Number(rgbMatch[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        return brightness > 160 ? '#000' : '#fff';
+    }
+
+    return '#fff';
+};
 
 const ProductDetails = ({ product }) => {
 
@@ -22,9 +56,10 @@ const ProductDetails = ({ product }) => {
     const dispatch = useDispatch();
 
     const [selectedColor, setSelectedColor] = useState(product?.availableColors?.[0] || null);
+    const [selectedColors, setSelectedColors] = useState([]);
     const cartKey = getCartKey(productId, selectedColor)
     const rawCartItem = cart[cartKey] || (selectedColor === null ? cart[productId] : undefined)
-    const cartQuantity = rawCartItem ? (typeof rawCartItem === 'number' ? rawCartItem : rawCartItem.quantity) : 0
+    const cartQuantity = rawCartItem ? (typeof rawCartItem === 'number' ? rawCartItem : rawCartItem.quantity) : 1
 
     const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -48,8 +83,34 @@ const ProductDetails = ({ product }) => {
             toast.error('Please sign in to add items to your cart')
             return
         }
+
+        // Validate color selection based on quantity
+        if (product.availableColors?.length > 0) {
+            if (cartQuantity === 1) {
+                if (!selectedColor) {
+                    toast.error('Please select a color')
+                    return
+                }
+            } else {
+                // Check if all units have a color selected
+                if (selectedColors.length < cartQuantity || selectedColors.some(color => !color)) {
+                    toast.error(`Please select a color for all ${cartQuantity} units`)
+                    return
+                }
+            }
+        }
+
         setIsAddingToCart(true)
-        dispatch(addToCart({ productId, selectedColor }))
+        
+        if (cartQuantity === 1) {
+            // Single item with one color
+            dispatch(addToCart({ productId, selectedColor }))
+        } else {
+            // Multiple items with potentially different colors
+            selectedColors.forEach(color => {
+                dispatch(addToCart({ productId, selectedColor: color }))
+            })
+        }
         
         // Simulate processing
         setTimeout(() => {
@@ -317,32 +378,78 @@ const ProductDetails = ({ product }) => {
                 {/* Color Picker */}
                 {product.availableColors?.length > 0 && (
                     <div className="mb-4">
-                        <p className="text-sm sm:text-base font-semibold text-slate-800 mb-2">Choose a Color</p>
-                        <div className="flex flex-wrap gap-2">
-                            {product.availableColors.map((color) => (
-                                <button
-                                    key={color}
-                                    type="button"
-                                    onClick={() => setSelectedColor(color)}
-                                    className={`px-3 py-2 rounded-full border transition ${selectedColor === color ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:border-slate-400'}`}
-                                >
-                                    {color}
-                                </button>
-                            ))}
-                        </div>
+                        {cartQuantity === 1 ? (
+                            <>
+                                <p className="text-sm sm:text-base font-semibold text-slate-800 mb-2">Choose a Color</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.availableColors.map((color) => {
+                                        const isSelected = selectedColor === color;
+                                        const textColor = getTextColorForBackground(color);
+                                        return (
+                                            <button
+                                                key={color}
+                                                type="button"
+                                                onClick={() => setSelectedColor(color)}
+                                                style={{
+                                                    backgroundColor: color,
+                                                    color: textColor,
+                                                    borderColor: isSelected ? color : '#e2e8f0'
+                                                }}
+                                                className={`px-3 py-2 rounded-full border transition ${isSelected ? 'ring-2 ring-offset-2 ring-slate-900' : 'hover:ring-2 hover:ring-slate-300'}`}
+                                            >
+                                                {color}
+                                            </button>
+                                        )
+                                    })}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-4">
+                                <div>
+                                    <p className="text-sm sm:text-base font-semibold text-slate-800 mb-2">Choose Colors for Each Unit</p>
+                                    <p className="text-xs text-slate-600 mb-3">Select a different color for each item (total: {cartQuantity})</p>
+                                </div>
+                                {Array.from({ length: cartQuantity }).map((_, idx) => (
+                                    <div key={idx} className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                                        <p className="text-xs font-medium text-slate-700 mb-2">Unit {idx + 1}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {product.availableColors.map((color) => {
+                                                const isSelected = selectedColors[idx] === color;
+                                                const textColor = getTextColorForBackground(color);
+                                                return (
+                                                    <button
+                                                        key={`${idx}-${color}`}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newColors = [...selectedColors];
+                                                            newColors[idx] = color;
+                                                            setSelectedColors(newColors);
+                                                        }}
+                                                        style={{
+                                                            backgroundColor: color,
+                                                            color: textColor,
+                                                            borderColor: isSelected ? color : '#e2e8f0'
+                                                        }}
+                                                        className={`px-2 py-1 rounded-full border text-sm transition ${isSelected ? 'ring-2 ring-offset-2 ring-slate-900' : 'hover:ring-2 hover:ring-slate-300'}`}
+                                                    >
+                                                        {color}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
                 {/* Quantity and Add to Cart */}
                 <div className="flex flex-wrap items-end gap-2 sm:gap-3 md:gap-5 mb-4 sm:mb-6">
-                    {
-                        cartQuantity > 0 && (
-                            <div className="flex flex-col gap-2 sm:gap-3">
-                                <p className="text-sm sm:text-base md:text-lg text-slate-800 font-semibold">Quantity</p>
-                                <Counter cartKey={cartKey} productId={productId} selectedColor={selectedColor} />
-                            </div>
-                        )
-                    }
+                    <div className="flex flex-col gap-2 sm:gap-3">
+                        <p className="text-sm sm:text-base md:text-lg text-slate-800 font-semibold">Quantity</p>
+                        <Counter cartKey={cartKey} productId={productId} selectedColor={selectedColor} />
+                    </div>
                     <button 
                         onClick={() => cartQuantity === 0 ? addToCartHandler() : router.push('/cart')} 
                         disabled={isAddingToCart}

@@ -48,20 +48,24 @@ export async function POST(request) {
 
     const imagesUrl = imageUrls;
 
-    const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        mrp,
-        price,
-        category,
-        availableColors: availableColors.length > 0 ? availableColors : [],
-        videoUrl: videoUrl || null,
-        images: imagesUrl,
-        quantity,
-        storeId: adminStore.id,
-      },
-    });
+    const createData = {
+      name,
+      description,
+      mrp,
+      price,
+      category,
+      videoUrl: videoUrl || null,
+      images: imagesUrl,
+      quantity,
+      storeId: adminStore.id,
+    }
+
+    if (availableColors && availableColors.length > 0) {
+      // only include availableColors when provided to avoid DB errors if column missing
+      createData.availableColors = availableColors
+    }
+
+    const product = await prisma.product.create({ data: createData });
 
     return NextResponse.json({ message: "product added successfully", product });
   } catch (error) {
@@ -103,20 +107,23 @@ export async function PATCH(request) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    const updated = await prisma.product.update({
-      where: { id: productId },
-      data: {
-        name: name ?? existing.name,
-        price: typeof price === 'number' ? price : existing.price,
-        mrp: typeof mrp === 'number' ? mrp : existing.mrp,
-        description: description ?? existing.description,
-        category: category ?? existing.category,
-        availableColors: Array.isArray(availableColors) ? availableColors.filter(Boolean) : existing.availableColors,
-        videoUrl: videoUrl !== undefined ? videoUrl : existing.videoUrl,
-        quantity: typeof quantity === 'number' ? quantity : existing.quantity,
-        inStock: typeof quantity === 'number' ? quantity > 0 : existing.inStock,
-      },
-    });
+    const updateData = {
+      name: name ?? existing.name,
+      price: typeof price === 'number' ? price : existing.price,
+      mrp: typeof mrp === 'number' ? mrp : existing.mrp,
+      description: description ?? existing.description,
+      category: category ?? existing.category,
+      videoUrl: videoUrl !== undefined ? videoUrl : existing.videoUrl,
+      quantity: typeof quantity === 'number' ? quantity : existing.quantity,
+      inStock: typeof quantity === 'number' ? quantity > 0 : existing.inStock,
+    }
+
+    if (availableColors !== undefined) {
+      // only attempt to update availableColors if it's provided in request
+      updateData.availableColors = Array.isArray(availableColors) ? availableColors.filter(Boolean) : existing.availableColors
+    }
+
+    const updated = await prisma.product.update({ where: { id: productId }, data: updateData });
 
     return NextResponse.json({ message: "product updated successfully", product: updated }, { status: 200 });
   } catch (error) {

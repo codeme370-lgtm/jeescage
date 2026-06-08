@@ -12,7 +12,7 @@ const Counter = ({ cartKey, productId, selectedColor = null }) => {
     const { user, isLoaded } = useAuth()
 
     const key = cartKey || getCartKey(productId, selectedColor)
-    const quantity = cartItems[key] ? (typeof cartItems[key] === 'number' ? cartItems[key] : cartItems[key].quantity) : 0
+    const quantity = cartItems[key] ? (typeof cartItems[key] === 'number' ? cartItems[key] : cartItems[key].quantity) : 1
 
     const addToCartHandler = () => {
         if (!isLoaded || !user) {
@@ -28,9 +28,13 @@ const Counter = ({ cartKey, productId, selectedColor = null }) => {
 
     return (
         <div className="inline-flex items-center gap-1 sm:gap-3 px-3 py-1 rounded border border-slate-200 max-sm:text-sm text-slate-600">
-            <button onClick={removeFromCartHandler} className="p-1 select-none">-</button>
+            <button
+                onClick={removeFromCartHandler}
+                disabled={quantity <= 0}
+                className={`p-1 select-none ${quantity <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-100 rounded'}`}
+            >-</button>
             <p className="p-1">{quantity}</p>
-            <button onClick={addToCartHandler} className="p-1 select-none">+</button>
+            <button onClick={addToCartHandler} className="p-1 select-none hover:bg-slate-100 rounded">+</button>
         </div>
     )
 }

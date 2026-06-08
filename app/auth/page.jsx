@@ -262,30 +262,6 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('google')}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
-                >
-                  Continue with Google
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('facebook')}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
-                >
-                  Continue with Facebook
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin('instagram')}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-50"
-                >
-                  Continue with Instagram
-                </button>
-              </div>
-
               <p className="mt-6 text-center text-sm text-slate-600">
                 {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
                 <button
