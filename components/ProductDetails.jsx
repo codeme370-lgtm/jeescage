@@ -374,7 +374,40 @@ const ProductDetails = ({ product }) => {
                 </div>
                 
                 <hr className="border-gray-300 my-6" />
-                
+
+                {/* Quantity and Add to Cart */}
+                <div className="flex flex-wrap items-end gap-2 sm:gap-3 md:gap-5 mb-4 sm:mb-6">
+                    <div className="flex flex-col gap-2 sm:gap-3">
+                        <p className="text-sm sm:text-base md:text-lg text-slate-800 font-semibold">Quantity</p>
+                        <Counter cartKey={cartKey} productId={productId} selectedColor={selectedColor} />
+                    </div>
+                    <button 
+                        onClick={() => cartQuantity === 0 ? addToCartHandler() : router.push('/cart')} 
+                        disabled={isAddingToCart}
+                        className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 md:px-10 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
+                            cartConfirmed 
+                                ? 'bg-green-500 text-white' 
+                                : cartQuantity === 0
+                                    ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:shadow-lg hover:from-slate-900 hover:to-black active:scale-95'
+                                    : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg active:scale-95'
+                        } ${isAddingToCart ? 'opacity-80' : ''}`}
+                    >
+                        {isAddingToCart ? (
+                            <>
+                                <Loader size={18} className="animate-spin" />
+                                Adding...
+                            </>
+                        ) : cartConfirmed ? (
+                            <>
+                                <Check size={18} />
+                                Added to Cart!
+                            </>
+                        ) : (
+                            cartQuantity === 0 ? 'Add to Cart' : 'View Cart'
+                        )}
+                    </button>
+                </div>
+
                 {/* Color Picker */}
                 {product.availableColors?.length > 0 && (
                     <div className="mb-4">
@@ -444,39 +477,6 @@ const ProductDetails = ({ product }) => {
                     </div>
                 )}
 
-                {/* Quantity and Add to Cart */}
-                <div className="flex flex-wrap items-end gap-2 sm:gap-3 md:gap-5 mb-4 sm:mb-6">
-                    <div className="flex flex-col gap-2 sm:gap-3">
-                        <p className="text-sm sm:text-base md:text-lg text-slate-800 font-semibold">Quantity</p>
-                        <Counter cartKey={cartKey} productId={productId} selectedColor={selectedColor} />
-                    </div>
-                    <button 
-                        onClick={() => cartQuantity === 0 ? addToCartHandler() : router.push('/cart')} 
-                        disabled={isAddingToCart}
-                        className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 md:px-10 py-2 sm:py-3 text-xs sm:text-sm md:text-base font-semibold rounded-lg transition-all duration-300 ${
-                            cartConfirmed 
-                                ? 'bg-green-500 text-white' 
-                                : cartQuantity === 0
-                                    ? 'bg-gradient-to-r from-slate-800 to-slate-900 text-white hover:shadow-lg hover:from-slate-900 hover:to-black active:scale-95'
-                                    : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:shadow-lg active:scale-95'
-                        } ${isAddingToCart ? 'opacity-80' : ''}`}
-                    >
-                        {isAddingToCart ? (
-                            <>
-                                <Loader size={18} className="animate-spin" />
-                                Adding...
-                            </>
-                        ) : cartConfirmed ? (
-                            <>
-                                <Check size={18} />
-                                Added to Cart!
-                            </>
-                        ) : (
-                            cartQuantity === 0 ? 'Add to Cart' : 'View Cart'
-                        )}
-                    </button>
-                </div>
-                
                 <hr className="border-gray-300 my-6" />
                 
                 {/* Trust Badges */}
