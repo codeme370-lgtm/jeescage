@@ -1,5 +1,5 @@
  'use client'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useSelector, useDispatch } from 'react-redux'
 import Image from 'next/image'
@@ -11,6 +11,7 @@ const PopularCategoriesSection = () => {
     const products = useSelector(state => state.product.list)
     const dbCategories = useSelector(state => state.category.list)
     const dispatch = useDispatch()
+    const [scrollPosition, setScrollPosition] = useState(0)
 
     useEffect(() => {
         // If categories or products are missing, fetch them
@@ -53,6 +54,37 @@ const PopularCategoriesSection = () => {
         { bg: 'bg-green-600', gradient: 'from-green-500 to-green-700', text: 'text-white' },
     ]
 
+    // Continuous scroll animation
+    useEffect(() => {
+        if (categories.length === 0) return
+
+        let animationFrameId
+        let currentScroll = 0
+        const scrollContainer = document.getElementById('categories-scroll-container')
+        
+        if (!scrollContainer) return
+
+        const totalWidth = scrollContainer.scrollWidth
+        const containerWidth = scrollContainer.clientWidth
+        const scrollableWidth = totalWidth - containerWidth
+
+        const animate = () => {
+            currentScroll += 0.3 // Smooth continuous scroll
+            
+            if (currentScroll > scrollableWidth) {
+                currentScroll = 0 // Loop back to start
+            }
+            
+            scrollContainer.scrollLeft = currentScroll
+            setScrollPosition(currentScroll)
+            animationFrameId = requestAnimationFrame(animate)
+        }
+
+        animationFrameId = requestAnimationFrame(animate)
+
+        return () => cancelAnimationFrame(animationFrameId)
+    }, [categories])
+
     return (
         <div className='w-full bg-gray-50 py-6 sm:py-8 px-2 sm:px-4 md:px-8'>
             <div className='max-w-7xl mx-auto'>
@@ -63,15 +95,54 @@ const PopularCategoriesSection = () => {
                     </Link>
                 </div>
                 
-                <div className='overflow-x-auto no-scrollbar -mx-2 px-2 sm:-mx-4 sm:px-4'>
-                    <div className='flex gap-2 sm:gap-3 md:gap-4 min-w-max'>
+                <div 
+                    id="categories-scroll-container"
+                    className='overflow-x-hidden no-scrollbar'
+                    style={{ scrollBehavior: 'auto' }}
+                >
+                    <div className='flex gap-2 sm:gap-3 md:gap-4'>
+                        {/* Original categories */}
                         {categories.map((category, idx) => {
                             const color = colors[idx % colors.length]
                             const productImage = category.products?.[0]?.images?.[0]
                             
                             return (
-                                <Link key={idx} href={`/category/${encodeURIComponent(category.name)}`}>
-                                    <div className='relative bg-white border border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transform hover:scale-105 transition-all duration-200 h-28 sm:h-40 md:h-48 min-w-[180px] md:min-w-[220px] flex flex-col items-center justify-center'>
+                                <Link key={`${category.name}-${idx}`} href={`/category/${encodeURIComponent(category.name)}`}>
+                                    <div className='relative bg-white border border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transform hover:scale-105 transition-all duration-200 h-28 sm:h-40 md:h-48 min-w-[180px] md:min-w-[220px] flex flex-col items-center justify-center flex-shrink-0'>
+                                        {/* Background product image with low opacity */}
+                                        {productImage && (
+                                            <Image
+                                                src={productImage}
+                                                alt={category.name}
+                                                fill
+                                                className='object-cover opacity-20 absolute inset-0'
+                                            />
+                                        )}
+
+                                        <div className='absolute inset-0 bg-slate-50/60'></div>
+
+                                        {/* Content overlay */}
+                                        <div className='relative z-10 text-center px-2 sm:px-4'>
+                                            <h3 className='font-bold text-sm sm:text-base md:text-lg line-clamp-2 mb-1 text-slate-900'>
+                                                {category.name}
+                                            </h3>
+                                            <p className='text-sm sm:text-base text-slate-700 font-semibold'>
+                                                {category.count} products
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+
+                        {/* Duplicate categories for seamless loop */}
+                        {categories.map((category, idx) => {
+                            const color = colors[idx % colors.length]
+                            const productImage = category.products?.[0]?.images?.[0]
+                            
+                            return (
+                                <Link key={`${category.name}-duplicate-${idx}`} href={`/category/${encodeURIComponent(category.name)}`}>
+                                    <div className='relative bg-white border border-slate-200 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transform hover:scale-105 transition-all duration-200 h-28 sm:h-40 md:h-48 min-w-[180px] md:min-w-[220px] flex flex-col items-center justify-center flex-shrink-0'>
                                         {/* Background product image with low opacity */}
                                         {productImage && (
                                             <Image

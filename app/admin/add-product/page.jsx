@@ -64,6 +64,7 @@ export default function AdminAddProduct() {
     quantity: 0,
     availableColors: [],
   })
+  const [showColors, setShowColors] = useState(false)
   const [loading, setLoading] = useState(false)
   const [aiUsed, setAiUsed] = useState(false)
 
@@ -241,16 +242,49 @@ export default function AdminAddProduct() {
                 </section>
 
                 <section className="rounded-3xl border border-slate-200 bg-slate-50/70 p-6 shadow-sm transition-transform duration-300 hover:-translate-y-1">
-                  <h2 className="text-lg font-semibold text-slate-900 mb-4">Available Colors</h2>
-                  <div className="grid grid-cols-6 gap-3">
-                    {colorPalette.map((c) => {
-                      const selected = productInfo.availableColors.includes(c.name)
-                      return (
-                        <button type="button" key={c.name} onClick={() => toggleColor(c.name)} className={`flex h-10 w-10 items-center justify-center rounded-full border ${selected ? 'ring-2 ring-offset-1 ring-slate-900' : 'border-slate-200'}`} style={{ background: c.hex }} aria-label={c.name} />
-                      )
-                    })}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <h2 className="text-lg font-semibold text-slate-900">Available Colors</h2>
+                        <p className="text-sm text-slate-500">Optional field. Customers only need to select a color when you provide options.</p>
+                      </div>
+                      <label className="inline-flex items-center gap-2 text-sm font-medium text-slate-700">
+                        <input
+                          type="checkbox"
+                          checked={showColors}
+                          onChange={() => {
+                            const next = !showColors
+                            setShowColors(next)
+                            if (!next) setProductInfo((prev) => ({ ...prev, availableColors: [] }))
+                          }}
+                          className="h-4 w-4 rounded border-slate-300 text-slate-900"
+                        />
+                        Add color options
+                      </label>
+                    </div>
+                    {showColors ? (
+                      <>
+                        <div className="grid grid-cols-6 gap-3">
+                          {colorPalette.map((c) => {
+                            const selected = productInfo.availableColors.includes(c.name)
+                            return (
+                              <button
+                                type="button"
+                                key={c.name}
+                                onClick={() => toggleColor(c.name)}
+                                className={`flex h-10 w-10 items-center justify-center rounded-full border ${selected ? 'ring-2 ring-offset-1 ring-slate-900' : 'border-slate-200'}`}
+                                style={{ background: c.hex }}
+                                aria-label={c.name}
+                              />
+                            )
+                          })}
+                        </div>
+                        <p className="mt-3 text-sm text-slate-500">Select one or more colors that buyers can choose from.</p>
+                      </>
+                    ) : (
+                      <p className="mt-3 text-sm text-slate-500">Color options are disabled for this product. Buyers can purchase without choosing a color.</p>
+                    )}
                   </div>
-                  <p className="mt-3 text-sm text-slate-500">Select one or more colors that buyers can choose from.</p>
                 </section>
 
                 <section className="rounded-3xl border border-slate-200 bg-slate-50/70 p-6 shadow-sm transition-transform duration-300 hover:-translate-y-1">

@@ -25,27 +25,46 @@ export default function Cart() {
 
     const createCartArray = () => {
         setTotalPrice(0);
-        const cartArray = [];
+        const cartMap = {};
+        
+        // Group cart items by productId
         for (const [key, value] of Object.entries(cartItems)) {
             const cartItem = typeof value === 'number'
-                ? { productId: key, quantity: value, selectedColor: null, cartKey: key }
-                : { ...value, cartKey: key, quantity: value.quantity || 0, selectedColor: value.selectedColor || null };
+                ? { productId: key, quantity: value, selectedColor: null }
+                : { productId: value.productId || key.split('|')[0], quantity: value.quantity || 0, selectedColor: value.selectedColor || null };
+            
             const product = products.find(product => product.id === cartItem.productId);
             if (product) {
-                cartArray.push({
-                    ...product,
-                    quantity: cartItem.quantity,
-                    selectedColor: cartItem.selectedColor,
-                    cartKey: cartItem.cartKey,
-                });
-                setTotalPrice(prev => prev + product.price * cartItem.quantity);
+                if (!cartMap[product.id]) {
+                    cartMap[product.id] = {
+                        ...product,
+                        colorGroups: {}, // { colorName: quantity }
+                        totalQuantity: 0,
+                    };
+                }
+                
+                const colorKey = cartItem.selectedColor || 'no-color';
+                cartMap[product.id].colorGroups[colorKey] = (cartMap[product.id].colorGroups[colorKey] || 0) + cartItem.quantity;
+                cartMap[product.id].totalQuantity += cartItem.quantity;
             }
         }
+        
+        const cartArray = Object.values(cartMap);
+        cartArray.forEach(item => {
+            setTotalPrice(prev => prev + item.price * item.totalQuantity);
+        });
         setCartArray(cartArray);
     }
 
-    const handleDeleteItemFromCart = (cartKey) => {
-        dispatch(deleteItemFromCart({ cartKey }))
+    const handleDeleteItemFromCart = (productId) => {
+        // Delete all cart entries (all colors) for this product
+        for (const [key] of Object.entries(cartItems)) {
+            const keyParts = key.split('|');
+            const id = keyParts[0];
+            if (id === productId) {
+                dispatch(deleteItemFromCart({ cartKey: key }));
+            }
+        }
     }
 
     useEffect(() => {
@@ -85,18 +104,25 @@ export default function Cart() {
                                                     <Image src={item.images[0]} className="h-14 w-auto" alt={item?.name ? `${item.name} thumbnail` : 'Product thumbnail'} width={45} height={45} />
                                                 </div>
                                                 <div>
-                                                    <p className="max-sm:text-sm">{item.name}</p>
+                                                    <p className="max-sm:text-sm font-medium">{item.name}</p>
                                                     <p className="text-xs text-slate-500">{item.category}</p>
-                                                    {item.selectedColor && <p className="text-xs text-slate-500">Color: {item.selectedColor}</p>}
-                                                    <p>{currency}{item.price}</p>
+                                                    {Object.keys(item.colorGroups).length > 0 && (
+                                                        <p className="text-xs text-slate-600 mt-1">
+                                                            {Object.entries(item.colorGroups)
+                                                                .filter(([color]) => color !== 'no-color')
+                                                                .map(([color, qty]) => `${color}:${qty}`)
+                                                                .join(' ')}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-sm font-medium mt-1">{currency}{item.price}</p>
                                                 </div>
                                             </td>
                                             <td className="text-center">
-                                                <Counter cartKey={item.cartKey} productId={item.id} selectedColor={item.selectedColor} />
+                                                <p className="font-medium">{item.totalQuantity}</p>
                                             </td>
-                                            <td className="text-center">{currency}{(item.price * item.quantity).toLocaleString()}</td>
+                                            <td className="text-center">{currency}{(item.price * item.totalQuantity).toLocaleString()}</td>
                                             <td className="text-center max-md:hidden">
-                                                <button onClick={() => handleDeleteItemFromCart(item.cartKey)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
+                                                <button onClick={() => handleDeleteItemFromCart(item.id)} className=" text-red-500 hover:bg-red-50 p-2.5 rounded-full active:scale-95 transition-all">
                                                     <Trash2Icon size={18} />
                                                 </button>
                                             </td>

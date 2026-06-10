@@ -173,6 +173,9 @@ const ProductDetails = ({ product }) => {
 
     useEffect(() => {
         setSelectedColor(product?.availableColors?.[0] || null)
+        if (!product?.availableColors?.length) {
+            setSelectedColors([])
+        }
     }, [product?.availableColors])
 
     useEffect(() => {

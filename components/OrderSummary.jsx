@@ -75,12 +75,28 @@ const OrderSummary = ({ totalPrice, items }) => {
                         }
                         //suppose the user is available and address is selected
                         const token = await getToken();
-                            // normalize items to what the API expects
-                            const normalizedItems = items.map(i => ({
-                                productId: i.id || i.productId,
-                                quantity: i.quantity || 1,
-                                selectedColor: i.selectedColor || null,
-                            }))
+                            // normalize items to what the API expects, expanding color groups
+                            const normalizedItems = [];
+                            items.forEach(i => {
+                                const productId = i.id || i.productId;
+                                // Expand color groups into individual items
+                                if (i.colorGroups && Object.keys(i.colorGroups).length > 0) {
+                                    Object.entries(i.colorGroups).forEach(([color, qty]) => {
+                                        normalizedItems.push({
+                                            productId,
+                                            quantity: qty,
+                                            selectedColor: color === 'no-color' ? null : color,
+                                        });
+                                    });
+                                } else {
+                                    // Fallback for items without color groups (shouldn't happen but safe)
+                                    normalizedItems.push({
+                                        productId,
+                                        quantity: i.totalQuantity || i.quantity || 1,
+                                        selectedColor: null,
+                                    });
+                                }
+                            })
                             const orderData = {
                                 items: normalizedItems,
                                 // enforce PAYSTACK on server

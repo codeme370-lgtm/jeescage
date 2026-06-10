@@ -19,6 +19,8 @@ export default function AdminOrders() {
     const [deliveryHours, setDeliveryHours] = useState(24)
     const [deliveryMessage, setDeliveryMessage] = useState('')
     const [sendingSms, setSendingSms] = useState(false)
+    const [expandedProducts, setExpandedProducts] = useState({})
+    const [selectedProductModal, setSelectedProductModal] = useState(null)
 
     const fetchOrders = async () => {
        try {
@@ -164,18 +166,18 @@ export default function AdminOrders() {
                     <table className="w-full text-sm text-left text-gray-600">
                         <thead className="bg-gray-50 text-gray-700 text-xs uppercase tracking-wider">
                             <tr>
-                                {["Sr. No.", "Customer", "Address", "Total", "Payment", "Coupon", "Status", "Date"].map((heading, i) => (
+                                {["Sr. No.", "Customer", "Product", "Qty", "Unit Price", "Total", "Colors", "Status", "Payment", "Date"].map((heading, i) => (
                                     <th key={i} className="px-4 py-3">{heading}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {orders.map((order, index) => {
+                            {orders.flatMap((order, index) => {
                                 const orderAlert = getAlertForOrder(order.id)
                                 const hasUnreadChange = !!orderAlert
-                                return (
+                                return order.orderItems.map((item, itemIndex) => (
                                 <tr
-                                    key={order.id}
+                                    key={`${order.id}-${itemIndex}`}
                                     className={`transition-colors duration-150 cursor-pointer ${hasUnreadChange ? 'bg-yellow-50 hover:bg-yellow-100' : 'hover:bg-gray-50'}`}
                                     onClick={() => {
                                         openModal(order)
@@ -184,52 +186,70 @@ export default function AdminOrders() {
                                         }
                                     }}
                                 >
-                                    <td className="pl-6 text-red-600 relative" >
-                                        <div className="flex items-center gap-2">
-                                            <span>{index + 1}</span>
-                                            {hasUnreadChange && (
-                                                <span className="inline-flex items-center gap-1 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full font-medium" title="Address changed">
-                                                    <AlertCircle size={12} />
-                                                    Changed
-                                                </span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">{order.user?.name}</td>
+                                    {itemIndex === 0 && (
+                                        <td rowSpan={order.orderItems.length} className="pl-6 text-red-600 relative" >
+                                            <div className="flex items-center gap-2">
+                                                <span>{index + 1}</span>
+                                                {hasUnreadChange && (
+                                                    <span className="inline-flex items-center gap-1 text-xs bg-yellow-200 text-yellow-800 px-2 py-1 rounded-full font-medium" title="Address changed">
+                                                        <AlertCircle size={12} />
+                                                        Changed
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    )}
+                                    {itemIndex === 0 && (
+                                        <td rowSpan={order.orderItems.length} className="px-4 py-3">{order.user?.name}</td>
+                                    )}
                                     <td className="px-4 py-3 text-sm">
                                         <div className="flex items-center gap-2">
-                                            <span>{`${order.address?.street || ''}, ${order.address?.city || ''}, ${order.address?.state || ''}`.slice(0, 40)}{(`${order.address?.street || ''}${order.address?.city || ''}${order.address?.state || ''}`).length > 40 ? '...' : ''}</span>
-                                            <button onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setShowAddrModal(true); if (orderAlert) markAlertAsRead(orderAlert.id); }} className="text-xs text-blue-500 hover:underline whitespace-nowrap">View</button>
+                                            <span className="font-medium text-slate-700 truncate max-w-[150px]">{item.product?.name}</span>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    setSelectedProductModal(item.product)
+                                                }}
+                                                className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs hover:bg-blue-200 transition flex-shrink-0"
+                                            >
+                                                View
+                                            </button>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-3 font-medium text-slate-800">GHS {order.total}</td>
-                                    <td className="px-4 py-3">{order.paymentMethod}</td>
-                                    <td className="px-4 py-3">
-                                        {order.isCouponUsed ? (
-                                            <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full">
-                                                {order.coupon?.code}
-                                            </span>
+                                    <td className="px-4 py-3 text-center">{item.quantity}</td>
+                                    <td className="px-4 py-3">GHS {item.price}</td>
+                                    <td className="px-4 py-3 font-medium">GHS {item.price * item.quantity}</td>
+                                    <td className="px-4 py-3 text-sm">
+                                        {item.selectedColor ? (
+                                            <span className="bg-slate-200 text-slate-800 px-2 py-1 rounded text-xs font-medium">{item.selectedColor}</span>
                                         ) : (
-                                            "—"
+                                            <span className="text-slate-400">—</span>
                                         )}
                                     </td>
-                                    <td className="px-4 py-3" onClick={(e) => { e.stopPropagation() }}>
-                                        <select
-                                            value={order.status}
-                                            onChange={e => updateOrderStatus(order.id, e.target.value)}
-                                            className="border-gray-300 rounded-md text-sm focus:ring focus:ring-blue-200"
-                                        >
-                                            <option value="ORDER_PLACED">ORDER_PLACED</option>
-                                            <option value="PROCESSING">PROCESSING</option>
-                                            <option value="SHIPPED">SHIPPED</option>
-                                            <option value="DELIVERED">DELIVERED</option>
-                                        </select>
-                                    </td>
-                                    <td className="px-4 py-3 text-gray-500">
-                                        {new Date(order.createdAt).toLocaleString()}
-                                    </td>
+                                    {itemIndex === 0 && (
+                                        <td rowSpan={order.orderItems.length} className="px-4 py-3" onClick={(e) => { e.stopPropagation() }}>
+                                            <select
+                                                value={order.status}
+                                                onChange={e => updateOrderStatus(order.id, e.target.value)}
+                                                className="border-gray-300 rounded-md text-sm focus:ring focus:ring-blue-200"
+                                            >
+                                                <option value="ORDER_PLACED">ORDER_PLACED</option>
+                                                <option value="PROCESSING">PROCESSING</option>
+                                                <option value="SHIPPED">SHIPPED</option>
+                                                <option value="DELIVERED">DELIVERED</option>
+                                            </select>
+                                        </td>
+                                    )}
+                                    {itemIndex === 0 && (
+                                        <td rowSpan={order.orderItems.length} className="px-4 py-3">{order.paymentMethod}</td>
+                                    )}
+                                    {itemIndex === 0 && (
+                                        <td rowSpan={order.orderItems.length} className="px-4 py-3 text-gray-500">
+                                            {new Date(order.createdAt).toLocaleString()}
+                                        </td>
+                                    )}
                                 </tr>
-                                )
+                                ))
                             })}
                         </tbody>
                     </table>
@@ -338,6 +358,90 @@ export default function AdminOrders() {
             )}
             {showAddrModal && selectedOrder && (
                 <AddressViewModal address={selectedOrder.address} onClose={() => setShowAddrModal(false)} orderId={selectedOrder.id} orderStatus={selectedOrder.status} />
+            )}
+
+            {/* Product Details Modal */}
+            {selectedProductModal && (
+                <div onClick={() => setSelectedProductModal(null)} className="fixed inset-0 flex items-center justify-center bg-black/50 text-slate-700 text-sm backdrop-blur-xs z-50">
+                    <div onClick={e => e.stopPropagation()} className="bg-white rounded-lg shadow-lg max-w-2xl w-full p-6 relative max-h-[80vh] overflow-y-auto">
+                        <button
+                            onClick={() => setSelectedProductModal(null)}
+                            className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                        >
+                            <X size={24} />
+                        </button>
+
+                        <h2 className="text-2xl font-semibold text-slate-900 mb-4">{selectedProductModal.name}</h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Product Images */}
+                            <div>
+                                {selectedProductModal.images && selectedProductModal.images.length > 0 && (
+                                    <div className="space-y-2">
+                                        {selectedProductModal.images.map((img, idx) => (
+                                            <img
+                                                key={idx}
+                                                src={img}
+                                                alt={`${selectedProductModal.name} ${idx + 1}`}
+                                                className="w-full h-auto rounded-lg object-cover"
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Product Details */}
+                            <div>
+                                <p className="text-lg font-semibold text-slate-900 mb-2">
+                                    Description
+                                </p>
+                                <p className="text-slate-700 mb-6">{selectedProductModal.description}</p>
+
+                                <div className="space-y-3 mb-6">
+                                    <div>
+                                        <p className="text-sm text-slate-600">Price</p>
+                                        <p className="text-xl font-semibold text-slate-900">GHS {selectedProductModal.price}</p>
+                                    </div>
+                                    {selectedProductModal.mrp && (
+                                        <div>
+                                            <p className="text-sm text-slate-600">MRP</p>
+                                            <p className="text-lg line-through text-slate-500">GHS {selectedProductModal.mrp}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <p className="text-sm text-slate-600">Category</p>
+                                        <p className="text-slate-900">{selectedProductModal.category}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm text-slate-600">Stock</p>
+                                        <p className={`${selectedProductModal.inStock ? 'text-green-600' : 'text-red-600'} font-semibold`}>
+                                            {selectedProductModal.inStock ? 'In Stock' : 'Out of Stock'} ({selectedProductModal.quantity} available)
+                                        </p>
+                                    </div>
+                                    {selectedProductModal.availableColors && selectedProductModal.availableColors.length > 0 && (
+                                        <div>
+                                            <p className="text-sm text-slate-600 mb-2">Available Colors</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedProductModal.availableColors.map((color, idx) => (
+                                                    <span key={idx} className="bg-slate-200 text-slate-800 px-2 py-1 rounded text-xs">
+                                                        {color}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <button
+                                    onClick={() => setSelectedProductModal(null)}
+                                    className="w-full px-4 py-2 bg-slate-200 rounded hover:bg-slate-300 transition"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             )}
         </>
     )

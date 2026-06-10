@@ -7,6 +7,7 @@ import PopularCategoriesSection from "@/components/PopularCategoriesSection";
 import BestSellersSection from "@/components/BestSellersSection";
 import TopRatedSection from "@/components/TopRatedSection";
 import WhyShopWithUsSection from "@/components/WhyShopWithUsSection";
+import VideoCarousel from "@/components/VideoCarousel";
 
 export default function Home() {
     return (
@@ -35,6 +36,9 @@ export default function Home() {
 
             {/* Why Shop With Us - White background with borders */}
             <WhyShopWithUsSection />
+
+            {/* Video Carousel - Featured Videos */}
+            <VideoCarousel />
         </div>
     );
 }
