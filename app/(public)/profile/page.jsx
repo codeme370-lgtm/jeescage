@@ -182,7 +182,7 @@ export default function ProfilePage() {
               <Link href="/profile" className="block rounded-3xl bg-slate-100 px-4 py-4 text-slate-900 shadow-sm transition hover:bg-slate-200">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-700 font-semibold">
-                    {getInitials(user.fullName || user.name)}
+                    {user ? getInitials(user.fullName || user.name) : 'U'}
                   </div>
                   <div>
                     <p className="text-sm font-semibold">My Profile</p>
