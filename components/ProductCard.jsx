@@ -10,6 +10,7 @@ import { addToWishlist, removeFromWishlist } from '@/lib/features/wishlist/wishl
 import { useAuth } from "@/context/AuthContext"
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { useInViewAnimation } from '@/hooks/useInViewAnimation'
 
 const ProductCard = ({ product, hideAddToCart = false }) => {
 
@@ -22,6 +23,9 @@ const ProductCard = ({ product, hideAddToCart = false }) => {
     const cart = useSelector(state => state.cart.cartItems)
     const wishlistItems = useSelector(state => state.wishlist.wishlistItems)
     const isInWishlist = wishlistItems[product.id]
+    
+    // Animation on scroll
+    const { ref, isInView } = useInViewAnimation()
 
     // calculate the average rating of the product
     const rating = product.rating && product.rating.length > 0 
@@ -75,7 +79,7 @@ const ProductCard = ({ product, hideAddToCart = false }) => {
 
     return (
         <Link href={`/product/${product.id}`} className='group max-xl:mx-auto block'>
-            <div className='relative'>
+            <div ref={ref} className={`relative transition-all duration-700 ${isInView ? 'animate-fadeInUp' : 'opacity-0 translate-y-8'}`}>
                 {/* Product Image */}
                 <div className='bg-gradient-to-br from-slate-100 to-slate-50 h-32 sm:h-44 md:h-56 lg:h-64 w-full rounded-lg flex items-center justify-center overflow-hidden shadow-md group-hover:shadow-xl transition-shadow duration-300 relative'>
                     <Image 

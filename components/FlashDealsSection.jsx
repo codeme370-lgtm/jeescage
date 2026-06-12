@@ -6,6 +6,7 @@ import ProductCard from './ProductCard'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useSidebar } from '@/context/SidebarContext'
+import { useInViewAnimation } from '@/hooks/useInViewAnimation'
 
 const FlashDealsSection = () => {
     const { sidebarOpen } = useSidebar()
@@ -14,6 +15,10 @@ const FlashDealsSection = () => {
     const [timeLeft, setTimeLeft] = useState({ hours: 2, minutes: 15, seconds: 22 })
     const [scrollPos, setScrollPos] = useState(0)
     const [greeting, setGreeting] = useState('')
+    
+    // Animation on scroll
+    const { ref: headerRef, isInView: headerInView } = useInViewAnimation()
+    const { ref: gridRef, isInView: gridInView } = useInViewAnimation()
 
     // Get greeting based on time of day
     useEffect(() => {
@@ -86,7 +91,7 @@ const FlashDealsSection = () => {
         <div className='w-full bg-white py-6 sm:py-8 px-2 sm:px-4 md:px-8'>
             <div className='max-w-7xl mx-auto'>
                 {/* Header - All in one line */}
-                <div className='flex flex-wrap items-center justify-between gap-1 sm:gap-1.5 mb-2 sm:mb-3'>
+                <div ref={headerRef} className={`flex flex-wrap items-center justify-between gap-1 sm:gap-1.5 mb-2 sm:mb-3 transition-all duration-700 ${headerInView ? 'animate-fadeInDown' : 'opacity-0 -translate-y-4'}`}>
                     {/* Greeting */}
                     <div className='text-xs sm:text-sm md:text-base font-semibold text-gray-700'>
                         {greeting} {user?.firstName && <span className='text-amber-700 font-bold'>{user.firstName}</span>}
@@ -114,7 +119,7 @@ const FlashDealsSection = () => {
                 </div>
 
                 {/* Grid layout for flash deals - responsive */}
-                <div className={`grid gap-2 sm:gap-3 md:gap-4 ${sidebarOpen ? 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4' : 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'}`}>
+                <div ref={gridRef} className={`grid gap-2 sm:gap-3 md:gap-4 transition-all duration-700 ${gridInView ? 'animate-fadeInUp' : 'opacity-0 translate-y-8'} ${sidebarOpen ? 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4' : 'grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5'}`}>
                     {flashProducts.map((product, idx) => (
                         <div key={product.id || idx} className='group relative'>
                             {/* Discount badge */}

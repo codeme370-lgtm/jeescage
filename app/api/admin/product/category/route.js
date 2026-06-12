@@ -24,18 +24,19 @@ export async function POST(request) {
     const { name } = body;
     if (!name) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    // defensive check: surface clearer error if prisma or model is missing
-    if (!prisma) {
-      console.error('POST /api/admin/product/category: prisma is undefined');
-      return NextResponse.json({ error: 'Database client not initialized' }, { status: 500 });
+    
+    // Check if category already exists
+    const existingCategory = await prisma.category.findUnique({
+      where: { name }
+    });
+    
+    if (existingCategory) {
+      return NextResponse.json(
+        { error: 'Category with this name already exists', category: existingCategory },
+        { status: 409 }
+      );
     }
-    if (!prisma.category || typeof prisma.category.create !== 'function') {
-      console.error('POST /api/admin/product/category: prisma.category.create is not available', {
-        prismaKeys: Object.keys(prisma),
-        categoryProp: prisma.category,
-      });
-      return NextResponse.json({ error: 'Database model unavailable' }, { status: 500 });
-    }
+    
     const created = await prisma.category.create({ data: { name, slug } });
     return NextResponse.json({ category: created }, { status: 201 });
   } catch (error) {

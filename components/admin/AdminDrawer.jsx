@@ -2,17 +2,19 @@
 import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag, BarChart3, Users } from 'lucide-react'
+import { X, Home, Store, ShieldCheck, TicketPercent, ShoppingBag, BarChart3, Users, Plus, PenTool, List } from 'lucide-react'
 
 const AdminDrawer = ({ open, onClose, userImage, userName }) => {
     const drawerLinks = [
         { name: 'Dashboard', href: '/admin', icon: Home, color: '#0ea5e9' },
         { name: 'Profile', href: '/admin/profile', icon: Users, color: '#7c3aed' },
+        { name: 'Add Product', href: '/admin/add-product', icon: Plus, color: '#22c55e' },
+        { name: 'Manage Products', href: '/admin/manage-product', icon: PenTool, color: '#8b5cf6' },
+        { name: 'Orders', href: '/admin/orders', icon: List, color: '#f97316' },
+        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent, color: '#ef4444' },
         { name: 'Analytics', href: '/admin/analytics', icon: BarChart3, color: '#06b6d4' },
         { name: 'Analytics Charts', href: '/admin/analytics-charts', icon: BarChart3, color: '#d946ef' },
         { name: 'Customers', href: '/admin/customers', icon: Users, color: '#f59e0b' },
-        { name: 'Coupons', href: '/admin/coupons', icon: TicketPercent, color: '#ef4444' },
-        { name: 'Back to Shop', href: '/shop', icon: ShoppingBag, color: '#10b981' },
     ]
 
     return (
@@ -26,7 +28,7 @@ const AdminDrawer = ({ open, onClose, userImage, userName }) => {
 
             {/* Drawer panel (left side) */}
             <aside 
-                className={`fixed top-0 left-0 h-full w-80 sm:w-96 md:hidden bg-white shadow-2xl transform transition-transform duration-300 backdrop-blur-sm ${open ? 'translate-x-0' : '-translate-x-full'}`} 
+                className={`fixed top-0 left-0 h-full w-72 sm:w-80 md:hidden bg-white shadow-2xl transform transition-transform duration-300 backdrop-blur-sm ${open ? 'translate-x-0' : '-translate-x-full'}`} 
                 aria-hidden={!open} 
                 style={{ zIndex: 50 }}
             >

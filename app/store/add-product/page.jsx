@@ -256,9 +256,13 @@ export default function StoreAddProduct() {
                         setCategories(prev => [data.category.name, ...prev])
                         setProductInfo(prev => ({ ...prev, category: data.category.name }))
                         setNewCategoryName('')
-                        toast.success('Category created')
+                        toast.success('Category created successfully')
                     }catch(err){
-                        toast.error(err?.response?.data?.error || err.message)
+                        if (err.response?.status === 409) {
+                            toast.error(`Category "${newCategoryName}" already exists`)
+                        } else {
+                            toast.error(err?.response?.data?.error || err.message)
+                        }
                     }
                 }} className="bg-slate-800 text-white px-3 py-2 rounded">Create Category</button>
 

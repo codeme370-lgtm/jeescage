@@ -49,9 +49,9 @@ fetchIsAdmin()
         <div className="flex flex-col h-screen">
             <AdminNavbar onMenuClick={() => setDrawerOpen(true)} />
             <AdminDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} userImage={user?.imageUrl} userName={user?.fullName} />
-            <div className="flex flex-1 items-start h-full overflow-y-scroll no-scrollbar">
+            <div className="flex flex-1 items-start h-full overflow-y-auto no-scrollbar">
                 <AdminSidebar />
-                <div className="flex-1 h-full p-5 lg:pl-12 lg:pt-12 overflow-y-scroll">
+                <div className="flex-1 h-full p-3 sm:p-4 md:p-5 md:pl-6 lg:pl-12 lg:pt-12 overflow-y-auto">
                     {children}
                 </div>
             </div>
