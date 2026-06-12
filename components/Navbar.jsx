@@ -64,8 +64,8 @@ const Navbar = () => {
             <div className="w-full px-2 sm:px-4 lg:px-8">
                 <div className="flex items-center justify-between gap-1 sm:gap-3 lg:gap-6 py-2.5 sm:py-3 max-w-full">
                     
-                    {/* Left: Hamburger + Logo */}
-                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 min-w-0">
+                    {/* Left: Hamburger + Logo + Mobile Cart & Profile Icons */}
+                    <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 min-w-0">
                         <button 
                             aria-label="Open menu" 
                             onClick={() => setDrawerOpen(true)} 
@@ -75,6 +75,39 @@ const Navbar = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                             </svg>
                         </button>
+
+                        {/* Mobile Cart Icon - visible only on mobile */}
+                        <Link 
+                            href="/cart"
+                            className="relative sm:hidden flex items-center justify-center text-gray-700 hover:text-orange-600 p-1.5 flex-shrink-0"
+                            title="Cart"
+                        >
+                            <ShoppingCart size={20} />
+                            {cartCount > 0 && (
+                                <span className={`absolute -top-0.5 -right-0.5 text-[8px] text-white bg-red-600 w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-lg ${cartPulse ? 'cart-badge-pulse' : 'cart-badge-bounce'}`}>
+                                    {cartCount}
+                                </span>
+                            )}
+                        </Link>
+
+                        {/* Mobile Profile Icon - visible only on mobile */}
+                        <div className="sm:hidden flex items-center justify-center">
+                            {user ? (
+                                <Link href="/profile" className="flex items-center justify-center p-1.5 rounded-full hover:bg-gray-100 transition-all" title="Profile">
+                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">
+                                        {getInitials(user.fullName || user.name)}
+                                    </div>
+                                </Link>
+                            ) : (
+                                <button 
+                                    onClick={handleOpenSignIn}
+                                    className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-xs font-semibold transition-all flex-shrink-0 whitespace-nowrap"
+                                    title="Login"
+                                >
+                                    Login
+                                </button>
+                            )}
+                        </div>
                         
                         <Link href="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0 min-w-0">
                             <div className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-red-600 shadow hidden sm:flex items-center justify-center flex-shrink-0">
@@ -187,7 +220,7 @@ const Navbar = () => {
                             )}
                         </Link>
 
-                        {/* Cart - hidden on mobile */}
+                        {/* Cart - hidden on mobile, visible from sm and up */}
                         <Link 
                             href="/cart"
                             className="relative hidden sm:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-orange-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
@@ -202,8 +235,8 @@ const Navbar = () => {
                             )}
                         </Link>
 
-                        {/* User Profile / Login */}
-                        <div className="flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
+                        {/* User Profile / Login - hidden on mobile, visible from sm and up */}
+                        <div className="hidden sm:flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
                             {user ? (
                                 <Link href="/profile" className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all">
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">

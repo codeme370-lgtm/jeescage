@@ -119,7 +119,7 @@ const FlashDealsSection = () => {
                 </div>
 
                 {/* Grid layout for flash deals - responsive */}
-                <div ref={gridRef} className={`grid gap-2 sm:gap-3 md:gap-4 transition-all duration-700 ${gridInView ? 'animate-fadeInUp' : 'opacity-0 translate-y-8'} ${sidebarOpen ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'}`}
+                <div ref={gridRef} className={`grid gap-2 sm:gap-3 md:gap-4 transition-all duration-700 ${gridInView ? 'animate-fadeInUp' : 'opacity-0 translate-y-8'} ${sidebarOpen ? 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5'}`}>
                     {flashProducts.map((product, idx) => (
                         <div key={product.id || idx} className='group relative'>
                             {/* Discount badge */}
