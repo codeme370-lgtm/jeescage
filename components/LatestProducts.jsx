@@ -36,7 +36,7 @@ const LatestProducts = () => {
                             <div className='h-8 w-1 bg-gradient-to-b from-green-600 to-green-400 rounded-full'></div>
                             <h3 className='text-3xl font-bold bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent capitalize'>{categoryGroup.category}</h3>
                         </div>
-                        <div className={`grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5`}>
+                        <div className={`grid gap-3 sm:gap-4 lg:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5`}>
                             {categoryGroup.products.map((product, productIndex) => (
                                 <div key={productIndex} className='transform transition-all duration-300 hover:scale-105'>
                                     <ProductCard product={product} />
