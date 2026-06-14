@@ -77,7 +77,6 @@ export async function POST(request) {
     cloudinaryFormData.append("folder", "jeeshop/products");
 
     // Determine upload endpoint based on file type
-    const isVideo = file.type.startsWith('video/');
     const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
 
     try {
