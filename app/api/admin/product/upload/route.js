@@ -61,21 +61,9 @@ export async function POST(request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    // Create signature - params must be in alphabetical order
-    const params = {
-      api_key: apiKey,
-      folder: 'jeeshop/products',
-      resource_type: 'auto',
-      timestamp: timestamp.toString(),
-    };
-
-    // Sort params and create signature string
-    const sortedParams = Object.keys(params)
-      .sort()
-      .map(key => `${key}=${params[key]}`)
-      .join('&');
-    
-    const signatureString = sortedParams + apiSecret;
+    // Create signature string - ONLY include these parameters in alphabetical order
+    // Cloudinary expects: folder and timestamp only for the signature
+    const signatureString = `folder=jeeshop/products&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto
       .createHash('sha256')
       .update(signatureString)
