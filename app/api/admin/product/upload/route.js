@@ -61,8 +61,8 @@ export async function POST(request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    // Create signature string
-    const signatureString = `folder=jeeshop/products&timestamp=${timestamp}${apiSecret}`;
+    // Create signature string (resource_type=auto allows both images and videos)
+    const signatureString = `folder=jeeshop/products&resource_type=auto&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto
       .createHash('sha256')
       .update(signatureString)
@@ -75,9 +75,10 @@ export async function POST(request) {
     cloudinaryFormData.append("timestamp", timestamp.toString());
     cloudinaryFormData.append("signature", signature);
     cloudinaryFormData.append("folder", "jeeshop/products");
+    cloudinaryFormData.append("resource_type", "auto"); // Auto-detect whether it's image, video, or raw
 
-    // Determine upload endpoint based on file type
-    const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
+    // Use unified upload endpoint with resource_type=auto
+    const uploadEndpoint = 'upload';
 
     try {
       // Create abort controller for timeout (longer for videos)
