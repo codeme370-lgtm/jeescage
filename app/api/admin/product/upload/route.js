@@ -37,11 +37,23 @@ export async function POST(request) {
       );
     }
 
-    // Convert file to base64 for Cloudinary upload
+    // Validate file size
+    const isVideo = file.type.startsWith('video/');
+    const maxSizeVideo = 500 * 1024 * 1024; // 500MB for videos
+    const maxSizeImage = 100 * 1024 * 1024; // 100MB for images
+    const maxSize = isVideo ? maxSizeVideo : maxSizeImage;
+
+    if (file.size > maxSize) {
+      const maxSizeMB = isVideo ? 500 : 100;
+      return NextResponse.json(
+        { error: `File size exceeds ${maxSizeMB}MB limit` },
+        { status: 400 }
+      );
+    }
+
+    // Convert file to buffer for Cloudinary upload
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const base64 = buffer.toString("base64");
-    const dataURI = `data:${file.type};base64,${base64}`;
 
     // Generate Cloudinary signature for authenticated upload
     const timestamp = Math.floor(Date.now() / 1000);
@@ -58,7 +70,7 @@ export async function POST(request) {
 
     // Upload to Cloudinary with authentication
     const cloudinaryFormData = new FormData();
-    cloudinaryFormData.append("file", dataURI);
+    cloudinaryFormData.append("file", new Blob([buffer], { type: file.type }), file.name);
     cloudinaryFormData.append("api_key", apiKey);
     cloudinaryFormData.append("timestamp", timestamp.toString());
     cloudinaryFormData.append("signature", signature);
@@ -69,26 +81,42 @@ export async function POST(request) {
     const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
 
     try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/${uploadEndpoint}`,
-        {
-          method: "POST",
-          body: cloudinaryFormData,
+      // Create abort controller for timeout (longer for videos)
+      const timeoutMs = isVideo ? 120000 : 60000; // 2 min for video, 1 min for image
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), timeoutMs);
+
+      try {
+        const response = await fetch(
+          `https://api.cloudinary.com/v1_1/${cloudName}/${uploadEndpoint}`,
+          {
+            method: "POST",
+            body: cloudinaryFormData,
+            signal: abortController.signal,
+          }
+        );
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || "Cloudinary upload failed");
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || "Cloudinary upload failed");
+        const result = await response.json();
+        const mediaUrl = result.secure_url;
+
+        return NextResponse.json(
+          { mediaUrl, imageUrl: mediaUrl, message: `${isVideo ? 'Video' : 'Image'} uploaded successfully` },
+          { status: 200 }
+        );
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        if (fetchError.name === 'AbortError') {
+          throw new Error(`Upload timeout - ${isVideo ? 'video' : 'image'} upload took too long. Please try a smaller file.`);
+        }
+        throw fetchError;
       }
-
-      const result = await response.json();
-      const mediaUrl = result.secure_url;
-
-      return NextResponse.json(
-        { mediaUrl, imageUrl: mediaUrl, message: `${isVideo ? 'Video' : 'Image'} uploaded successfully` },
-        { status: 200 }
-      );
     } catch (uploadError) {
       console.error("Cloudinary upload error:", uploadError);
       return NextResponse.json(
