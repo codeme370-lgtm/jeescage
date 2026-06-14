@@ -61,8 +61,21 @@ export async function POST(request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
-    // Create signature string (resource_type=auto allows both images and videos)
-    const signatureString = `folder=jeeshop/products&resource_type=auto&timestamp=${timestamp}${apiSecret}`;
+    // Create signature - params must be in alphabetical order
+    const params = {
+      api_key: apiKey,
+      folder: 'jeeshop/products',
+      resource_type: 'auto',
+      timestamp: timestamp.toString(),
+    };
+
+    // Sort params and create signature string
+    const sortedParams = Object.keys(params)
+      .sort()
+      .map(key => `${key}=${params[key]}`)
+      .join('&');
+    
+    const signatureString = sortedParams + apiSecret;
     const signature = crypto
       .createHash('sha256')
       .update(signatureString)
@@ -70,12 +83,13 @@ export async function POST(request) {
 
     // Upload to Cloudinary with authentication
     const cloudinaryFormData = new FormData();
+    // Append as buffer directly wrapped in a way that works on Node.js
     cloudinaryFormData.append("file", new Blob([buffer], { type: file.type }), file.name);
     cloudinaryFormData.append("api_key", apiKey);
     cloudinaryFormData.append("timestamp", timestamp.toString());
     cloudinaryFormData.append("signature", signature);
     cloudinaryFormData.append("folder", "jeeshop/products");
-    cloudinaryFormData.append("resource_type", "auto"); // Auto-detect whether it's image, video, or raw
+    cloudinaryFormData.append("resource_type", "auto");
 
     // Use unified upload endpoint with resource_type=auto
     const uploadEndpoint = 'upload';
@@ -100,7 +114,15 @@ export async function POST(request) {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(errorData.error?.message || "Cloudinary upload failed");
+          console.error("Cloudinary error response:", {
+            status: response.status,
+            errorMessage: errorData.error?.message,
+            fullError: errorData,
+            fileType: file.type,
+            fileSize: file.size,
+            isVideo
+          });
+          throw new Error(errorData.error?.message || `Cloudinary upload failed with status ${response.status}`);
         }
 
         const result = await response.json();
@@ -119,6 +141,11 @@ export async function POST(request) {
       }
     } catch (uploadError) {
       console.error("Cloudinary upload error:", uploadError);
+      console.error("Error details:", {
+        message: uploadError.message,
+        name: uploadError.name,
+        stack: uploadError.stack
+      });
       return NextResponse.json(
         { error: uploadError.message || `Failed to upload ${isVideo ? 'video' : 'image'} to Cloudinary` },
         { status: 500 }
@@ -126,6 +153,11 @@ export async function POST(request) {
     }
   } catch (error) {
     console.error("image:upload error:", error);
+    console.error("Outer error details:", {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack
+    });
     return NextResponse.json(
       { error: error?.message || "Server error" },
       { status: 500 }
