@@ -34,11 +34,11 @@ export default function Home() {
             {/* Top Rated - Gray background */}
             <TopRatedSection />
 
-            {/* Why Shop With Us - White background with borders */}
-            <WhyShopWithUsSection />
-
             {/* Video Carousel - Featured Videos */}
             <VideoCarousel />
+
+            {/* Why Shop With Us - White background with borders */}
+            <WhyShopWithUsSection />
         </div>
     );
 }
