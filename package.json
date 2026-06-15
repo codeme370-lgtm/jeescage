@@ -31,7 +31,10 @@
     "react-hot-toast": "^2.5.2",
     "react-redux": "^9.2.0",
     "recharts": "^3.1.2",
-    "ws": "^8.19.0"
+    "ws": "^8.19.0",
+    "cloudinary": "^1.30.0",
+    "streamifier": "^0.1.1"
+    ,"core-js": "^3.32.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
