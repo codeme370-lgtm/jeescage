@@ -21,8 +21,22 @@ export async function POST(request) {
       );
     }
 
+    const contentType = request.headers.get('content-type') || '';
+
+    // Only parse as FormData when the request is truly multipart.
+    if (!contentType.toLowerCase().includes('multipart/form-data')) {
+      return NextResponse.json(
+        {
+          error: 'Invalid request body. Expected multipart/form-data.',
+          receivedContentType: contentType || null,
+        },
+        { status: 400 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
+
 
     if (!file) {
       return NextResponse.json(
