@@ -6,6 +6,16 @@ import { v2 as cloudinary } from 'cloudinary';
 import streamifier from 'streamifier';
 
 // Upload image and return URL
+// Increase request body limit for this endpoint.
+// Note: App Router route handlers support exporting `config`.
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '200mb',
+    },
+  },
+};
+
 export async function POST(request) {
   try {
     const userId = getSessionUserId(request);
@@ -34,7 +44,22 @@ export async function POST(request) {
       );
     }
 
-    const formData = await request.formData();
+    let formData;
+    try {
+      formData = await request.formData();
+    } catch (err) {
+      // When the request exceeds Next's parsing limit, Next may truncate the body.
+      // In that case, parsing as multipart/form-data fails with messages like:
+      // "Failed to parse body as FormData" / "expected boundary after body".
+      return NextResponse.json(
+        {
+          error: 'Payload too large or malformed multipart/form-data.',
+          details: err?.message || String(err),
+        },
+        { status: 413 }
+      );
+    }
+
     const file = formData.get("file");
 
 
