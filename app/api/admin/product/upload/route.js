@@ -78,7 +78,6 @@ export async function POST(request) {
     const maxSize = isVideo ? maxSizeVideo : maxSizeImage;
 
     if (!fileSize || fileSize > maxSize) {
-      const maxSizeMB = isVideo ? 500 : 100;
       return NextResponse.json(
         {
           error: isVideo ? "Video file is missing/invalid size" : "Image file is missing/invalid size",
@@ -104,14 +103,26 @@ export async function POST(request) {
     const buffer = Buffer.from(bytes);
 
     try {
-      const result = await cloudinary.uploader.upload(buffer, {
-        folder: "jeeshop/products",
-        resource_type: resourceType,
-        use_filename: true,
-        unique_filename: false,
-        overwrite: false,
-      });
+      const streamUpload = () =>
+        new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: "jeeshop/products",
+              resource_type: resourceType,
+              use_filename: true,
+              unique_filename: false,
+              overwrite: false,
+            },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            }
+          );
 
+          uploadStream.end(buffer);
+        });
+
+      const result = await streamUpload();
       const mediaUrl = result.secure_url;
       return NextResponse.json(
         {
