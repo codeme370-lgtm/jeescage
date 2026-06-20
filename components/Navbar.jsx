@@ -62,70 +62,34 @@ const Navbar = () => {
     return (
         <nav className="relative bg-white border-b border-gray-200">
             <div className="w-full px-2 sm:px-4 lg:px-8">
-                <div className="flex items-center justify-between gap-1 sm:gap-3 lg:gap-6 py-2.5 sm:py-3 max-w-full">
-                    
-                    {/* Left: Hamburger + Logo + Mobile Cart & Profile Icons */}
-                    <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 min-w-0">
-                        <button 
-                            aria-label="Open menu" 
-                            onClick={() => setDrawerOpen(true)} 
-                            className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 flex-shrink-0 md:hidden"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
+                <div className="w-full flex items-center flex-nowrap gap-2 sm:gap-3">
+                    <button 
+                        aria-label="Open menu" 
+                        onClick={() => setDrawerOpen(true)} 
+                        className="p-1.5 sm:p-2 rounded-md hover:bg-gray-100 flex-shrink-0 md:hidden"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
 
-                        {/* Mobile Cart Icon - visible only on mobile */}
-                        <Link 
-                            href="/cart"
-                            className="relative sm:hidden flex items-center justify-center text-gray-700 hover:text-orange-600 p-1.5 flex-shrink-0"
-                            title="Cart"
-                        >
-                            <ShoppingCart size={20} />
-                            {cartCount > 0 && (
-                                <span className={`absolute -top-0.5 -right-0.5 text-[8px] text-white bg-red-600 w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-lg ${cartPulse ? 'cart-badge-pulse' : 'cart-badge-bounce'}`}>
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
-
-                        {/* Mobile Profile Icon - visible only on mobile */}
-                        <div className="sm:hidden flex items-center justify-center">
-                            {user ? (
-                                <Link href="/profile" className="flex items-center justify-center p-1.5 rounded-full hover:bg-gray-100 transition-all" title="Profile">
-                                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">
-                                        {getInitials(user.fullName || user.name)}
-                                    </div>
-                                </Link>
-                            ) : (
-                                <button 
-                                    onClick={handleOpenSignIn}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-xs font-semibold transition-all flex-shrink-0 whitespace-nowrap"
-                                    title="Login"
-                                >
-                                    Login
-                                </button>
-                            )}
+                    <Link href="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0 min-w-0">
+                        <div className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-red-600 shadow hidden sm:flex items-center justify-center flex-shrink-0">
+                            <Image 
+                                src={logo} 
+                                alt="Jeescage Logo" 
+                                width={40}
+                                height={40}
+                                className="w-full h-full object-cover"
+                            />
                         </div>
-                        
-                        <Link href="/" className="flex items-center gap-1 sm:gap-2 flex-shrink-0 min-w-0">
-                            <div className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full overflow-hidden border-2 border-red-600 shadow hidden sm:flex items-center justify-center flex-shrink-0">
-                                <Image 
-                                    src={logo} 
-                                    alt="Jeescage Logo" 
-                                    width={40}
-                                    height={40}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <span className="font-bold text-black text-lg sm:text-3xl md:text-4xl whitespace-nowrap">
-                                jees<span className="text-amber-700">cage</span>
-                            </span>
-                        </Link>
-                    </div>
-                    {/* Center: Search Bar - Always expanded on mobile, responsive on larger screens */}
-                    <div className="flex-1 min-w-0 max-w-xs mx-auto md:max-w-sm md:ml-auto">
+                        <span className="font-bold text-black text-lg sm:text-3xl md:text-4xl whitespace-nowrap">
+                            jees<span className="text-amber-700">cage</span>
+                        </span>
+                    </Link>
+
+                    {/* Center: Search Bar - Desktop/tablet only */}
+                    <div className="hidden md:block flex-1 min-w-0 max-w-xs mx-auto md:max-w-sm">
                         <form onSubmit={handleSearch} className="flex items-center gap-1 sm:gap-2 bg-white border-2 border-gray-200 rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 hover:border-orange-400 focus-within:border-orange-500 transition-all">
                             <Search size={16} className="text-gray-400 flex-shrink-0 sm:w-5 sm:h-5 hidden sm:block" />
                             <input 
@@ -145,10 +109,8 @@ const Navbar = () => {
                         </form>
                     </div>
 
-
                     {/* Right: Location + Orders + Wishlist + Cart + User */}
-                    <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 flex-shrink-0">
-                        
+                    <div className="flex items-center gap-1 sm:gap-2 lg:gap-3 flex-shrink-0 flex-nowrap whitespace-nowrap">
                         {/* Location Dropdown - hidden on small screens */}
                         <div className="hidden lg:block relative">
                             <button 
@@ -193,26 +155,26 @@ const Navbar = () => {
                             <span className="font-semibold text-[10px] md:text-xs mt-0.5">Categories</span>
                         </Link>
 
-                        {/* Orders - hidden on mobile */}
+                        {/* Orders - mobile + desktop */}
                         <Link 
                             href="/orders"
-                            className="hidden sm:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-blue-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
+                            className="flex sm:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-blue-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
                             title="Orders"
                         >
                             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span className="font-semibold text-[10px] sm:text-xs mt-0.5">Orders</span>
+                            <span className="font-semibold text-[10px] sm:text-xs">Orders</span>
                         </Link>
 
-                        {/* Wishlist - hidden on mobile */}
+                        {/* Wishlist - mobile + desktop */}
                         <Link 
                             href="/wishlist"
-                            className="relative hidden sm:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-red-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
+                            className="relative flex sm:flex flex-row items-center justify-center gap-1 text-gray-700 hover:text-white hover:bg-red-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
                             title="Wishlist"
                         >
                             <Heart size={18} className="sm:w-5 sm:h-5" />
-                            <span className="font-semibold text-[10px] sm:text-xs mt-0.5">Wishlist</span>
+                            <span className="font-semibold text-[10px] sm:text-xs">Wishlist</span>
                             {wishlistCount > 0 && (
                                 <span className={`absolute -top-1 -right-1 text-[8px] sm:text-[10px] text-white bg-red-600 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold shadow-lg`}>
                                     {wishlistCount}
@@ -220,45 +182,80 @@ const Navbar = () => {
                             )}
                         </Link>
 
-                        {/* Cart - hidden on mobile, visible from sm and up */}
-                        <Link 
-                            href="/cart"
-                            className="relative hidden sm:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-orange-600 bg-gray-50 rounded-lg px-1.5 sm:px-2 py-1.5 sm:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
-                            title="Cart"
-                        >
-                            <ShoppingCart size={18} className="sm:w-5 sm:h-5" />
-                            <span className="font-semibold text-[10px] sm:text-xs mt-0.5">Cart</span>
-                            {cartCount > 0 && (
-                                <span className={`absolute -top-1 -right-1 text-[8px] sm:text-[10px] text-white bg-red-600 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold shadow-lg ${cartPulse ? 'cart-badge-pulse' : 'cart-badge-bounce'}`}>
-                                    {cartCount}
-                                </span>
-                            )}
-                        </Link>
+                        {/* User Profile / Login + Cart: mobile order = cart, then profile/login */}
+                        <div className="flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2 flex-nowrap">
+                            {/* Mobile Cart Icon - visible only on mobile, placed before profile/login */}
+                            <Link
+                                href="/cart"
+                                className="relative sm:hidden flex items-center justify-center text-gray-700 hover:text-orange-600 p-1.5 flex-shrink-0"
+                                title="Cart"
+                            >
+                                <ShoppingCart size={20} />
+                                {cartCount > 0 && (
+                                    <span
+                                        className={`absolute -top-0.5 -right-0.5 text-[8px] text-white bg-red-600 w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-lg ${
+                                            cartPulse ? 'cart-badge-pulse' : 'cart-badge-bounce'
+                                        }`}
+                                    >
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
 
-                        {/* User Profile / Login - hidden on mobile, visible from sm and up */}
-                        <div className="hidden sm:flex items-center gap-2 ml-1 px-1.5 sm:px-2 py-1.5 sm:py-2">
-                            {user ? (
-                                <Link href="/profile" className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all">
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">
-                                        {getInitials(user.fullName || user.name)}
-                                    </div>
-                                    <div className="hidden sm:flex flex-col text-left">
-                                        <span className="text-[10px] text-gray-500">Hello,</span>
-                                        <span className="font-semibold text-gray-900 text-sm">{user.firstName || user.fullName || user.name}</span>
-                                    </div>
-                                </Link>
-                            ) : (
-                                <button 
-                                    onClick={handleOpenSignIn}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex-shrink-0 whitespace-nowrap"
-                                >
-                                    Login
-                                </button>
-                            )}
+                            {/* Mobile profile/login icon (far right on mobile) */}
+                            <div className="sm:hidden flex items-center justify-center">
+                                {user ? (
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center justify-center p-1.5 rounded-full hover:bg-gray-100 transition-all"
+                                        title="Profile"
+                                    >
+                                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-600 text-[10px] font-semibold text-white">
+                                            {getInitials(user.fullName || user.name)}
+                                        </div>
+                                    </Link>
+                                ) : (
+                                    <button
+                                        onClick={handleOpenSignIn}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-1 rounded text-xs font-semibold transition-all flex-shrink-0 whitespace-nowrap"
+                                        title="Login"
+                                    >
+                                        Login
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Desktop profile/login */}
+                            <div className="hidden sm:flex items-center gap-2">
+                                {user ? (
+                                    <Link
+                                        href="/profile"
+                                        className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-2 hover:bg-slate-200 transition-all"
+                                    >
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-600 text-xs font-semibold uppercase text-white">
+                                            {getInitials(user.fullName || user.name)}
+                                        </div>
+                                        <div className="hidden sm:flex flex-col text-left">
+                                            <span className="text-[10px] text-gray-500">Hello,</span>
+                                            <span className="font-semibold text-gray-900 text-sm">
+                                                {user.firstName || user.fullName || user.name}
+                                            </span>
+                                        </div>
+                                    </Link>
+                                ) : (
+                                    <button
+                                        onClick={handleOpenSignIn}
+                                        className="bg-orange-500 hover:bg-orange-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all flex-shrink-0 whitespace-nowrap"
+                                    >
+                                        Login
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
             <Drawer 
                 open={drawerOpen} 
                 onClose={() => setDrawerOpen(false)} 
