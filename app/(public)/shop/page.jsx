@@ -89,7 +89,7 @@ import { useSelector } from "react-redux"
                     </div>
                 </div>
 
-                <div className={`grid gap-2 sm:gap-4 lg:gap-6 grid-cols-4 md:grid-cols-6 lg:grid-cols-6 mx-auto mb-32`}>
+                <div className={`grid gap-2 sm:gap-4 lg:gap-6 grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 mx-auto mb-32`}>
                     {filteredProducts.map((product) => <ProductCard key={product.id} product={product} />)}
                 </div>
             </div>
