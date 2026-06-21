@@ -12,7 +12,7 @@ const Counter = ({ cartKey, productId, selectedColor = null }) => {
     const { user, isLoaded } = useAuth()
 
     const key = cartKey || getCartKey(productId, selectedColor)
-    const quantity = cartItems[key] ? (typeof cartItems[key] === 'number' ? cartItems[key] : cartItems[key].quantity) : 1
+    const quantity = cartItems[key] ? (typeof cartItems[key] === 'number' ? cartItems[key] : cartItems[key].quantity) : 0
 
     const addToCartHandler = () => {
         if (!isLoaded || !user) {

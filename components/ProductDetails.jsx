@@ -59,7 +59,7 @@ const ProductDetails = ({ product }) => {
     const [selectedColors, setSelectedColors] = useState([]);
     const cartKey = getCartKey(productId, selectedColor)
     const rawCartItem = cart[cartKey] || (selectedColor === null ? cart[productId] : undefined)
-    const cartQuantity = rawCartItem ? (typeof rawCartItem === 'number' ? rawCartItem : rawCartItem.quantity) : 1
+    const cartQuantity = rawCartItem ? (typeof rawCartItem === 'number' ? rawCartItem : rawCartItem.quantity) : 0
 
     const [mainImage, setMainImage] = useState(product?.images?.[0] || assets.product_placeholder || '/placeholder.svg');
     const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
