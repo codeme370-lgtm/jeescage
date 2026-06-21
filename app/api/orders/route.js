@@ -218,8 +218,21 @@ if(paymentMethod === PaymentMethod.PAYSTACK){
                 console.log('Authorization URL:', authUrl)
                 return NextResponse.json({authorizationUrl: authUrl, reference: paystackRef})
     } catch(paystackError) {
-        console.error('Paystack error:', paystackError.response?.data || paystackError.message)
-        return NextResponse.json({error: paystackError.response?.data?.message || 'Payment initialization failed'}, {status: 400})
+        const paystackData = paystackError.response?.data
+        const paystackMessage = paystackData?.message || paystackError.message || 'Payment initialization failed'
+        const isIpBlocked = /ip address.*not allowed|not allowed to make this call/i.test(paystackMessage)
+
+        console.error('Paystack error:', paystackData || paystackError.message)
+
+        return NextResponse.json(
+            {
+                error: paystackMessage,
+                details: isIpBlocked
+                    ? 'Paystack rejected the request because this server IP is not allowed. Please whitelist the deployment IP in your Paystack dashboard or switch to a permitted environment.'
+                    : undefined
+            },
+            { status: 400 }
+        )
     }
 }
 //return a response (cart will be cleared after Paystack payment verification)
