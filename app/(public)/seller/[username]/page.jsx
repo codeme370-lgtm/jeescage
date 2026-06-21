@@ -82,7 +82,7 @@ export default function SellerProfile() {
               <p className="text-slate-600 mb-4 max-w-2xl">{seller.description}</p>
 
               {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
                 <div>
                   <p className="text-slate-500 text-sm">Rating</p>
                   <div className="flex items-center gap-1">

@@ -145,7 +145,7 @@ export default function Cart() {
                         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-8">
                             <span className="text-red-600">Suggested</span> Products
                         </h2>
-                        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                             {suggestedProducts.map((product) => (
                                 <ProductCard key={product.id} product={product} />
                             ))}

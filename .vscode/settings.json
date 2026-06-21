@@ -13,6 +13,7 @@
     "prisma.pinToPrisma6": false,
     "powerquery.client.additionalSymbolsDirectories": [
         "c:/Users/KA/Desktop/jeeshop/.vscode/excel-pq-symbols",
-        "c:/Users/KA/OneDrive/Desktop/jeeshop/.vscode/excel-pq-symbols"
+        "c:/Users/KA/OneDrive/Desktop/jeeshop/.vscode/excel-pq-symbols",
+        "c:/Users/KA/OneDrive/Desktop/My Project/jeeshop/.vscode/excel-pq-symbols"
     ]
 }

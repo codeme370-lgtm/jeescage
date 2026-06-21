@@ -5,10 +5,10 @@ import Link from 'next/link'
 const MegaSaleBanner = () => {
     return (
         <div className='w-full'>
-            {/* Two-column banner layout - responsive for narrow screens */}
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full'>
-                {/* Mega Sale Banner - Left (takes up full width on mobile, 1/2 on tablet, 2/3 on desktop) */}
-                <div className='relative col-span-1 sm:col-span-1 lg:col-span-2 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 rounded-lg sm:rounded-xl overflow-hidden shadow-lg h-36 sm:h-44 md:h-56 flex items-center'>
+            {/* Two-column banner layout - keep only the main banner on medium/tablet screens */}
+            <div className='grid grid-cols-1 md:grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 w-full'>
+                {/* Mega Sale Banner - Left (full width on mobile/medium, 2/3 on desktop) */}
+                <div className='relative col-span-1 md:col-span-1 lg:col-span-2 bg-gradient-to-r from-red-600 via-red-500 to-orange-600 rounded-lg sm:rounded-xl overflow-hidden shadow-lg h-36 sm:h-44 md:h-56 flex items-center'>
                     {/* Background pattern */}
                     <div className='absolute inset-0 opacity-20'>
                         <div className='absolute top-0 right-0 w-64 sm:w-80 h-64 sm:h-80 bg-yellow-300 rounded-full blur-3xl'></div>
@@ -31,8 +31,8 @@ const MegaSaleBanner = () => {
                     </div>
                 </div>
 
-                {/* Daily Deals Banner - Right (hidden on mobile, shown on tablet+) */}
-                <div className='hidden sm:flex relative col-span-1 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl overflow-hidden shadow-lg h-36 sm:h-44 md:h-56 flex-col items-start justify-center px-3 sm:px-6 md:px-8 py-3 sm:py-4 border-2 border-orange-100'>
+                {/* Daily Deals Banner - Right (shown only on large screens) */}
+                <div className='hidden lg:flex relative col-span-1 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg sm:rounded-xl overflow-hidden shadow-lg h-36 sm:h-44 md:h-56 flex-col items-start justify-center px-3 sm:px-6 md:px-8 py-3 sm:py-4 border-2 border-orange-100'>
                     {/* Background decoration */}
                     <div className='absolute top-0 right-0 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-40'></div>
 
