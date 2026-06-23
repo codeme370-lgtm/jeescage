@@ -192,63 +192,78 @@ export default function StoreAddProduct() {
 
 
     return (
-        <form onSubmit={e => toast.promise(onSubmitHandler(e), { loading: "Adding Product..." })} className="text-slate-500 mb-28">
-            <h1 className="text-2xl">Add New <span className="text-slate-800 font-medium">Products</span></h1>
-            <p className="mt-7">Product Images</p>
+        <form onSubmit={e => toast.promise(onSubmitHandler(e), { loading: "Adding Product..." })} className="mb-28 max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div className="mb-8">
+                <h1 className="text-2xl font-semibold text-slate-800">Add New <span className="text-slate-900">Products</span></h1>
+                <p className="mt-2 text-sm text-slate-500">Fill in the product details below to publish it on your store.</p>
+            </div>
 
-            <div htmlFor="" className="flex gap-3 mt-4">
-                {Object.keys(images).map((key) => (
-                    <label key={key} htmlFor={`images${key}`}>
-                        <Image width={300} height={300} className='h-15 w-auto border border-slate-200 rounded cursor-pointer' src={images[key] ? URL.createObjectURL(images[key]) : assets.upload_area} alt={images[key] ? `Product image ${key} preview` : 'Upload placeholder'} />
-                        <input type="file" accept='image/*' id={`images${key}`}
-                         onChange={e => handleImageUpload(key, e.target.files[0])}
-                          hidden />
+            <div className="space-y-8">
+                <section className="rounded-xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-600">Product Media</h2>
+                    <p className="mb-4 text-sm text-slate-500">Upload clear images for your product. The first image will be used as the main thumbnail.</p>
+                    <div className="flex flex-wrap gap-3">
+                        {Object.keys(images).map((key) => (
+                            <label key={key} htmlFor={`images${key}`} className="cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-sm transition hover:shadow-md">
+                                <Image width={300} height={300} className='h-20 w-20 object-cover sm:h-24 sm:w-24' src={images[key] ? URL.createObjectURL(images[key]) : assets.upload_area} alt={images[key] ? `Product image ${key} preview` : 'Upload placeholder'} />
+                                <input type="file" accept='image/*' id={`images${key}`}
+                                 onChange={e => handleImageUpload(key, e.target.files[0])}
+                                  hidden />
+                            </label>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Pricing & Inventory</h2>
+                    <label htmlFor="" className="mb-4 flex flex-col gap-2">
+                        Product Video (optional)
+                        <input type="file" accept="video/*" onChange={e => setVideo(e.target.files[0])} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" />
+                        <span className="text-xs text-slate-400">Upload a video for product usage, installment details, or buyer guidance.</span>
+                        {video && <span className="text-xs font-medium text-green-600">Selected: {video.name}</span>}
                     </label>
-                ))}
-            </div>
 
-            <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-                Name
-                <input type="text" name="name" onChange={onChangeHandler} value={productInfo.name} placeholder="Enter product name" className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" required />
-            </label>
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <label htmlFor="" className="flex flex-col gap-2">
+                            Actual Price (GHS)
+                            <input type="number" name="mrp" onChange={onChangeHandler} value={productInfo.mrp} placeholder="0" rows={5} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                        </label>
+                        <label htmlFor="" className="flex flex-col gap-2">
+                            Offer Price (GHS)
+                            <input type="number" name="price" onChange={onChangeHandler} value={productInfo.price} placeholder="0" rows={5} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                        </label>
+                        <label htmlFor="" className="flex flex-col gap-2">
+                            Quantity
+                            <input type="number" name="quantity" onChange={onChangeHandler} value={productInfo.quantity} placeholder="0" min="0" className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                        </label>
+                    </div>
+                </section>
 
-            <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-                Description
-                <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
-            </label>
+                <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Product Details</h2>
+                    <label htmlFor="" className="mb-4 flex flex-col gap-2">
+                        Name
+                        <input type="text" name="name" onChange={onChangeHandler} value={productInfo.name} placeholder="Enter product name" className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                    </label>
 
-            <label htmlFor="" className="flex flex-col gap-2 my-6 ">
-                Product Video (optional)
-                <input type="file" accept="video/*" onChange={e => setVideo(e.target.files[0])} className="w-full max-w-sm p-2 px-4 outline-none border border-slate-200 rounded" />
-                <span className="text-xs text-slate-400">Upload a video for product usage, installment details, or buyer guidance.</span>
-                {video && <span className="text-xs text-green-600">Selected: {video.name}</span>}
-            </label>
+                    <label htmlFor="" className="mb-4 flex flex-col gap-2">
+                        Description
+                        <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                    </label>
 
-            <div className="flex gap-5">
-                <label htmlFor="" className="flex flex-col gap-2 ">
-                    Actual Price (GHS)
-                    <input type="number" name="mrp" onChange={onChangeHandler} value={productInfo.mrp} placeholder="0" rows={5} className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
-                </label>
-                <label htmlFor="" className="flex flex-col gap-2 ">
-                    Offer Price (GHS)
-                    <input type="number" name="price" onChange={onChangeHandler} value={productInfo.price} placeholder="0" rows={5} className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
-                </label>
-                <label htmlFor="" className="flex flex-col gap-2 ">
-                    Quantity
-                    <input type="number" name="quantity" onChange={onChangeHandler} value={productInfo.quantity} placeholder="0" min="0" className="w-full max-w-45 p-2 px-4 outline-none border border-slate-200 rounded resize-none" required />
-                </label>
-            </div>
+                    <label htmlFor="" className="mb-4 flex flex-col gap-2">
+                        Category
+                        <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required>
+                            <option value="">Select a category</option>
+                            {categories.map((category) => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                    </label>
 
-            <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-sm p-2 px-4 my-6 outline-none border border-slate-200 rounded" required>
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                    <option key={category} value={category}>{category}</option>
-                ))}
-            </select>
-
-            <div className="flex items-center gap-3 mt-2">
-                <input placeholder="New category name" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="border p-2 rounded" />
-                <button type="button" onClick={async () => {
+                    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
+                        <input placeholder="New category name" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-500" />
+                        <button type="button" onClick={async () => {
                     if(!newCategoryName) return toast.error('Enter a category name')
                     try{
                         const token = await getToken()
@@ -264,7 +279,7 @@ export default function StoreAddProduct() {
                             toast.error(err?.response?.data?.error || err.message)
                         }
                     }
-                }} className="bg-slate-800 text-white px-3 py-2 rounded">Create Category</button>
+                }} className="rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-900">Create Category</button>
 
                 <button type="button" onClick={async () => {
                     try{
@@ -293,20 +308,20 @@ export default function StoreAddProduct() {
                     }catch(err){
                         toast.error(err?.response?.data?.error || err.message)
                     }
-                }} className="bg-indigo-600 text-white px-3 py-2 rounded">Generate with AI</button>
+                }} className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700">Generate with AI</button>
             </div>
 
             {aiSuggestion && (
-                <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded">
-                    <p><strong>AI category:</strong> {aiSuggestion.category}</p>
-                    <p><strong>Suggested MRP:</strong> {aiSuggestion.suggestedMrp}</p>
-                    <p><strong>Suggested Price:</strong> {aiSuggestion.suggestedPrice}</p>
+                <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                    <p><span className="font-semibold text-slate-700">AI category:</span> {aiSuggestion.category}</p>
+                    <p><span className="font-semibold text-slate-700">Suggested MRP:</span> {aiSuggestion.suggestedMrp}</p>
+                    <p><span className="font-semibold text-slate-700">Suggested Price:</span> {aiSuggestion.suggestedPrice}</p>
                 </div>
             )}
 
-            <br />
-
-            <button disabled={loading} className="bg-slate-800 text-white px-6 mt-7 py-2 hover:bg-slate-900 rounded transition">Add Product</button>
+            <button disabled={loading} className="mt-8 rounded-lg bg-slate-800 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-70">{loading ? 'Adding Product...' : 'Add Product'}</button>
+                </section>
+            </div>
         </form>
     )
 }

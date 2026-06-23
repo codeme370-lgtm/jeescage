@@ -72,6 +72,11 @@ export async function POST(request) {
 
     const isVideo = fileType.toLowerCase().startsWith("video/");
     const resourceType = isVideo ? "video" : "image";
+    const safeName = (fileName || "file")
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9_-]+/g, "-")
+      .toLowerCase() || "file";
+    const publicId = `jeeshop/products/${safeName}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
 
     const maxSizeVideo = 500 * 1024 * 1024;
     const maxSizeImage = 100 * 1024 * 1024;
@@ -108,8 +113,9 @@ export async function POST(request) {
           const uploadStream = cloudinary.uploader.upload_stream(
             {
               folder: "jeeshop/products",
+              public_id: publicId,
               resource_type: resourceType,
-              use_filename: true,
+              use_filename: false,
               unique_filename: false,
               overwrite: false,
             },

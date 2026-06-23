@@ -49,8 +49,17 @@ export async function POST(request) {
     const apiKey = process.env.CLOUDINARY_API_KEY;
     const apiSecret = process.env.CLOUDINARY_API_SECRET;
 
+    // Determine upload endpoint based on file type
+    const isVideo = file.type.startsWith('video/');
+    const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
+    const safeName = (file.name || "file")
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-zA-Z0-9_-]+/g, "-")
+      .toLowerCase() || "file";
+    const publicId = `jeeshop/products/${safeName}-${Date.now()}-${crypto.randomUUID().slice(0, 8)}`;
+
     // Create signature string
-    const signatureString = `folder=jeeshop/products&timestamp=${timestamp}${apiSecret}`;
+    const signatureString = `folder=jeeshop/products&public_id=${encodeURIComponent(publicId)}&timestamp=${timestamp}${apiSecret}`;
     const signature = crypto
       .createHash('sha256')
       .update(signatureString)
@@ -63,10 +72,7 @@ export async function POST(request) {
     cloudinaryFormData.append("timestamp", timestamp.toString());
     cloudinaryFormData.append("signature", signature);
     cloudinaryFormData.append("folder", "jeeshop/products");
-
-    // Determine upload endpoint based on file type
-    const isVideo = file.type.startsWith('video/');
-    const uploadEndpoint = isVideo ? 'video/upload' : 'image/upload';
+    cloudinaryFormData.append("public_id", publicId);
 
     try {
       const response = await fetch(
@@ -86,7 +92,7 @@ export async function POST(request) {
       const mediaUrl = result.secure_url;
 
       return NextResponse.json(
-        { mediaUrl, message: `${isVideo ? 'Video' : 'Image'} uploaded successfully` },
+        { mediaUrl, imageUrl: mediaUrl, message: `${isVideo ? 'Video' : 'Image'} uploaded successfully` },
         { status: 200 }
       );
     } catch (uploadError) {
