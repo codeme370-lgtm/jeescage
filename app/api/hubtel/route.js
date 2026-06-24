@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { createOrdersFromPendingCheckout } from '@/lib/checkoutLifecycle';
 
 export async function POST(request) {
   try {
@@ -20,15 +21,14 @@ export async function POST(request) {
       return NextResponse.json({ received: true });
     }
 
-    await Promise.all((orderIds || []).map((orderId) =>
-      prisma.order.update({
-        where: { id: orderId },
-        data: { paymentStatus: 'PENDING', paystackReference: reference, status: 'PROCESSING' },
-      })
-    ));
-
     if (userId) {
-      await prisma.user.update({ where: { id: userId }, data: { cart: {} } });
+      await createOrdersFromPendingCheckout({
+        userId,
+        reference,
+        paymentMethod: 'HUBTEL',
+        paymentStatus: 'PENDING',
+        status: 'PROCESSING',
+      });
     }
 
     return NextResponse.json({ received: true });

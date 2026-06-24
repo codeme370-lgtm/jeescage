@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma";
 import axios from "axios";
 import { isSupportedPaymentMethod, normalizePaymentMethod } from "@/lib/paymentProviders.mjs";
 import { createHubtelCheckoutSession } from "@/lib/hubtel";
+import { savePendingCheckout, abandonPendingCheckout, createOrdersFromPendingCheckout } from "@/lib/checkoutLifecycle";
 
 //Get a new order
 export async function POST(request) {
@@ -107,8 +108,9 @@ export async function POST(request) {
 }
 let orderIds = []
 let totalOrderAmount = 0
+const orderDrafts = []
 
-//create orders for each seller
+//prepare checkout drafts for each seller without creating persisted orders yet
 for(const [storeId, orderItems] of storeByOrders.entries()){
     //calculate total amount for the order
     let orderAmount = orderItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
@@ -137,53 +139,36 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
     // accumulate to total order amount
     totalOrderAmount += orderAmount
 
-        //create the order
-        let newOrder
-        try {
-            // Force payment method to PAYSTACK (COD disabled)
-            newOrder = await prisma.order.create({
-                data: {
-                    userId,
-                    storeId,
-                    addressId,
-                    paymentMethod: selectedPaymentMethod,
-                    total: parseFloat(orderAmount.toFixed(2)),
-                    isCouponUsed: coupon ? true : false,
-                    coupon: coupon ? coupon : {},
-                    status: selectedPaymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
-                    orderItems: {
-                        create: orderItems.map(item => ({
-                            productId: item.productId,
-                            quantity: item.quantity,
-                            price: item.price,
-                            selectedColor: item.selectedColor || null
-                        }))
-                    }
-                }
-            })
-            console.log('created order id:', newOrder.id)
-            orderIds.push(newOrder.id)
-
-            // Reduce product quantities
-            for (const item of orderItems) {
-                const product = await prisma.product.findUnique({
-                    where: { id: item.productId },
-                    select: { quantity: true }
-                })
-                const newQuantity = product.quantity - item.quantity
-                await prisma.product.update({
-                    where: { id: item.productId },
-                    data: {
-                        quantity: newQuantity,
-                        inStock: newQuantity > 0
-                    }
-                })
-            }
-        } catch (createErr) {
-            console.error('Error creating order for storeId', storeId, 'items:', orderItems, createErr?.message ?? createErr)
-            throw createErr
-        }
+        orderDrafts.push({
+            storeId,
+            orderAmount: parseFloat(orderAmount.toFixed(2)),
+            orderItems: orderItems.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity,
+                price: item.price,
+                selectedColor: item.selectedColor || null
+            }))
+        })
 }
+await savePendingCheckout(userId, {
+    addressId,
+    couponCode: couponCode || null,
+    coupon,
+    orderDrafts,
+    paymentMethod: selectedPaymentMethod,
+})
+
+if(selectedPaymentMethod === PaymentMethod.COD){
+    const createdOrders = await createOrdersFromPendingCheckout({
+        userId,
+        reference: `cod-${Date.now()}`,
+        paymentMethod: PaymentMethod.COD,
+        paymentStatus: 'AUTHORIZED',
+        status: 'PROCESSING',
+    })
+    return NextResponse.json({ message: 'Order placed successfully', orderIds: createdOrders.createdOrderIds, totalOrderAmount, paymentMethod: selectedPaymentMethod }, { status: 201 })
+}
+
 if(selectedPaymentMethod === PaymentMethod.PAYSTACK){
     //initialize paystack
     // prefer request origin, fallback to env var (useful in non-browser requests)
@@ -215,12 +200,14 @@ if(selectedPaymentMethod === PaymentMethod.PAYSTACK){
                         throw new Error('No authorization URL received from Paystack')
                 }
 
-                // persist paystack reference on created orders to help later correlation
                 const paystackRef = response.data.data.reference
                 if(paystackRef){
-                    await Promise.all(orderIds.map((oid) =>
-                        prisma.order.update({ where: { id: oid }, data: { paystackReference: paystackRef } })
-                    ))
+                    const pendingCheckout = await prisma.user.findUnique({ where: { id: userId }, select: { cart: true } })
+                    const cart = pendingCheckout?.cart && typeof pendingCheckout.cart === 'object' && !Array.isArray(pendingCheckout.cart) ? pendingCheckout.cart : {}
+                    await prisma.user.update({
+                        where: { id: userId },
+                        data: { cart: { ...cart, pendingCheckout: { ...(cart.pendingCheckout || {}), reference: paystackRef, paymentMethod: selectedPaymentMethod } } }
+                    })
                 }
                 console.log('Paystack initialized, authorization_url present')
                 const authUrl = response.data.data.authorization_url
@@ -233,6 +220,7 @@ if(selectedPaymentMethod === PaymentMethod.PAYSTACK){
         const isIpBlocked = /ip address.*not allowed|not allowed to make this call/i.test(paystackMessage)
 
         console.error('Paystack error:', paystackData || paystackError.message)
+        await abandonPendingCheckout(userId)
 
         return NextResponse.json(
             {
@@ -262,19 +250,24 @@ if(selectedPaymentMethod === PaymentMethod.HUBTEL){
             throw new Error('No authorization URL received from Hubtel')
         }
 
-        await Promise.all(orderIds.map((oid) =>
-            prisma.order.update({ where: { id: oid }, data: { paystackReference: hubtelResponse.reference } })
-        ))
+        if (hubtelResponse.reference) {
+            const pendingCheckout = await prisma.user.findUnique({ where: { id: userId }, select: { cart: true } })
+            const cart = pendingCheckout?.cart && typeof pendingCheckout.cart === 'object' && !Array.isArray(pendingCheckout.cart) ? pendingCheckout.cart : {}
+            await prisma.user.update({
+                where: { id: userId },
+                data: { cart: { ...cart, pendingCheckout: { ...(cart.pendingCheckout || {}), reference: hubtelResponse.reference, paymentMethod: selectedPaymentMethod } } }
+            })
+        }
 
         return NextResponse.json({ authorizationUrl: hubtelResponse.authorizationUrl, reference: hubtelResponse.reference })
     } catch (hubtelError) {
         console.error('Hubtel error:', hubtelError.message || hubtelError)
+        await abandonPendingCheckout(userId)
         return NextResponse.json({ error: hubtelError.message || 'Hubtel payment initialization failed' }, { status: 400 })
     }
 }
 
-//return a response (cart will be cleared after payment verification)
-return NextResponse.json({message: "Order placed successfully", orderIds, totalOrderAmount, paymentMethod: selectedPaymentMethod}, {status: 201})
+return NextResponse.json({message: "Checkout initialized", orderIds: [], totalOrderAmount, paymentMethod: selectedPaymentMethod}, {status: 201})
 } catch (error) {
     console.error('POST /api/orders failed:', error)
     try {
