@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getFallbackPayloadForRoute, isDatabaseUnavailableError } from "@/lib/prismaFallback.mjs";
 
 //Get all products or products by storeId
 export async function GET(request) {
@@ -72,6 +73,9 @@ export async function GET(request) {
     return NextResponse.json({ products: productsWithVideoFlag }, { status: 200 });
   } catch (error) {
     console.error("products:get error:", error);
+    if (isDatabaseUnavailableError(error)) {
+      return NextResponse.json(getFallbackPayloadForRoute("products"), { status: 200 });
+    }
     return NextResponse.json(
       { error: error?.message || "Server error" },
       { status: 500 }

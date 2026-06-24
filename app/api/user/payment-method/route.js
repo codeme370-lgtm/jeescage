@@ -11,7 +11,7 @@ export async function POST(request) {
 
     const body = await request.json();
     const preferredPaymentMethod = body?.preferredPaymentMethod;
-    const supportedMethods = ["PAYSTACK", "COD"];
+    const supportedMethods = ["PAYSTACK", "HUBTEL"];
     if (!preferredPaymentMethod || !supportedMethods.includes(preferredPaymentMethod)) {
       return NextResponse.json({ error: "Invalid payment method" }, { status: 400 });
     }

@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from "@/context/AuthContext";
 import axios from 'axios';
 import { fetchCart } from '@/lib/features/cart/cartSlice';
+import { normalizePaymentMethod } from '@/lib/paymentProviders.mjs';
+
 const OrderSummary = ({ totalPrice, items }) => {
     const {user}=useAuth();
     const {getToken}=useAuth();
@@ -97,10 +99,10 @@ const OrderSummary = ({ totalPrice, items }) => {
                                     });
                                 }
                             })
+                            const normalizedPaymentMethod = normalizePaymentMethod(paymentMethod) || 'PAYSTACK';
                             const orderData = {
                                 items: normalizedItems,
-                                // enforce PAYSTACK on server
-                                paymentMethod: 'PAYSTACK',
+                                paymentMethod: normalizedPaymentMethod,
                                 addressId: selectedAddress.id,
                                 couponCode: coupon ? coupon.code : null
                             };
@@ -112,13 +114,12 @@ const OrderSummary = ({ totalPrice, items }) => {
                                 }
                         });
                         console.log('Order API Response:', data);
-                        //payment handling: Paystack only
                         if(!data?.authorizationUrl){
                             console.error('authorizationUrl missing. Response:', data);
                             toast.error(data?.error || 'Payment initialization failed')
                             return;
                         }
-                        console.log('Redirecting to Paystack:', data.authorizationUrl);
+                        console.log('Redirecting to payment provider:', data.authorizationUrl);
                         window.location.href = data.authorizationUrl;
                         return;
         }catch(error){
@@ -133,9 +134,15 @@ const OrderSummary = ({ totalPrice, items }) => {
         <div className='w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7'>
             <h2 className='text-xl font-medium text-slate-600'>Payment Summary</h2>
             <p className='text-slate-400 text-xs my-4'>Payment Method</p>
-            <div className='flex gap-2 items-center'>
-                <input type="radio" id="PAYSTACK" name='payment' onChange={() => setPaymentMethod('PAYSTACK')} checked={paymentMethod === 'PAYSTACK'} className='accent-gray-500' />
-                <label htmlFor="PAYSTACK" className='cursor-pointer'>Paystack Payment</label>
+            <div className='flex flex-col gap-3'>
+                <label className='flex items-center gap-2 cursor-pointer'>
+                    <input type="radio" id="PAYSTACK" name='payment' onChange={() => setPaymentMethod('PAYSTACK')} checked={paymentMethod === 'PAYSTACK'} className='accent-gray-500' />
+                    <span>Paystack</span>
+                </label>
+                <label className='flex items-center gap-2 cursor-pointer'>
+                    <input type="radio" id="HUBTEL" name='payment' onChange={() => setPaymentMethod('HUBTEL')} checked={paymentMethod === 'HUBTEL'} className='accent-gray-500' />
+                    <span>Hubtel</span>
+                </label>
             </div>
             <div className='my-4 py-4 border-y border-slate-200 text-slate-400'>
                 <p>Address</p>

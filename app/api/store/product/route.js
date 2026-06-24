@@ -28,6 +28,7 @@ export async function POST(request) {
     const quantity = Number(formData.get("quantity"));
     const imageUrls = formData.getAll("imageUrls");
     const videoUrl = formData.get("videoUrl");
+    const availableColors = formData.getAll("availableColors").filter(Boolean);
 
     if (
       !name ||
@@ -57,6 +58,7 @@ export async function POST(request) {
         videoUrl: videoUrl || null,
         images: imagesUrl,
         quantity,
+        availableColors: availableColors.length > 0 ? availableColors : [],
         storeId,
       },
     });

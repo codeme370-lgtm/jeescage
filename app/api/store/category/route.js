@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUserId } from "@/lib/authHelpers";
 import prisma from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
+import { getFallbackPayloadForRoute, isDatabaseUnavailableError } from "@/lib/prismaFallback.mjs";
 
 export async function GET(request) {
   try {
@@ -10,6 +11,9 @@ export async function GET(request) {
     return NextResponse.json({ categories });
   } catch (error) {
     console.error(error);
+    if (isDatabaseUnavailableError(error)) {
+      return NextResponse.json(getFallbackPayloadForRoute('categories'), { status: 200 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -42,6 +46,9 @@ export async function POST(request) {
     return NextResponse.json({ category: created }, { status: 201 });
   } catch (error) {
     console.error(error);
+    if (isDatabaseUnavailableError(error)) {
+      return NextResponse.json({ error: "Categories service is temporarily unavailable" }, { status: 503 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

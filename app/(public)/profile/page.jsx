@@ -11,7 +11,7 @@ import Loading from "@/components/Loading";
 
 const preferredOptions = [
   { value: "PAYSTACK", label: "Paystack" },
-  { value: "COD", label: "Cash on Delivery" },
+  { value: "HUBTEL", label: "Hubtel" },
 ];
 
 const formatCurrency = (value) => {
@@ -349,7 +349,7 @@ export default function ProfilePage() {
                           />
                           <div>
                             <p className="font-semibold text-slate-900">{option.label}</p>
-                            <p className="text-sm text-slate-500">{option.value === "COD" ? "Pay when your order arrives." : "Secure Paystack checkout."}</p>
+                            <p className="text-sm text-slate-500">{option.value === "HUBTEL" ? "Pay with mobile money or card through Hubtel." : "Secure Paystack checkout."}</p>
                           </div>
                         </label>
                       ))}

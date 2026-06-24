@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getSessionFromRequest } from '@/lib/authHelpers'
 import prisma from '@/lib/prisma'
+import { getFallbackPayloadForRoute, isDatabaseUnavailableError } from '@/lib/prismaFallback.mjs'
 
 export async function GET(request) {
   try {
@@ -14,6 +15,9 @@ export async function GET(request) {
     return NextResponse.json({ user })
   } catch (err) {
     console.error(err)
+    if (isDatabaseUnavailableError(err)) {
+      return NextResponse.json(getFallbackPayloadForRoute('auth-me'))
+    }
     return NextResponse.json({ user: null })
   }
 }

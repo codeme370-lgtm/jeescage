@@ -21,6 +21,7 @@ export default function StoreAddProduct() {
 
     const [images, setImages] = useState({ 1: null, 2: null, 3: null, 4: null })
     const [video, setVideo] = useState(null)
+    const colorOptions = ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Pink', 'Purple', 'Gray', 'Brown']
     const [productInfo, setProductInfo] = useState({
         name: "",
         description: "",
@@ -28,6 +29,7 @@ export default function StoreAddProduct() {
         price: 0,
         category: "",
         quantity: 0,
+        availableColors: [],
     })
     const [loading, setLoading] = useState(false)
      const [aiUsed, setAiUsed] = useState(false)
@@ -49,6 +51,15 @@ export default function StoreAddProduct() {
 
     const onChangeHandler = (e) => {
         setProductInfo({ ...productInfo, [e.target.name]: e.target.value })
+    }
+
+    const toggleColor = (color) => {
+        setProductInfo((prev) => ({
+            ...prev,
+            availableColors: prev.availableColors.includes(color)
+                ? prev.availableColors.filter((item) => item !== color)
+                : [...prev.availableColors, color],
+        }))
     }
 
     const handleImageUpload=async (key, file) => {
@@ -149,6 +160,9 @@ export default function StoreAddProduct() {
             formData.append("price", productInfo.price)
             formData.append("category", productInfo.category)
             formData.append("quantity", productInfo.quantity)
+            productInfo.availableColors.forEach((color) => {
+                formData.append("availableColors", color)
+            })
 
             //adding image URLs to form data instead of files
             imageUrls.forEach((url) => {
@@ -177,6 +191,7 @@ export default function StoreAddProduct() {
                 price: 0,
                 category: "",
                 quantity: 0,
+                availableColors: [],
             })
             //reset images
             setImages({ 1: null, 2: null, 3: null, 4: null })
@@ -218,12 +233,12 @@ export default function StoreAddProduct() {
                     <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Pricing & Inventory</h2>
                     <label htmlFor="" className="mb-4 flex flex-col gap-2">
                         Product Video (optional)
-                        <input type="file" accept="video/*" onChange={e => setVideo(e.target.files[0])} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" />
+                        <input type="file" accept="video/*" onChange={e => setVideo(e.target.files[0])} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" />
                         <span className="text-xs text-slate-400">Upload a video for product usage, installment details, or buyer guidance.</span>
                         {video && <span className="text-xs font-medium text-green-600">Selected: {video.name}</span>}
                     </label>
 
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="flex flex-col gap-4">
                         <label htmlFor="" className="flex flex-col gap-2">
                             Actual Price (GHS)
                             <input type="number" name="mrp" onChange={onChangeHandler} value={productInfo.mrp} placeholder="0" rows={5} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
@@ -243,14 +258,37 @@ export default function StoreAddProduct() {
                     <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Product Details</h2>
                     <label htmlFor="" className="mb-4 flex flex-col gap-2">
                         Name
-                        <input type="text" name="name" onChange={onChangeHandler} value={productInfo.name} placeholder="Enter product name" className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                        <input type="text" name="name" onChange={onChangeHandler} value={productInfo.name} placeholder="Enter product name" className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
                     </label>
 
                     <label htmlFor="" className="mb-4 flex flex-col gap-2">
                         Description
-                        <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
+                        <textarea name="description" onChange={onChangeHandler} value={productInfo.description} placeholder="Enter product description" rows={5} className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required />
                     </label>
+                </section>
 
+                <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Available Colors</h2>
+                    <p className="mb-3 text-sm text-slate-500">Select any colors that buyers can choose from for this product.</p>
+                    <div className="flex flex-wrap gap-2">
+                        {colorOptions.map((color) => {
+                            const selected = productInfo.availableColors.includes(color)
+                            return (
+                                <button
+                                    key={color}
+                                    type="button"
+                                    onClick={() => toggleColor(color)}
+                                    className={`rounded-full border px-3 py-2 text-sm transition ${selected ? 'border-slate-800 bg-slate-800 text-white' : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'}`}
+                                >
+                                    {color}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </section>
+
+                <section className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+                    <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-600">Product Categories</h2>
                     <label htmlFor="" className="mb-4 flex flex-col gap-2">
                         Category
                         <select onChange={e => setProductInfo({ ...productInfo, category: e.target.value })} value={productInfo.category} className="w-full max-w-xl rounded-lg border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm outline-none transition focus:border-slate-500 focus:bg-white" required>
@@ -261,7 +299,7 @@ export default function StoreAddProduct() {
                         </select>
                     </label>
 
-                    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center">
+                    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
                         <input placeholder="New category name" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm outline-none transition focus:border-slate-500" />
                         <button type="button" onClick={async () => {
                     if(!newCategoryName) return toast.error('Enter a category name')
@@ -318,10 +356,10 @@ export default function StoreAddProduct() {
                     <p><span className="font-semibold text-slate-700">Suggested Price:</span> {aiSuggestion.suggestedPrice}</p>
                 </div>
             )}
-
-            <button disabled={loading} className="mt-8 rounded-lg bg-slate-800 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-70">{loading ? 'Adding Product...' : 'Add Product'}</button>
                 </section>
             </div>
+
+            <button disabled={loading} className="mt-8 rounded-lg bg-slate-800 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-70">{loading ? 'Adding Product...' : 'Add Product'}</button>
         </form>
     )
 }

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { PaymentMethod } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import axios from "axios";
+import { isSupportedPaymentMethod, normalizePaymentMethod } from "@/lib/paymentProviders.mjs";
+import { createHubtelCheckoutSession } from "@/lib/hubtel";
 
 //Get a new order
 export async function POST(request) {
@@ -17,12 +19,23 @@ export async function POST(request) {
         return NextResponse.json({error: "Unauthorized"}, {status: 401})
        }
     const {items, addressId, paymentMethod, couponCode} = JSON.parse(textBody || "{}")
-    console.log('order payload:', { itemsCount: Array.isArray(items) ? items.length : 0, addressId, paymentMethod, couponCode })
+    const normalizedPaymentMethod = normalizePaymentMethod(paymentMethod)
+    console.log('order payload:', { itemsCount: Array.isArray(items) ? items.length : 0, addressId, paymentMethod: normalizedPaymentMethod, couponCode })
 
        //check if all required fields are there
-       if(!Array.isArray(items) || items.length === 0 || !addressId || !paymentMethod){
+       if(!Array.isArray(items) || items.length === 0 || !addressId || !normalizedPaymentMethod){
         return NextResponse.json({error: "All fields are required"}, {status: 400})
        }
+
+       if (!isSupportedPaymentMethod(normalizedPaymentMethod)) {
+        return NextResponse.json({ error: "Unsupported payment method" }, { status: 400 })
+       }
+
+       const selectedPaymentMethod = normalizedPaymentMethod === 'HUBTEL'
+        ? PaymentMethod.HUBTEL
+        : normalizedPaymentMethod === 'PAYSTACK'
+          ? PaymentMethod.PAYSTACK
+          : PaymentMethod.COD
 
        //get user email for Paystack
        const user = await prisma.user.findUnique({
@@ -128,18 +141,16 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
         let newOrder
         try {
             // Force payment method to PAYSTACK (COD disabled)
-            const forcedPaymentMethod = PaymentMethod.PAYSTACK
-
             newOrder = await prisma.order.create({
                 data: {
                     userId,
                     storeId,
                     addressId,
-                    paymentMethod: forcedPaymentMethod,
+                    paymentMethod: selectedPaymentMethod,
                     total: parseFloat(orderAmount.toFixed(2)),
                     isCouponUsed: coupon ? true : false,
                     coupon: coupon ? coupon : {},
-                    status: forcedPaymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
+                    status: selectedPaymentMethod === PaymentMethod.COD ? 'PROCESSING' : 'ORDER_PLACED',
                     orderItems: {
                         create: orderItems.map(item => ({
                             productId: item.productId,
@@ -173,8 +184,7 @@ for(const [storeId, orderItems] of storeByOrders.entries()){
             throw createErr
         }
 }
-//check if payment method is paystack
-if(paymentMethod === PaymentMethod.PAYSTACK){
+if(selectedPaymentMethod === PaymentMethod.PAYSTACK){
     //initialize paystack
     // prefer request origin, fallback to env var (useful in non-browser requests)
     const origin = request?.headers?.get?.('origin') || process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
@@ -235,8 +245,36 @@ if(paymentMethod === PaymentMethod.PAYSTACK){
         )
     }
 }
-//return a response (cart will be cleared after Paystack payment verification)
-return NextResponse.json({message: "Order placed successfully", orderIds, totalOrderAmount}, {status: 201})
+if(selectedPaymentMethod === PaymentMethod.HUBTEL){
+    const origin = request?.headers?.get?.('origin') || process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+    try {
+        const callbackUrl = `${origin || 'https://localhost:3000'}/hubtel`
+        const hubtelResponse = await createHubtelCheckoutSession({
+            amount: totalOrderAmount,
+            email: userEmail,
+            orderIds,
+            userId,
+            callbackUrl,
+            description: 'Jeeshop order payment'
+        })
+
+        if (!hubtelResponse.authorizationUrl) {
+            throw new Error('No authorization URL received from Hubtel')
+        }
+
+        await Promise.all(orderIds.map((oid) =>
+            prisma.order.update({ where: { id: oid }, data: { paystackReference: hubtelResponse.reference } })
+        ))
+
+        return NextResponse.json({ authorizationUrl: hubtelResponse.authorizationUrl, reference: hubtelResponse.reference })
+    } catch (hubtelError) {
+        console.error('Hubtel error:', hubtelError.message || hubtelError)
+        return NextResponse.json({ error: hubtelError.message || 'Hubtel payment initialization failed' }, { status: 400 })
+    }
+}
+
+//return a response (cart will be cleared after payment verification)
+return NextResponse.json({message: "Order placed successfully", orderIds, totalOrderAmount, paymentMethod: selectedPaymentMethod}, {status: 201})
 } catch (error) {
     console.error('POST /api/orders failed:', error)
     try {
@@ -262,7 +300,7 @@ export async function GET(request) {
                 OR:[
                     {paymentMethod: PaymentMethod.COD},
                     {AND:[
-                        {paymentMethod: PaymentMethod.PAYSTACK},
+                        {paymentMethod: {in: [PaymentMethod.PAYSTACK, PaymentMethod.HUBTEL]}},
                         {paymentStatus: {in: ["PENDING", "AUTHORIZED"]}}
                     ]}
                 ]

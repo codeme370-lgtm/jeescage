@@ -235,6 +235,7 @@ enum OrderStatus {
 enum PaymentMethod {
   COD
   PAYSTACK
+  HUBTEL
 }
 
 enum PaymentStatus {
