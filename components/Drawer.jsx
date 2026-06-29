@@ -1,14 +1,40 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { X, ShoppingCart, Zap, Flame, TrendingUp, Sparkles, UtensilsCrossed, Heart, Smartphone, Shirt, Home, Dumbbell, ShoppingBag, Baby, Car, BookOpen, Grid, ChevronLeft, Package, User } from 'lucide-react'
 import { useSelector } from 'react-redux'
+import axios from 'axios'
+import { useAuth } from '@/context/AuthContext'
 import logo from '@/app/logo.jpg'
 
 const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, onSidebarToggle = () => {} }) => {
     const cartCount = useSelector(state => state.cart.total)
     const dbCategories = useSelector(state => state.category.list)
+    const { user } = useAuth()
+    const [isAdminLinkVisible, setIsAdminLinkVisible] = useState(false)
+
+    useEffect(() => {
+        if (!user) {
+            setIsAdminLinkVisible(false)
+            return
+        }
+
+        let cancelled = false
+        const checkAdmin = async () => {
+            try {
+                const { data } = await axios.get('/api/admin/is-admin', { withCredentials: true })
+                if (!cancelled) setIsAdminLinkVisible(Boolean(data?.isAdmin))
+            } catch (error) {
+                if (!cancelled) setIsAdminLinkVisible(false)
+            }
+        }
+
+        checkAdmin()
+        return () => {
+            cancelled = true
+        }
+    }, [user])
 
     // Default categories if db is empty
     const defaultCategories = [
@@ -73,7 +99,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
 
                     {/* Drawer panel (left side) */}
                     <aside className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 ${open ? 'translate-x-0' : '-translate-x-full'}`} aria-hidden={!open} style={{ zIndex: 80 }}>
-                        <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} />
+                        <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} isAdmin={isAdminLinkVisible} />
                     </aside>
                 </>
             )}
@@ -84,7 +110,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
                             {/* Mobile Drawer panel (small screens) */}
                     <div className={`fixed inset-0 bg-black/40 transition-opacity md:hidden ${open ? 'opacity-100 visible' : 'opacity-0 invisible'}`} onClick={onClose} style={{ zIndex: 70 }} />
                     <aside className={`fixed top-0 left-0 h-full w-80 sm:w-96 bg-white shadow-2xl transform transition-transform duration-300 md:hidden ${open ? 'translate-x-0' : '-translate-x-full'}`} aria-hidden={!open} style={{ zIndex: 80 }}>
-                        <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} />
+                        <DrawerContent onClose={onClose} categories={categories} quickLinks={quickLinks} isAdmin={isAdminLinkVisible} />
                     </aside>
 
                     {/* Sidebar Header (Top Logo) */}
@@ -113,7 +139,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
                         </button>
 
                         {isSidebarOpen ? (
-                            <DrawerContent onClose={() => {}} categories={categories} quickLinks={quickLinks} isSidebar={true} />
+                            <DrawerContent onClose={() => {}} categories={categories} quickLinks={quickLinks} isSidebar={true} isAdmin={isAdminLinkVisible} />
                         ) : (
                             /* Collapsed sidebar icons */
                             <div className="w-full p-4 overflow-y-auto flex flex-col items-center gap-4">
@@ -145,7 +171,7 @@ const Drawer = ({ open, onClose, isSidebarMode = false, isSidebarOpen = true, on
     )
 }
 
-function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
+function DrawerContent({ onClose, categories, quickLinks, isSidebar = false, isAdmin = false }) {
     const cartCount = useSelector(state => state.cart.total)
     const wishlistCount = useSelector(state => state.wishlist.total)
     
@@ -157,6 +183,7 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
         red: 'bg-red-50 text-red-700 hover:bg-red-600 hover:text-white',
         orange: 'bg-orange-50 text-orange-700 hover:bg-orange-600 hover:text-white',
         slate: 'bg-slate-50 text-slate-700 hover:bg-slate-700 hover:text-white',
+        admin: 'bg-amber-500 text-white hover:bg-amber-600 hover:text-white ring-2 ring-amber-300',
     }
 
     const mobileNav = [
@@ -173,6 +200,11 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
         { name: 'Wishlist', icon: Heart, href: '/wishlist', color: 'red', badge: wishlistCount > 0 ? wishlistCount : null },
         { name: 'Cart', icon: ShoppingCart, href: '/cart', color: 'orange', badge: cartCount > 0 ? cartCount : null },
     ]
+
+    if (isAdmin) {
+        mobileNav.splice(2, 0, { name: 'Admin', icon: Package, href: '/admin', color: 'admin', adminLabel: true })
+        accountLinks.splice(1, 0, { name: 'Admin', icon: Package, href: '/admin', color: 'admin', adminLabel: true })
+    }
     
     return (
         <div className={`p-4 h-full flex flex-col overflow-y-auto ${isSidebar ? 'pt-6' : ''}`}>
@@ -209,6 +241,11 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                                         {item.badge && (
                                             <span className="absolute -top-2 -right-2 text-[8px] bg-red-600 text-white w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-lg">
                                                 {item.badge}
+                                            </span>
+                                        )}
+                                        {item.adminLabel && (
+                                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full bg-white text-[9px] font-semibold text-amber-700 px-2 py-0.5 shadow-sm border border-amber-200">
+                                                Admin
                                             </span>
                                         )}
                                     </div>
@@ -302,7 +339,9 @@ function DrawerContent({ onClose, categories, quickLinks, isSidebar = false }) {
                                         </span>
                                         <span>{item.name}</span>
                                     </div>
-                                    {item.badge ? (
+                                    {item.adminLabel ? (
+                                        <span className="rounded-full bg-amber-500 px-2 py-1 text-[10px] font-semibold text-white">Admin</span>
+                                    ) : item.badge ? (
                                         <span className="rounded-full bg-red-600 px-2 py-1 text-[10px] font-semibold text-white">{item.badge}</span>
                                     ) : (
                                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

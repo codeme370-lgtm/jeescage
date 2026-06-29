@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/context/SidebarContext";
 import logo from "@/app/logo.jpg";
@@ -24,6 +25,7 @@ const Navbar = () => {
     const wishlistCount = useSelector(state => state.wishlist.total)
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [showLocationDropdown, setShowLocationDropdown] = useState(false)
+    const [isAdminLinkVisible, setIsAdminLinkVisible] = useState(false)
 
     const getInitials = (name) => {
         if (!name) return 'U'
@@ -58,6 +60,28 @@ const Navbar = () => {
     const handleOpenSignIn = () => {
         router.push('/auth')
     }
+
+    useEffect(() => {
+        if (!user) {
+            setIsAdminLinkVisible(false)
+            return
+        }
+
+        let isCancelled = false
+        const checkAdmin = async () => {
+            try {
+                const { data } = await axios.get('/api/admin/is-admin', { withCredentials: true })
+                if (!isCancelled) setIsAdminLinkVisible(Boolean(data?.isAdmin))
+            } catch (error) {
+                if (!isCancelled) setIsAdminLinkVisible(false)
+            }
+        }
+
+        checkAdmin()
+        return () => {
+            isCancelled = true
+        }
+    }, [user])
 
     return (
         <nav className="relative bg-white border-b border-gray-200">
@@ -144,6 +168,17 @@ const Navbar = () => {
                             <Home size={18} className="sm:w-5 sm:h-5" />
                             <span className="font-semibold text-[10px] sm:text-xs mt-0.5">Home</span>
                         </Link>
+
+                        {isAdminLinkVisible && (
+                            <Link 
+                                href="/admin"
+                                className="hidden md:flex flex-col items-center justify-center text-gray-700 hover:text-white hover:bg-indigo-600 bg-gray-50 rounded-lg px-1.5 md:px-2 py-1.5 md:py-2 text-xs transition-all duration-200 transform hover:scale-110 hover:shadow-md active:scale-95 flex-shrink-0"
+                                title="Admin"
+                            >
+                                <PackageIcon size={18} className="md:w-5 md:h-5" />
+                                <span className="font-semibold text-[10px] md:text-xs mt-0.5">Admin</span>
+                            </Link>
+                        )}
 
                         {/* Categories */}
                         <Link 
