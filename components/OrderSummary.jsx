@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import axios from 'axios';
 import { fetchCart } from '@/lib/features/cart/cartSlice';
 import { normalizePaymentMethod } from '@/lib/paymentProviders.mjs';
+import { buildWhatsAppCheckoutMessage, createWhatsAppCheckoutLink, getBusinessWhatsAppNumber } from '@/lib/whatsappCheckout';
 
 const OrderSummary = ({ totalPrice, items }) => {
     const {user}=useAuth();
@@ -18,6 +19,7 @@ const OrderSummary = ({ totalPrice, items }) => {
     const router = useRouter();
 
     const addressList = useSelector(state => state.address.list);
+    const cartItems = useSelector(state => state.cart.cartItems || {});
 
     const [paymentMethod, setPaymentMethod] = useState('PAYSTACK');
     const [selectedAddress, setSelectedAddress] = useState(null);
@@ -62,73 +64,57 @@ const OrderSummary = ({ totalPrice, items }) => {
         
     }
 
+    const buildWhatsAppOrderItems = () => {
+        const orderItems = [];
+
+        Object.values(cartItems || {}).forEach((cartEntry) => {
+            const item = typeof cartEntry === 'number'
+                ? { productId: null, quantity: cartEntry, selectedColor: null }
+                : cartEntry;
+
+            const product = items.find((entry) => {
+                const productId = entry.id || entry.productId;
+                return productId === item.productId;
+            });
+
+            orderItems.push({
+                productName: product?.name || item.productName || 'Product',
+                quantity: Number(item.quantity || 0) || 0,
+                unitPrice: Number(product?.price ?? item.price ?? 0),
+                variant: item.selectedColor || item.selectedVariant || item.selectedSize || item.variant || null,
+            });
+        });
+
+        return orderItems.filter((item) => item.quantity > 0);
+    };
+
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
-        try{
-                        //when the user is not logged in
-                        if(!user){
-                                toast.error("You need to be logged in to place an order")
-                                return;
-                        }
-                        //when no address is selected
-                        if(!selectedAddress){
-                                toast.error("Please select an address to place order")
-                                return;
-                        }
-                        //suppose the user is available and address is selected
-                        const token = await getToken();
-                            // normalize items to what the API expects, expanding color groups
-                            const normalizedItems = [];
-                            items.forEach(i => {
-                                const productId = i.id || i.productId;
-                                // Expand color groups into individual items
-                                if (i.colorGroups && Object.keys(i.colorGroups).length > 0) {
-                                    Object.entries(i.colorGroups).forEach(([color, qty]) => {
-                                        normalizedItems.push({
-                                            productId,
-                                            quantity: qty,
-                                            selectedColor: color === 'no-color' ? null : color,
-                                        });
-                                    });
-                                } else {
-                                    // Fallback for items without color groups (shouldn't happen but safe)
-                                    normalizedItems.push({
-                                        productId,
-                                        quantity: i.totalQuantity || i.quantity || 1,
-                                        selectedColor: null,
-                                    });
-                                }
-                            })
-                            const normalizedPaymentMethod = normalizePaymentMethod(paymentMethod) || 'PAYSTACK';
-                            const orderData = {
-                                items: normalizedItems,
-                                paymentMethod: normalizedPaymentMethod,
-                                addressId: selectedAddress.id,
-                                couponCode: coupon ? coupon.code : null
-                            };
-                        //make the API call to place order
-                        const {data} =
-                        await axios.post('/api/orders', orderData, {
-                                headers: {
-                                        Authorization: `Bearer ${token}`
-                                }
-                        });
-                        console.log('Order API Response:', data);
-                        if(!data?.authorizationUrl){
-                            console.error('authorizationUrl missing. Response:', data);
-                            toast.error(data?.error || 'Payment initialization failed')
-                            return;
-                        }
-                        console.log('Redirecting to payment provider:', data.authorizationUrl);
-                        window.location.href = data.authorizationUrl;
-                        return;
-        }catch(error){
-                        const apiErr = error?.response?.data?.error || error?.response?.data?.message || error?.message
-                        toast.error(apiErr || "Something went wrong while placing order")
+
+        const whatsappItems = buildWhatsAppOrderItems();
+
+        if (!whatsappItems.length) {
+            toast.error('Your cart is empty. Add products before checkout.');
             return;
         }
-       
-    }
+
+        const subtotal = Number(totalPrice || 0);
+        const total = Number(displayedTotal || subtotal);
+        const businessWhatsAppNumber = getBusinessWhatsAppNumber();
+        const orderMessage = buildWhatsAppCheckoutMessage({
+            items: whatsappItems,
+            subtotal,
+            total,
+            currency,
+        });
+        const whatsappUrl = createWhatsAppCheckoutLink({
+            number: businessWhatsAppNumber,
+            message: orderMessage,
+        });
+
+        window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+        toast.success('Checkout started on WhatsApp. Review and send your order to confirm it.');
+    };
 
     return (
         <div className='w-full max-w-lg lg:max-w-[340px] bg-slate-50/30 border border-slate-200 text-slate-500 text-sm rounded-xl p-7'>
@@ -203,7 +189,14 @@ const OrderSummary = ({ totalPrice, items }) => {
                 <p>Total:</p>
                 <p className='font-medium text-right'>{currency}{displayedTotal.toFixed(2)}</p>
             </div>
-            <button onClick={e => toast.promise(handlePlaceOrder(e), { loading: 'placing Order...' })} className='w-full bg-slate-700 text-white py-2.5 rounded hover:bg-slate-900 active:scale-95 transition-all'>Place Order</button>
+            <button
+                onClick={handlePlaceOrder}
+                className='w-full bg-green-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-green-700 active:scale-95 transition-all focus:outline-none focus:ring-4 focus:ring-green-200'
+                aria-label="Checkout via WhatsApp"
+            >
+                Checkout via WhatsApp
+            </button>
+            <p className='mt-2 text-center text-xs text-slate-500'>Confirm your order on WhatsApp and arrange payment securely with the business.</p>
 
             {showAddressModal && <AddressModal setShowAddressModal={setShowAddressModal} />}
 
